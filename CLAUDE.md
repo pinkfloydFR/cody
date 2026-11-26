@@ -161,8 +161,32 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 - Optima 5, 9, 11, 12, 12, 20. Départs aléatoires à tous les niveaux + cas fixes.
 - Avec une seule attente on inverse un ordre sans pouvoir le rétablir : ne pas créer de niveau
   qui l'exige.
-- **Suite prévue (enseignant)** : après les tests, niveaux 19 et plus avec **bras + tapis
-  orientables** (design à faire, rien n'est commencé).
+
+## Bras pivotant (niveaux 19 à 23, groupe « Pivot »)
+
+- Design validé le 27/11/2026 : `docs/superpowers/specs/2026-11-27-bras-pivotant-design.md` ;
+  images fixes `docs/essais/bras-pivotant.html` et `bras-sur-rail.html`.
+- Fichiers : `js/pivot-moteur.js` (règles, niveaux, vérification ; Node), `js/pivot.js` (blocs
+  `pivot_*`, géométrie, 2D, objectif, textes : `window.KitPivot`), `js/pivot-3d.js`. `pivot-3d.js`
+  **recopie les matières et les caisses** de `manutention-3d.js` : reporter toute retouche dans les
+  trois fichiers 3D.
+- Entrée à l'ouest (file), sorties N, E, S (6 caisses, on n'y reprend rien). Rotation par
+  **quart de tour** (choix de l'enseignant). La pince et la caisse restent alignées avec les tapis.
+- Initialisation : orientation inconnue (4 cas). Bloc « répéter jusqu'à être face à l'ouest ».
+- « Il y a une caisse ici » regarde du côté visé, sorties comprises : dans une boucle, le bras doit
+  être revenu face à l'entrée en fin de tour.
+- Optima 6, 7, 10, 12, 19. Recherche exhaustive : minimum prouvé aux niveaux 19 et 20 ; aux 21 et
+  22, rien de plus court jusqu'à 9 blocs pour la forme « jusqu'à + tant que » ; 23 : meilleure
+  solution connue.
+- Capot absent au tapis sud (il masquerait le bras) : une seule caisse visible au-delà de la place.
+- **Pas encore testé par l'enseignant.**
+
+## Suite prévue
+
+- **Pivot + rail** (niveaux 24 à 27, même design), après les retours de l'enseignant sur le pivot :
+  3 crans, tapis A, B, C au nord, D à l'est, pile d'attente au sud du cran 2 ; « glisser d'un
+  cran » ; le moteur et le rendu du pivot sont à étendre (le pivot est un rail à un seul cran).
+- Idée antérieure, non conçue : bras et tapis orientables.
 
 ## Blocs (les deux ateliers, `js/atelier.js`)
 
@@ -182,7 +206,8 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 
 ## Tests
 
-- `node --test tests/manutention.test.js` : 103 tests du moteur du bras ; `node --test tests/tri.test.js` : 44 tests du tri.
+- `node --test tests/*.test.js` : 190 tests (bras 103, tri 44, pivot 43).
+  `tests/navigateur-pivot.js` : solutions 19 à 23 dans la page.
   `tests/navigateur-tri.js` : solutions 13 à 18 dans la page.
 - `tests/navigateur-tracage.js` et `tests/navigateur-manutention.js` : à évaluer dans la page
   (console), ils construisent les solutions en blocs. Ils écrasent les programmes sauvegardés

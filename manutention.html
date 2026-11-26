@@ -48,6 +48,7 @@
         <dl>
           <dt>répéter 3 fois</dt><dd>le nombre est connu</dd>
           <dt>répéter tant que</dt><dd>il est inconnu</dd>
+          <dt>répéter jusqu'à</dt><dd>on vise une position</dd>
           <dt>s'il y a, si</dt><dd>on vérifie une seule fois</dd>
         </dl>
       </section>
@@ -86,6 +87,7 @@
         <canvas id="c-scene" width="2400" height="1000" role="img" aria-label="Poste de manutention"></canvas>
         <canvas id="c-3d" class="vue-3d" role="img" aria-label="Bras de manutention en 3D" hidden></canvas>
         <canvas id="c-tri" class="vue-3d" role="img" aria-label="Centre de tri en 3D" hidden></canvas>
+        <canvas id="c-pivot" class="vue-3d" role="img" aria-label="Bras pivotant en 3D" hidden></canvas>
         <p class="aide-3d" id="aide-3d" hidden>Glisser : tourner · double-clic : recentrer</p>
       </div>
     </div>
@@ -128,6 +130,9 @@
 <script src="js/tri-3d.js"></script>
 <script src="js/tri-moteur.js"></script>
 <script src="js/tri.js"></script>
+<script src="js/pivot-moteur.js"></script>
+<script src="js/pivot.js"></script>
+<script src="js/pivot-3d.js"></script>
 <script src="js/manutention.js"></script>
 </body>
 </html>

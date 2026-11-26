@@ -7,8 +7,9 @@ extérieur. La progression est enregistrée dans le navigateur.
 ## Ateliers
 
 - **Traçage** : 13 niveaux, dont des niveaux à couleurs imposées et une création libre.
-- **Manutention** : 18 niveaux avec un bras robot (piles, tapis roulants) puis un centre de tri à
-  plateaux tournants. Les départs sont tirés au hasard : le programme doit gérer tous les cas.
+- **Manutention** : 23 niveaux avec un bras robot (piles, tapis roulants), un centre de tri à
+  plateaux tournants, puis un bras pivotant. Les départs sont tirés au hasard : le programme doit
+  gérer tous les cas.
 
 Chaque programme peut être relu en Python.
 
@@ -35,7 +36,7 @@ Sans Docker : `python -m http.server 8000` dans ce dossier.
 ## Tests
 
 ```sh
-node --test tests/manutention.test.js tests/tri.test.js
+node --test tests/*.test.js
 ```
 
 Les fichiers `tests/navigateur-*.js` s'évaluent dans la page correspondante.

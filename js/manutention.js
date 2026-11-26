@@ -1,8 +1,10 @@
 /* Atelier Manutention : blocs, scène et verdict. Les règles sont dans manutention-moteur.js. */
 {
   const B = window.Blockly, A = window.Atelier, M = window.Manutention, memo = A.memo;
-  /* Niveaux 1 à 12 : bras ; 13 à 18 : centre de tri (tri.js) */
-  const NIVEAUX = [...M.NIVEAUX, ...window.Tri.NIVEAUX];
+  /* Niveaux 1 à 12 : bras sur rail ; 13 à 18 : centre de tri (tri.js) ; 19 à 23 : bras pivotant (pivot.js) */
+  const NIVEAUX = [...M.NIVEAUX, ...window.Tri.NIVEAUX, ...window.Pivot.NIVEAUX];
+  /* La machine d'un niveau, d'après son groupe */
+  const machine = (n) => ({ Convoyeurs: "tri", Pivot: "pivot" })[n.groupe] || "bras";
   const $ = (id) => document.getElementById(id);
 
   /* ---------- Blocs ---------- */
@@ -282,7 +284,7 @@
     return vue;
   }
 
-  /* ---------- Les deux machines : même interface ---------- */
+  /* ---------- Les trois machines : même interface ---------- */
   const KitBras = {
     prefixe: "manut_", moteur: M, compiler, etatDepart, fixe, image, libelle, dessin2D: (g, vue) => sceneBras(vue), objectif: objectifBras,
     releve: (e) => [["pince", NOM[e.pos]], ["caisse tenue", e.main ? e.main.l : "aucune"], ["livrées", e.piles.S.map((c) => c.l).join(", ") || "aucune"]],
@@ -295,7 +297,7 @@
   };
   let kit = KitBras;
   function scene(vue) {
-    const moteur3D = vue.tri ? troisDTri : troisD;
+    const moteur3D = vue.tri ? troisDTri : vue.pivot ? troisDPivot : troisD;
     if (moteur3D) moteur3D.dessiner({ ...vue, decor: numNiv });
     else kit.dessin2D(toile, vue, palette());
   }
@@ -445,7 +447,7 @@
     if (surIntro) presenter(false);
     arreter();
     numNiv = i; niv = NIVEAUX[i];
-    kit = niv.groupe === "Convoyeurs" ? window.KitTri : KitBras;
+    kit = { tri: window.KitTri, pivot: window.KitPivot, bras: KitBras }[machine(niv)];
     basculer();
     memo.ecrire("manut-niveau", i);
     $("niv-num").textContent = `Niveau ${i + 1} sur ${NIVEAUX.length}`;
@@ -485,14 +487,15 @@
   A.sombre.addEventListener("change", () => { redessiner(); dessinerObjectif(montre); });
   document.fonts.ready.then(redessiner);
 
-  let troisDTri = null;
+  let troisDTri = null, troisDPivot = null;
+  const rendu3D = () => ({ bras: troisD, tri: troisDTri, pivot: troisDPivot })[machine(niv)];
+  const TOILES = { bras: "c-3d", tri: "c-tri", pivot: "c-pivot" };
   /* N'affiche que la toile utile : 3D de la machine du niveau, sinon dessin 2D */
   function basculer() {
-    const tri = niv.groupe === "Convoyeurs", bras3D = !tri && !!troisD, tri3D = tri && !!troisDTri;
-    $("c-3d").hidden = !bras3D;
-    $("c-tri").hidden = !tri3D;
-    $("c-scene").hidden = bras3D || tri3D;
-    $("aide-3d").hidden = !(bras3D || tri3D);
+    const actif = rendu3D() ? machine(niv) : null;
+    for (const [nom, id] of Object.entries(TOILES)) $(id).hidden = nom !== actif;
+    $("c-scene").hidden = !!actif;
+    $("aide-3d").hidden = !actif;
   }
   async function activer3D() {
     if (!window.THREE || new URLSearchParams(location.search).has("2d")) return;
@@ -512,11 +515,12 @@
     };
     troisD = essayer("c-3d", (c) => window.Rendu3D.creer(c, { centres: CENTRE, sol: SOL, haut: HAUT }), () => { troisD = null; });
     troisDTri = essayer("c-tri", (c) => window.Rendu3DTri.creer(c), () => { troisDTri = null; });
+    troisDPivot = essayer("c-pivot", (c) => window.Rendu3DPivot.creer(c, window.KitPivot.geometrie), () => { troisDPivot = null; });
     basculer();
     scene(kit.fixe(vu));
   }
 
-  window.manutTest = { NIVEAUX, ouvrir, ws, departMaximum, nombreCaisses, get en3D() { return !!(niv.groupe === "Convoyeurs" ? troisDTri : troisD); } };
+  window.manutTest = { NIVEAUX, ouvrir, ws, departMaximum, nombreCaisses, get en3D() { return !!rendu3D(); } };
   $("commencer").addEventListener("click", () => ouvrir(0));
   ouvrir(Math.min(+memo.lire("manut-niveau", 0) || 0, NIVEAUX.length - 1));
   /* À la première visite sur ce navigateur, on commence par les explications */

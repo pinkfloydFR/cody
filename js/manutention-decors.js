@@ -1,4 +1,5 @@
-/* Décors de fond de l'atelier Manutention : un par niveau (1 à 12 : bras ; 13 à 18 : centre de tri).
+/* Décors de fond de l'atelier Manutention : un par niveau (1 à 12 : bras ; 13 à 18 : centre de tri ;
+   19 à 23 : bras pivotant).
    Tout est dessiné ici (aucune image externe). Repère en unités de la scène : x de -30 à 30,
    y de 0 (le sol) à 22, vers le haut. La caméra voit surtout x de -17 à 17 et y de 0 à 9.
    Le hasard est « à graine » : chaque décor est identique d'un affichage à l'autre. */
@@ -340,6 +341,71 @@
       }
       for (const y of [3.4, 6.3]) { o.rect(-30, y, 60, .16, "#bfeaff"); for (let x = -26; x < 28; x += 9.5) { const dx = x + o.entre(0, 3); o.rect(dx, y + .2, 2.2, .55, "#ffe27a"); o.disque(dx + 2.2, y + .47, .28, "#ffe27a"); } }
       o.garde("#12163a");
+    } },
+    { nom: "Champs et éoliennes", sol: 0xb4ae93, dessiner(o) {
+      o.ciel([[0, "#d9eefb"], [5, "#9fd0f2"], [22, "#4f8fd0"]]);
+      for (let i = 0; i < 9; i++) o.nuage(o.entre(-26, 26), o.entre(5, 11), o.entre(.6, 1.2));
+      for (let x = -24; x <= 24; x += 8) {
+        const px = x + o.entre(-2, 2), h = o.entre(4.5, 7);
+        o.trait(px, 1.5, px, h, "#f4f7fa", .22);
+        for (let k = 0; k < 3; k++) { const a = .5 + k * 2.094 + x; o.trait(px, h, px + Math.cos(a) * 2.2, h + Math.sin(a) * 2.2, "#ffffff", .16); }
+        o.disque(px, h, .22, "#c9d3dc");
+      }
+      o.cretes(2.4, 1.1, 5, "#7fb36a"); o.cretes(1.2, .8, 4, "#d9b94c"); o.cretes(.5, .5, 3, "#5f9a4f");
+      o.garde("#6b5535", 1.1);
+    } },
+    { nom: "Désert et pyramides", sol: 0xcdb594, dessiner(o) {
+      o.ciel([[0, "#ffe3ac"], [4, "#f7b66e"], [9, "#c97f8f"], [22, "#4d4f87"]]);
+      o.halo(9, 6.2, 3.6, "rgba(255,238,190,.9)"); o.disque(9, 6.2, 1.25, "#fff1c4");
+      for (const [x, h] of [[-13, 6.4], [-5, 4.6], [16, 5.2]]) {
+        o.forme([[x - h, 1], [x, h], [x + h, 1]], "#c8925a");
+        o.forme([[x, h], [x + h, 1], [x + h * .25, 1]], "#9d6c43");
+      }
+      o.cretes(1.6, 1.2, 7, "#dca45f"); o.cretes(.7, .8, 5, "#c88a49");
+      o.garde("#5a3d28", 1.05);
+    } },
+    { nom: "Île tropicale", sol: 0xbdb49b, dessiner(o) {
+      o.ciel([[0, "#c9f1f2"], [4.5, "#8fd6ee"], [22, "#2f82c4"]]);
+      o.rect(-30, 0, 60, 3.4, "#1f97ad");
+      for (let i = 0; i < 90; i++) o.rect(o.entre(-30, 29), o.entre(.8, 3.2), o.entre(.4, 1.8), .06, "rgba(255,255,255,.55)");
+      for (let i = 0; i < 6; i++) o.nuage(o.entre(-26, 26), o.entre(6, 11), o.entre(.7, 1.3));
+      for (const x of [-15, -6.5, 12.5, 20]) {
+        o.forme([[x - 3.4, 1.4], [x - 1.4, 2.5], [x + 1.4, 2.5], [x + 3.4, 1.4]], "#e8cf8e");
+        o.trait(x, 2.3, x + .7, 6, "#7a5530", .34);
+        for (const [dx, dy] of [[-2.2, -.4], [-1.5, 1], [.1, 1.4], [1.7, .9], [2.3, -.5]]) o.forme([[x + .7, 6], [x + .7 + dx * .55, 6.35 + dy], [x + .7 + dx, 6 + dy * .5]], "#2f7d43");
+      }
+      o.garde("#6d4a2c", 1.1);
+    } },
+    { nom: "Fête foraine", sol: 0x9b97ad, dessiner(o) {
+      o.ciel([[0, "#f2a07b"], [4.5, "#8d5f9e"], [10, "#34376f"], [22, "#131737"]]);
+      o.etoiles(160, 7);
+      const roue = (cx, cy, r) => {
+        o.g.strokeStyle = "#e7d9f4"; o.g.lineWidth = .16; o.g.beginPath(); o.g.arc(cx, cy, r, 0, Math.PI * 2); o.g.stroke();
+        for (let k = 0; k < 12; k++) {
+          const a = k * Math.PI / 6, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+          o.trait(cx, cy, x, y, "#a892c8", .08); o.disque(x, y, .42, ["#ffd35a", "#ff6f7d", "#62d6e8"][k % 3]);
+        }
+        o.trait(cx, cy, cx - r * .6, 0, "#6d5a8c", .3); o.trait(cx, cy, cx + r * .6, 0, "#6d5a8c", .3);
+      };
+      roue(-11, 5, 3.9); roue(15, 3.8, 2.6);
+      for (let x = -4; x <= 9; x += 4.3) {
+        o.rect(x - 1.6, 0, 3.2, 2.4, "#3a2f5c");
+        for (let k = 0; k < 4; k++) o.forme([[x - 1.8 + k * .9, 2.4], [x, 4.4], [x - .9 + k * .9, 2.4]], k % 2 ? "#f2ead8" : "#c94452");
+      }
+      for (let x = -29; x < 29; x += .9) o.disque(x, 4.9 + Math.sin(x * .55) * .45, .11, "#ffe9a8");
+      o.garde("#171433", 1.1);
+    } },
+    { nom: "Station de montagne", sol: 0xc3c8cc, dessiner(o) {
+      o.ciel([[0, "#e6f4fd"], [5, "#a9d2f0"], [22, "#4a7fb8"]]);
+      o.cretes(5.2, 3.6, 5.5, "#8aa3bd"); o.cretes(3.6, 2.4, 3.2, "#dfe8f0"); o.cretes(1.6, 1.6, 4, "#6f879c");
+      o.trait(-30, 8.6, 30, 4.6, "#323c48", .09);
+      for (const x of [-12, 3, 18]) {
+        const y = 6.6 - x * (4 / 60);
+        o.trait(x, y, x, y - .8, "#323c48", .12); o.rect(x - 1, y - 2.2, 2, 1.45, "#c4453c");
+        o.rect(x - .8, y - 1.55, .65, .55, "#dff0fb"); o.rect(x + .15, y - 1.55, .65, .55, "#dff0fb");
+      }
+      for (let x = -28; x < 29; x += 2.1) { const h = o.entre(1.4, 2.9); o.forme([[x - .75, .4], [x, h], [x + .75, .4]], "#2f5a45"); }
+      o.garde("#3c4651", 1);
     } },
   ];
 
