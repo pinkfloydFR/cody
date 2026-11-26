@@ -181,11 +181,27 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 - Capot absent au tapis sud (il masquerait le bras) : une seule caisse visible au-delà de la place.
 - **Pas encore testé par l'enseignant.**
 
-## Suite prévue
+## Pivot sur rail (niveaux 24 à 27, groupe « Pivot + rail »)
 
-- **Pivot + rail** (niveaux 24 à 27, même design), après les retours de l'enseignant sur le pivot :
-  3 crans, tapis A, B, C au nord, D à l'est, pile d'attente au sud du cran 2 ; « glisser d'un
-  cran » ; le moteur et le rendu du pivot sont à étendre (le pivot est un rail à un seul cran).
+- Même design. `pivot-moteur.js` fabrique **deux machines** (`fabriquer`) : `Pivot` (sur place) et
+  `Pivot.Rail` / `window.PivotRail`. Un « plan » associe « cran,orientation » au poste atteint.
+  `pivot.js` fait de même pour l'interface (`KitPivot`, `KitRail`, blocs `pivot_*` communs, plus
+  `pivot_glisser` et `pivot_jusquarail`) ; `pivot-3d.js` construit les deux scènes d'après la
+  géométrie du kit (toiles `c-pivot` et `c-rail`).
+- 3 crans ; entrée à l'ouest du cran 1 ; A, B, C au nord ; D à l'est du cran 3 ; pile d'attente (4,
+  on y reprend) au sud du cran 2. Rien ailleurs : saisir ou poser y est une erreur.
+- Initialisation : 12 départs. « répéter jusqu'à être [face à l'ouest · au bout ouest du rail] ».
+- La pince se relève au-dessus de la pile d'attente selon sa hauteur (`disposer`, `levee`).
+- Optima 9, 13, 15, **24** (la fiche ne fixait pas de nombre ; solutions testées). Recherche bornée,
+  partielle : rien de plus court au niveau 24 jusqu'à 4 blocs, ni aux niveaux 25 et 26 pour la forme
+  « initialisation + tant que » jusqu'à un corps de 7 et 6 blocs ; 27 : meilleure solution connue.
+- Déployé le 27/11/2026. **Pas encore testé par l'enseignant.**
+
+## Pistes
+
+- Niveau 23 : l'enseignant a demandé pourquoi il est plus dur que le 22 (aucune information sur la
+  caisse : la place dans le programme sert de mémoire). Proposé : réduire à une alternance nord / est
+  ou le rendre facultatif ; pas de réponse à ce jour.
 - Idée antérieure, non conçue : bras et tapis orientables.
 
 ## Blocs (les deux ateliers, `js/atelier.js`)
@@ -206,8 +222,8 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 
 ## Tests
 
-- `node --test tests/*.test.js` : 190 tests (bras 103, tri 44, pivot 43).
-  `tests/navigateur-pivot.js` : solutions 19 à 23 dans la page.
+- `node --test tests/*.test.js` : 227 tests (bras 103, tri 44, pivot 43, rail 37).
+  `tests/navigateur-pivot.js` et `navigateur-rail.js` : solutions 19 à 23 et 24 à 27 dans la page.
   `tests/navigateur-tri.js` : solutions 13 à 18 dans la page.
 - `tests/navigateur-tracage.js` et `tests/navigateur-manutention.js` : à évaluer dans la page
   (console), ils construisent les solutions en blocs. Ils écrasent les programmes sauvegardés

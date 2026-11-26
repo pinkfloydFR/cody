@@ -1,9 +1,9 @@
-/* Rendu 3D du bras pivotant (three.js r128). Aucune image externe : les textures sont dessinées ici.
+/* Rendu 3D du bras pivotant, sur place ou sur rail (three.js r128). Aucune image externe : les textures sont dessinées ici.
    Il reçoit les mêmes « vues » que le dessin 2D de secours (pivot.js).
    Les matières et les caisses sont recopiées de manutention-3d.js (comme dans tri-3d.js) :
    reporter toute retouche dans les trois fichiers. */
 window.Rendu3DPivot = {
-creer(toile, { PRISE }) {
+creer(toile, { PRISE, PAS, CRAN, rail, milieu, postes }) {
 const T = window.THREE;
 const rendu = new T.WebGLRenderer({ canvas: toile, antialias: true });
 rendu.setPixelRatio(Math.min(devicePixelRatio, 1.5));
@@ -189,10 +189,11 @@ const danger = (rx, ry) => texture(256, 256, (g, l, h) => {
 }, rx, ry);
 const peint = (rx, ry) => new T.MeshStandardMaterial({ map: danger(rx, ry), roughness: .75 });
 
-/* ---------- Quatre tapis en croix, construits vers l'est puis pivotés ---------- */
-const DEBUT = PRISE - .95, FIN = { entree: 10.2, N: 9.0, E: 10.2, S: 7.4 };
-const CAP = { entree: Math.PI, N: Math.PI / 2, E: 0, S: -Math.PI / 2 };
+/* ---------- Tapis, construits vers l'est puis pivotés autour de leur cran ---------- */
+const DEBUT = PRISE - .95;
 const DIR = { O: Math.PI, N: Math.PI / 2, E: 0, S: -Math.PI / 2 };
+/* abscisse d'un cran (nombre à virgule pendant un glissement) */
+const enX = (cran) => (cran - milieu) * CRAN;
 const au = (cap, r) => [Math.cos(cap) * r, -Math.sin(cap) * r];
 const bandeTex = () => texture(512, 128, (g, l, h) => {
   g.fillStyle = "#1d2024"; g.fillRect(0, 0, l, h);
@@ -201,9 +202,15 @@ const bandeTex = () => texture(512, 128, (g, l, h) => {
   grain(g, l, h, 2500, .12);
 }, 3, 1);
 const bandes = {};
-for (const poste of Object.keys(CAP)) {
-  const g = new T.Group(); g.rotation.y = CAP[poste]; monde.add(g);
-  const x1 = FIN[poste], l = x1 - DEBUT, m = (x1 + DEBUT) / 2, bande = bandeTex();
+for (const [poste, p] of Object.entries(postes)) {
+  const g = new T.Group(); g.position.x = enX(p.cran); g.rotation.y = DIR[p.dir]; monde.add(g);
+  if (p.pile) { /* la pile d'attente : une table */
+    bloc(1.9, .18, 2.0, ACIER, PRISE, .52, 0, g);
+    bloc(1.75, .02, 1.85, CAOUTCHOUC, PRISE, .626, 0, g);
+    for (const dx of [-.78, .78]) for (const dz of [-.85, .85]) bloc(.16, .45, .16, SOMBRE, PRISE + dx, .225, dz, g);
+    continue;
+  }
+  const x1 = p.fin, l = x1 - DEBUT, m = (x1 + DEBUT) / 2, bande = bandeTex();
   bandes[poste] = { bande, parMetre: 3 / l };
   bloc(l, .1, 1.62, new T.MeshStandardMaterial({ map: bande, roughness: .85 }), m, .6, 0, g);
   for (const z of [-.9, .9]) {
@@ -215,8 +222,8 @@ for (const poste of Object.keys(CAP)) {
   /* Place de prise ou de dépose */
   bloc(1.7, .02, 1.5, peint(4, 1), PRISE, .622, 0, g);
   bloc(1.5, .022, 1.3, CAOUTCHOUC, PRISE, .626, 0, g);
-  /* Capot au bout (pas au sud : il masquerait le bras) */
-  if (poste !== "S") {
+  /* Capot au bout (pas sur un tapis trop court : il masquerait le bras) */
+  if (p.visible > 2) {
     const G = metal(acier("#4a5666"), .55, .5), x = x1 - .6;
     bloc(1.8, .2, 2.2, G, x, 2.05, 0, g);
     for (const z of [1.04, -1.04]) bloc(1.8, 1.5, .14, G, x, 1.3, z, g);
@@ -237,10 +244,17 @@ function panneau(texte, x, y, z, l, entree) {
   const p = new T.Mesh(new T.PlaneGeometry(l, l / 4), new T.MeshBasicMaterial({ map: t, toneMapped: false }));
   p.position.set(x, y, z); p.rotation.x = -.45; monde.add(p);
 }
-panneau("ENTRÉE · OUEST", -7.2, .45, 1.65, 3.5, true);
-panneau("NORD", 0, 2.75, -8.4, 2.3);
-panneau("EST", 7.2, .45, 1.65, 2.1);
-panneau("SUD", 2.1, .45, 6.4, 2.1);
+if (rail) {
+  panneau("ENTRÉE", -12.4, .6, 1.9, 3.6, true);
+  for (const nom of ["A", "B", "C"]) panneau(nom, enX(postes[nom].cran), 3.15, -8.6, 3.8);
+  panneau("D", 12.4, .75, 2.0, 3.8);
+  panneau("ATTENTE", 2.55, .45, 4.7, 2.3);
+} else {
+  panneau("ENTRÉE · OUEST", -7.2, .45, 1.65, 3.5, true);
+  panneau("NORD", 0, 2.75, -8.4, 2.3);
+  panneau("EST", 7.2, .45, 1.65, 2.1);
+  panneau("SUD", 2.1, .45, 6.4, 2.1);
+}
 
 /* ---------- Écran : instruction en cours ---------- */
 const toileEcran = document.createElement("canvas");
@@ -260,25 +274,37 @@ function ecran(texte) {
 }
 ecran("en attente");
 {
-  const g = new T.Group(); g.position.set(8.8, 2.9, -6.4); g.rotation.set(-.3, -.3, 0, "YXZ"); monde.add(g);
+  const ex = rail ? 11.6 : 8.8;
+  const g = new T.Group(); g.position.set(ex, 2.9, -6.4); g.rotation.set(-.3, -.3, 0, "YXZ"); monde.add(g);
   bloc(4.5, 1.92, .26, metal(acier("#e8860f", .7), .35, .42), 0, 0, 0, g);
   objet(new T.PlaneGeometry(4.16, 1.63), new T.MeshBasicMaterial({ map: carteEcran, toneMapped: false }), 0, 0, .15, g);
-  for (const dx of [-1.5, 1.5]) cyl(.07, 2.4, SOMBRE, 8.8 + dx, 1.0, -6.7);
+  for (const dx of [-1.5, 1.5]) cyl(.07, 2.4, SOMBRE, ex + dx, 1.0, -6.7);
 }
 
-/* ---------- Plateau tournant gradué ---------- */
+/* ---------- Socle : plateau tournant gradué, ou rail et chariot ---------- */
 const NOIR = metal(acier("#2b3038"), .5, .5), ORANGE = metal(acier("#e8860f", .7), .35, .42);
-cyl(2.35, .22, NOIR, 0, .11, 0, monde, 64);
-cyl(2.05, .12, CLAIR, 0, .27, 0, monde, 64);
-cyl(1.85, .14, peint(10, 1), 0, .36, 0, monde, 64);
-cyl(1.6, .16, NOIR, 0, .45, 0, monde, 64);
-for (const [lettre, cap] of Object.entries(DIR)) {
+function pastille(lettre, jaune, rayon, x, z) {
   const t = texture(128, 128, (g) => {
-    g.fillStyle = lettre === "O" ? "#e0a81e" : "#e9ebe6"; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill();
+    g.fillStyle = jaune ? "#e0a81e" : "#e9ebe6"; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill();
     g.fillStyle = "#20262e"; g.font = "700 84px Luciole, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(lettre, 64, 70);
   });
-  const p = new T.Mesh(new T.CircleGeometry(.36, 32), new T.MeshBasicMaterial({ map: t, toneMapped: false }));
-  const [x, z] = au(cap, 2.72); p.rotation.x = -Math.PI / 2; p.position.set(x, .03, z); monde.add(p);
+  const p = new T.Mesh(new T.CircleGeometry(rayon, 32), new T.MeshBasicMaterial({ map: t, toneMapped: false }));
+  p.rotation.x = -Math.PI / 2; p.position.set(x, .03, z); monde.add(p);
+}
+const chariot = new T.Group(); monde.add(chariot);
+if (rail) {
+  for (const z of [-.7, .7]) bloc(13.6, .16, .2, CLAIR, 0, .16, z);
+  for (let x = -6.7; x <= 6.75; x += .62) bloc(.26, .08, 2.0, SOMBRE, x, .04, 0);
+  for (const x of [-6.95, 6.95]) bloc(.34, .6, 2.0, peint(1, 1), x, .3, 0);
+  for (const c of [1, 2, 3]) pastille(String(c), false, .5, enX(c) - (c === 2 ? 1.75 : 0), 2.0);
+  bloc(2.2, .34, 2.0, NOIR, 0, .42, 0, chariot);
+  bloc(2.22, .12, 2.02, peint(6, 1), 0, .56, 0, chariot);
+} else {
+  cyl(2.35, .22, NOIR, 0, .11, 0, monde, 64);
+  cyl(2.05, .12, CLAIR, 0, .27, 0, monde, 64);
+  cyl(1.85, .14, peint(10, 1), 0, .36, 0, monde, 64);
+  cyl(1.6, .16, NOIR, 0, .45, 0, monde, 64);
+  for (const [lettre, cap] of Object.entries(DIR)) pastille(lettre, lettre === "O", .36, ...au(cap, 2.72));
 }
 
 /* ---------- Bras pivotant : construit dans un plan, le groupe entier tourne ---------- */
@@ -365,31 +391,34 @@ monde.add(new T.HemisphereLight(0xdfe9f5, 0x40382c, .48));
 const soleil = new T.DirectionalLight(0xfff1dd, 1.35);
 soleil.position.set(5, 14, 8); soleil.castShadow = true;
 soleil.shadow.mapSize.set(2048, 2048); soleil.shadow.bias = -.0004; soleil.shadow.radius = 4;
-Object.assign(soleil.shadow.camera, { left: -15, right: 15, top: 13, bottom: -13, near: 1, far: 40 });
+Object.assign(soleil.shadow.camera, { left: -19, right: 19, top: 15, bottom: -15, near: 1, far: 50 });
 monde.add(soleil);
 const appoint = new T.PointLight(0x9fc4ff, .5, 30); appoint.position.set(9, 6, 5); monde.add(appoint);
 
-/* Hauteur du dessous d'une caisse : posée sur un tapis, ou soulevée */
-const POSE = .66, LEVEE = 1.9;
+/* Hauteur du dessous d'une caisse : posée, soulevée, ou à un étage de la pile */
+const POSE = .66, LEVEE = 1.9, ETAGE = H + .02;
 
 function disposer(vue) {
   for (const g of stock.values()) g.visible = false;
   for (const o of vue.caisses) {
     const [x, z] = au(DIR[o.dir], o.r);
-    placer(o.c, x, POSE, z);
+    placer(o.c, enX(o.cran) + x, POSE + o.niveau * ETAGE, z);
   }
   for (const poste of Object.keys(bandes)) {
-    bandes[poste].bande.offset.x = -(vue.avance[poste] || 0) * 1.7 * bandes[poste].parMetre;
+    bandes[poste].bande.offset.x = -(vue.avance[poste] || 0) * PAS * bandes[poste].parMetre;
   }
   /* angle en quarts de tour : 0 = ouest, 1 = nord… (sens des aiguilles d'une montre) */
-  const cap = Math.PI - vue.angle * Math.PI / 2;
+  const cap = Math.PI - vue.angle * Math.PI / 2, ax = enX(vue.x);
+  bras.position.x = chariot.position.x = ax;
   bras.rotation.y = cap;
   pince.rotation.y = -cap;
-  const bas = LEVEE + (POSE - LEVEE) * vue.bas;
+  /* Le bras reste au-dessus de la pile d'attente, quelle que soit sa hauteur */
+  const levee = Math.max(LEVEE, POSE + vue.pile * ETAGE + .2);
+  const bas = levee + (POSE + vue.cible * ETAGE - levee) * vue.bas;
   poserBras(bas + H + .02);
   if (vue.main) {
     const [x, z] = au(cap, PRISE);
-    placer(vue.main, x, bas, z);
+    placer(vue.main, ax + x, bas, z);
   }
   for (const [d, s] of doigts) d.position.x = vue.main ? 0 : s * .13;
   ecran(vue.instruction);
@@ -398,14 +427,15 @@ function disposer(vue) {
 
 /* ---------- Caméra plongeante : les quatre directions restent visibles ---------- */
 const camera = new T.PerspectiveCamera(32, 1.6, .1, 120);
-const DEPART = { angle: .14, hauteur: .54 }, VISE = new T.Vector3(0, .9, .35);
+const DEPART = rail ? { angle: .08, hauteur: .6 } : { angle: .14, hauteur: .54 };
+const VISE = rail ? new T.Vector3(0, .9, -1.3) : new T.Vector3(0, .9, .35);
 let angle = DEPART.angle, hauteur = DEPART.hauteur, derniere = null;
 function afficher() {
   const l = toile.clientWidth, h = toile.clientHeight;
   if (!l || !h || !derniere) return;
   rendu.setSize(l, h, false);
   camera.aspect = l / h;
-  const dist = Math.max(23.5, 42 / camera.aspect);
+  const dist = rail ? Math.max(29.5, 56 / camera.aspect) : Math.max(23.5, 42 / camera.aspect);
   camera.position.set(Math.sin(angle) * dist * Math.cos(hauteur), VISE.y + Math.sin(hauteur) * dist, Math.cos(angle) * dist * Math.cos(hauteur));
   camera.lookAt(VISE);
   camera.updateProjectionMatrix();

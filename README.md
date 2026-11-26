@@ -7,8 +7,8 @@ extérieur. La progression est enregistrée dans le navigateur.
 ## Ateliers
 
 - **Traçage** : 13 niveaux, dont des niveaux à couleurs imposées et une création libre.
-- **Manutention** : 23 niveaux avec un bras robot (piles, tapis roulants), un centre de tri à
-  plateaux tournants, puis un bras pivotant. Les départs sont tirés au hasard : le programme doit
+- **Manutention** : 27 niveaux avec un bras robot (piles, tapis roulants), un centre de tri à
+  plateaux tournants, puis un bras pivotant, sur place et sur rail. Les départs sont tirés au hasard : le programme doit
   gérer tous les cas.
 
 Chaque programme peut être relu en Python.

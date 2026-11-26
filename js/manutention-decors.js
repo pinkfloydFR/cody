@@ -1,5 +1,5 @@
 /* Décors de fond de l'atelier Manutention : un par niveau (1 à 12 : bras ; 13 à 18 : centre de tri ;
-   19 à 23 : bras pivotant).
+   19 à 27 : bras pivotant, sur place puis sur rail).
    Tout est dessiné ici (aucune image externe). Repère en unités de la scène : x de -30 à 30,
    y de 0 (le sol) à 22, vers le haut. La caméra voit surtout x de -17 à 17 et y de 0 à 9.
    Le hasard est « à graine » : chaque décor est identique d'un affichage à l'autre. */
@@ -406,6 +406,53 @@
       }
       for (let x = -28; x < 29; x += 2.1) { const h = o.entre(1.4, 2.9); o.forme([[x - .75, .4], [x, h], [x + .75, .4]], "#2f5a45"); }
       o.garde("#3c4651", 1);
+    } },
+    { nom: "Observatoire de nuit", sol: 0x8b90a0, dessiner(o) {
+      o.ciel([[0, "#3b4a74"], [5, "#1c2750"], [22, "#070b1c"]]);
+      o.etoiles(420, 2.5);
+      o.halo(-11, 8, 2.6, "rgba(220,230,255,.5)"); o.disque(-11, 8, 1.15, "#e9eefc"); o.disque(-10.5, 8.35, .95, "#1f2b55");
+      o.cretes(2.6, 2.2, 5, "#1e2a44");
+      for (const [x, r] of [[-3, 2.4], [8, 3.1], [19, 1.9]]) {
+        o.rect(x - r, 0, 2 * r, 3.1, "#aab4c8"); o.disque(x, 3.1, r, "#d5dced");
+        o.forme([[x - .25, 3.1], [x + r * .55, 3.1 + r * 1.05], [x + r * .85, 3.1 + r * .8], [x + .35, 3.1]], "#2c3652");
+        for (let k = -1; k <= 1; k++) o.rect(x + k * r * .55 - .18, 1.5, .36, .55, "#ffd98a");
+      }
+      o.garde("#0d1226", 1.05);
+    } },
+    { nom: "Ciel des montgolfières", sol: 0xbfb6a5, dessiner(o) {
+      o.ciel([[0, "#ffe9c9"], [4, "#bfe3f5"], [22, "#4b93d6"]]);
+      for (let i = 0; i < 7; i++) o.nuage(o.entre(-26, 26), o.entre(3.5, 11), o.entre(.5, 1.1));
+      for (const [x, y, r, a, b] of [[-14, 6.6, 1.9, "#d8514a", "#f6e3c0"], [-4, 8.2, 1.3, "#3f7fc2", "#f3f0e6"], [7, 5.9, 2.2, "#e79a2d", "#7a4d9a"], [17, 7.8, 1.5, "#3c9a68", "#f0e4a6"]]) {
+        o.disque(x, y, r, a); o.forme([[x - r * .45, y + r * .85], [x, y + r * 1.02], [x + r * .45, y + r * .85], [x, y - r * 1.1]], b);
+        o.forme([[x - r * .92, y - r * .4], [x + r * .92, y - r * .4], [x + r * .2, y - r * 1.45], [x - r * .2, y - r * 1.45]], a);
+        o.trait(x - r * .18, y - r * 1.45, x - r * .22, y - r * 1.9, "#4a3a2a", .06); o.trait(x + r * .18, y - r * 1.45, x + r * .22, y - r * 1.9, "#4a3a2a", .06);
+        o.rect(x - r * .26, y - r * 2.2, r * .52, r * .36, "#8a5a30");
+      }
+      o.cretes(1.8, 1.2, 5, "#86a86a"); o.cretes(.8, .7, 3.5, "#668a52");
+      o.garde("#5d4b33", 1.05);
+    } },
+    { nom: "Aurore boréale", sol: 0xaab9c2, dessiner(o) {
+      o.ciel([[0, "#1d4a5e"], [5, "#10253f"], [22, "#060d1f"]]);
+      o.etoiles(300, 4);
+      for (const [base, c] of [[4.2, "rgba(80,255,170,.20)"], [5.6, "rgba(120,200,255,.16)"], [6.8, "rgba(190,120,255,.14)"]]) {
+        for (let x = -30; x < 30; x += .45) {
+          const y = base + Math.sin(x * .23 + base) * 1.3 + Math.sin(x * .61) * .45;
+          o.rect(x, y, .5, o.entre(1.6, 3.8), c);
+        }
+      }
+      o.cretes(3, 2.6, 4.5, "#2d4658"); o.cretes(1.4, 1.2, 3, "#cfe0ea");
+      for (let x = -28; x < 29; x += 3.3) { const h = o.entre(1.5, 3); o.forme([[x - .7, .5], [x, h], [x + .7, .5]], "#12303a"); }
+      o.garde("#16252f", 1);
+    } },
+    { nom: "Circuit de course", sol: 0xb0aeaa, dessiner(o) {
+      o.ciel([[0, "#dcefff"], [5, "#a5d4f5"], [22, "#4e8fd2"]]);
+      for (let i = 0; i < 6; i++) o.nuage(o.entre(-26, 26), o.entre(7, 11), o.entre(.6, 1.1));
+      o.rect(-30, 2.2, 60, 3.4, "#8d939e"); o.rect(-30, 5.6, 60, .45, "#c2453d");
+      for (let y = 2.5; y < 5.3; y += .55) for (let x = -29.6; x < 29.5; x += .5) o.disque(x + o.entre(-.1, .1), y + o.entre(-.06, .06), .17, ["#e8c24a", "#3f7fc2", "#d8514a", "#e9ecef", "#3c9a68"][Math.floor(o.alea() * 5)]);
+      for (let x = -27; x < 28; x += 9) { o.rect(x, 2.2, .3, 5.8, "#454c57"); o.rect(x, 8, 3, .9, "#20262e"); for (let k = 0; k < 4; k++) o.disque(x + .45 + k * .7, 8.45, .24, k < 3 ? "#ff5147" : "#4de07f"); }
+      o.rect(-30, 0, 60, 2.2, "#4b5058");
+      for (let x = -30; x < 30; x += 1.2) o.rect(x, 1.75, .6, .45, x % 2.4 < 1.2 ? "#e9ecef" : "#c2453d");
+      o.garde("#22272f", 1.05);
     } },
   ];
 
