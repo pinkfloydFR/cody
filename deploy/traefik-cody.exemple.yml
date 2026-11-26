@@ -1,0 +1,21 @@
+# MODÈLE de règle Traefik (fournisseur « file ») : à copier dans le dossier des règles de Traefik
+# en remplaçant le nom de domaine. Deux protections seulement, appliquées à ce seul site :
+# le géoblocage et CrowdSec (middlewares déjà définis dans la configuration de Traefik).
+http:
+  routers:
+    cody:
+      rule: "Host(`cody.exemple.fr`)"
+      service: cody
+      entryPoints:
+        - websecure
+      tls: true
+      middlewares:
+        - my-geoblock@file
+        - crowdsec-bouncer@file
+
+  services:
+    cody:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: "http://cody:80"

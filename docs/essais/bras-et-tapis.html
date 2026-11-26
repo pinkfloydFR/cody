@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cody — essai bras et tapis (jetable)</title>
+<link rel="icon" href="data:,">
+<style>
+  @font-face{font-family:Luciole;src:url(../../fonts/Luciole-Bold.woff2) format("woff2");font-weight:700}
+  html,body{margin:0;height:100%;background:#1a2029;overflow:hidden}
+  canvas{display:block;cursor:grab}
+  p{position:fixed;left:12px;bottom:8px;margin:0;color:#c9d4e3;font:14px Luciole,sans-serif}
+</style>
+</head>
+<body>
+<p id="note">Essai jetable : fais glisser pour tourner la vue.</p>
+<script src="../../js/three.min.js"></script>
+<script>
+(async () => {
+await document.fonts.load("700 40px Luciole").catch(() => {});
+const T = THREE;
+const rendu = new T.WebGLRenderer({ antialias: true });
+rendu.setPixelRatio(Math.min(devicePixelRatio, 2));
+rendu.shadowMap.enabled = true;
+rendu.shadowMap.type = T.PCFSoftShadowMap;
+rendu.outputEncoding = T.sRGBEncoding;
+rendu.toneMapping = T.ACESFilmicToneMapping;
+rendu.toneMappingExposure = .86;
+document.body.prepend(rendu.domElement);
+const monde = new T.Scene();
+monde.background = new T.Color(0x1a2029);
+monde.fog = new T.Fog(0x1a2029, 28, 55);
+
+/* ---------- Textures dessinées dans le code ---------- */
+let graine = 7;
+const hasard = () => (graine = (graine * 16807) % 2147483647) / 2147483647;
+function texture(l, h, dessin, rx = 1, ry = 1, couleur = true) {
+  const c = document.createElement("canvas"); c.width = l; c.height = h;
+  dessin(c.getContext("2d"), l, h);
+  const t = new T.CanvasTexture(c);
+  t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rx, ry);
+  t.anisotropy = rendu.capabilities.getMaxAnisotropy();
+  if (couleur) t.encoding = T.sRGBEncoding;
+  return t;
+}
+function grain(g, l, h, n, a, taille = 2) {
+  for (let i = 0; i < n; i++) {
+    g.fillStyle = hasard() > .5 ? `rgba(255,255,255,${hasard() * a})` : `rgba(0,0,0,${hasard() * a})`;
+    g.fillRect(hasard() * l, hasard() * h, 1 + hasard() * taille, 1 + hasard() * taille);
+  }
+}
+function rayures(g, l, h, n, coul, long = 40) {
+  g.strokeStyle = coul;
+  for (let i = 0; i < n; i++) {
+    const x = hasard() * l, y = hasard() * h;
+    g.lineWidth = .4 + hasard();
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + (hasard() - .5) * long, y + (hasard() - .5) * long * .3); g.stroke();
+  }
+}
+const beton = texture(1024, 1024, (g, l, h) => {
+  g.fillStyle = "#8b8e90"; g.fillRect(0, 0, l, h);
+  for (let i = 0; i < 260; i++) {
+    const x = hasard() * l, y = hasard() * h, r = 20 + hasard() * 130;
+    const d = g.createRadialGradient(x, y, 0, x, y, r), v = hasard() > .5 ? "255,255,255" : "40,36,30";
+    d.addColorStop(0, `rgba(${v},.10)`); d.addColorStop(1, `rgba(${v},0)`);
+    g.fillStyle = d; g.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  grain(g, l, h, 26000, .22);
+  rayures(g, l, h, 160, "rgba(40,40,40,.18)", 120);
+  g.strokeStyle = "rgba(30,30,30,.45)"; g.lineWidth = 4; g.strokeRect(0, 0, l, h);
+}, 5, 3);
+const tole = texture(512, 512, (g, l, h) => {
+  for (let x = 0; x < l; x++) {
+    const v = 60 + Math.sin(x / l * Math.PI * 16) * 8;
+    g.fillStyle = `rgb(${v - 8},${v},${v + 12})`; g.fillRect(x, 0, 1, h);
+  }
+  grain(g, l, h, 5000, .10);
+}, 6, 2);
+const acier = (base, usure = 1) => texture(512, 512, (g, l, h) => {
+  g.fillStyle = base; g.fillRect(0, 0, l, h);
+  for (let i = 0; i < 1800; i++) {
+    g.fillStyle = `rgba(${hasard() > .5 ? "255,255,255" : "0,0,0"},${hasard() * .06})`;
+    g.fillRect(hasard() * l, hasard() * h, 40 + hasard() * 160, 1);
+  }
+  grain(g, l, h, 3500, .12);
+  rayures(g, l, h, 70 * usure, "rgba(225,230,235,.35)");
+  rayures(g, l, h, 40 * usure, "rgba(60,35,15,.35)");
+});
+const metal = (carte, m = .65, r = .45) => new T.MeshStandardMaterial({ map: carte, metalness: m, roughness: r });
+const ACIER = metal(acier("#6f7c8c")), SOMBRE = metal(acier("#39424e"), .6, .55), CLAIR = metal(acier("#b9c0c8", .5), .85, .3);
+const PETROLE = metal(acier("#157884"), .4, .45), CAOUTCHOUC = new T.MeshStandardMaterial({ color: 0x15171a, roughness: .9 });
+
+/* ---------- Reflets : un petit atelier virtuel pour éclairer les métaux ---------- */
+const pmrem = new T.PMREMGenerator(rendu), reflets = new T.Scene();
+reflets.background = new T.Color(0x59636f);
+for (const [x, y, z, l, h] of [[0, 9, 0, 14, 3], [-9, 4, 4, 3, 8], [9, 5, 6, 3, 6]]) {
+  const p = new T.Mesh(new T.PlaneGeometry(l, h), new T.MeshBasicMaterial({ color: 0xffffff, side: T.DoubleSide }));
+  p.position.set(x, y, z); p.lookAt(0, 0, 0); reflets.add(p);
+}
+monde.environment = pmrem.fromScene(reflets, .04).texture;
+
+/* ---------- Outils ---------- */
+function objet(geo, mat, x, y, z, parent = monde) {
+  const m = new T.Mesh(geo, mat); m.position.set(x, y, z);
+  m.castShadow = m.receiveShadow = true; parent.add(m); return m;
+}
+const bloc = (l, h, p, mat, x, y, z, parent) => objet(new T.BoxGeometry(l, h, p), mat, x, y, z, parent);
+const cyl = (r, h, mat, x, y, z, parent, n = 24) => objet(new T.CylinderGeometry(r, r, h, n), mat, x, y, z, parent);
+const boulon = (x, y, z) => { cyl(.055, .06, CLAIR, x, y, z, monde, 6).rotation.x = Math.PI / 2; };
+
+/* ---------- Décor ---------- */
+const sol = objet(new T.PlaneGeometry(60, 30), new T.MeshStandardMaterial({ map: beton, color: 0xa9a39a, roughness: .95, envMapIntensity: .35 }), 0, 0, 0);
+sol.rotation.x = -Math.PI / 2;
+objet(new T.PlaneGeometry(60, 22), new T.MeshStandardMaterial({ map: tole, metalness: .35, roughness: .65 }), 0, 11, -7);
+const danger = (rx, ry) => texture(256, 256, (g, l, h) => {
+  g.fillStyle = "#e0a81e"; g.fillRect(0, 0, l, h); g.fillStyle = "#22262c";
+  for (let i = -l; i < l * 2; i += 128) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i + 64, 0); g.lineTo(i - h + 64, h); g.lineTo(i - h, h); g.fill(); }
+  grain(g, l, h, 2500, .3);
+}, rx, ry);
+const peint = (rx, ry) => new T.MeshStandardMaterial({ map: danger(rx, ry), roughness: .75 });
+function plaque(texte, l = 1.1) {
+  const t = texture(512, 160, (g, w, h) => {
+    g.fillStyle = "#e9ebe6"; g.fillRect(0, 0, w, h); grain(g, w, h, 900, .12);
+    g.strokeStyle = "#20262e"; g.lineWidth = 12; g.strokeRect(10, 10, w - 20, h - 20);
+    g.fillStyle = "#20262e"; g.font = "700 96px Luciole, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText(texte, w / 2, h / 2 + 6);
+  });
+  return [new T.PlaneGeometry(l, l * .3125), new T.MeshStandardMaterial({ map: t, roughness: .6 })];
+}
+
+const L = 1.85, H = 1.1, P = 1.5;
+function bois(g, l, h, teinte) {
+  g.fillStyle = teinte; g.fillRect(0, 0, l, h);
+  const n = 4, e = h / n;
+  for (let i = 0; i < n; i++) {
+    g.fillStyle = `rgba(${hasard() > .5 ? "255,255,255" : "0,0,0"},${.03 + hasard() * .07})`; g.fillRect(0, i * e, l, e);
+    for (let k = 0; k < 26; k++) {
+      const y = i * e + hasard() * e;
+      g.strokeStyle = `rgba(30,15,5,${.08 + hasard() * .2})`; g.lineWidth = .6 + hasard() * 1.8;
+      g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= l; x += 40) g.lineTo(x, y + Math.sin(x / 90 + k) * 3 * hasard());
+      g.stroke();
+    }
+    for (let k = 0; k < 2; k++) {
+      const x = hasard() * l, y = i * e + e * (.25 + hasard() * .5);
+      for (let r = 12; r > 2; r -= 3) { g.strokeStyle = "rgba(35,18,6,.28)"; g.beginPath(); g.ellipse(x, y, r * 1.8, r * .6, 0, 0, 7); g.stroke(); }
+    }
+    g.fillStyle = "rgba(0,0,0,.5)"; g.fillRect(0, i * e, l, 4);
+    g.fillStyle = "rgba(255,255,255,.16)"; g.fillRect(0, i * e + 4, l, 2);
+  }
+  /* Peinture écaillée : le bois nu réapparaît */
+  for (let i = 0; i < 150; i++) {
+    const bord = hasard() > .35;
+    const x = bord ? (hasard() > .5 ? hasard() * 40 : l - hasard() * 40) : hasard() * l, y = hasard() * h;
+    g.fillStyle = `rgba(184,140,88,${.25 + hasard() * .5})`;
+    g.beginPath(); g.ellipse(x, y, 1 + hasard() * 7, .8 + hasard() * 2.5, hasard() * .5, 0, 7); g.fill();
+  }
+  rayures(g, l, h, 90, "rgba(240,225,200,.28)", 70);
+  grain(g, l, h, 7000, .14);
+}
+function faceCaisse(teinte, lettre, nom) {
+  return new T.MeshStandardMaterial({ roughness: .72, metalness: .05, map: texture(740, 440, (g, l, h) => {
+    bois(g, l, h, teinte);
+    if (!lettre) return;
+    const x = l / 2 - 185, y = h / 2 - 170;
+    g.fillStyle = "#efeadb"; g.fillRect(x, y, 370, 340); grain(g, l, h, 900, .1);
+    g.strokeStyle = "rgba(30,30,30,.55)"; g.lineWidth = 5; g.strokeRect(x + 10, y + 10, 350, 320);
+    g.fillStyle = "#191d24"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = "700 200px Luciole, sans-serif"; g.fillText(lettre, l / 2, y + 135);
+    g.font = "700 76px Luciole, sans-serif"; g.fillText(nom, l / 2, y + 280);
+  }) });
+}
+function caisse(x, y, teinte, lettre, nom) {
+  const g = new T.Group(); g.position.set(x, y, 0); monde.add(g);
+  const nu = faceCaisse(teinte), marque = faceCaisse(teinte, lettre, nom);
+  bloc(L, H, P, [nu, nu, nu, nu, marque, nu], 0, H / 2, 0, g);
+  const e = .1;
+  for (const sy of [e / 2, H - e / 2]) for (const sz of [-P / 2, P / 2]) bloc(L + .04, e, e, SOMBRE, 0, sy, sz, g);
+  for (const sy of [e / 2, H - e / 2]) for (const sx of [-L / 2, L / 2]) bloc(e, e, P + .04, SOMBRE, sx, sy, 0, g);
+  for (const sx of [-L / 2, L / 2]) for (const sz of [-P / 2, P / 2]) {
+    bloc(e, H, e, SOMBRE, sx, H / 2, sz, g);
+    for (const sy of [e / 2, H - e / 2]) objet(new T.SphereGeometry(.042, 12, 10), CLAIR, sx, sy, sz + Math.sign(sz) * .052, g);
+  }
+}
+
+/* ---------- Postes : trois piles au centre ---------- */
+function pied(x, z, h) { bloc(.16, h, .16, SOMBRE, x, h / 2, z); }
+for (const [nom, x] of [["1", -2.6], ["2", 0], ["3", 2.6]]) {
+  bloc(2.2, .18, 1.85, ACIER, x, .55, 0);
+  bloc(2.04, .02, 1.7, CAOUTCHOUC, x, .65, 0);
+  for (const dx of [-.92, .92]) for (const dz of [-.75, .75]) pied(x + dx, dz, .48);
+  objet(...plaque(nom, 1.05), x, .24, 1.0);
+}
+
+/* ---------- Tapis roulants ---------- */
+const bande = texture(512, 128, (g, l, h) => {
+  g.fillStyle = "#1d2024"; g.fillRect(0, 0, l, h);
+  g.strokeStyle = "#33383f"; g.lineWidth = 10;
+  for (let x = 0; x < l; x += 64) { g.beginPath(); g.moveTo(x, 8); g.lineTo(x + 26, h / 2); g.lineTo(x, h - 8); g.stroke(); }
+  grain(g, l, h, 2500, .12);
+}, 3, 1);
+function tapis(x0, x1, nom) {
+  const l = x1 - x0, m = (x0 + x1) / 2;
+  bloc(l, .1, 1.62, new T.MeshStandardMaterial({ map: bande, roughness: .85 }), m, .6, 0);
+  for (const z of [-.9, .9]) {
+    bloc(l + .1, .3, .12, ACIER, m, .5, z);
+    for (let x = x0 + .3; x < x1; x += .75) cyl(.065, .06, CLAIR, x, .5, z + Math.sign(z) * .07, monde, 16).rotation.x = Math.PI / 2;
+  }
+  for (let x = x0 + .25; x <= x1; x += 2.1) for (const z of [-.8, .8]) pied(x, z, .45);
+  for (const x of [x0, x1]) cyl(.17, 1.7, CLAIR, x, .5, 0).rotation.x = Math.PI / 2;
+  objet(...plaque(nom, 1.8), nom === "ENTRÉE" ? x1 - 1.1 : x0 + 1.1, .18, 1.12);
+}
+tapis(-11.4, -4.15, "ENTRÉE");
+tapis(4.15, 11.4, "SORTIE");
+
+/* Capots : les caisses suivantes sont cachées, comme dans l'exercice */
+function capot(x, sens) {
+  const G = metal(acier("#4a5666"), .55, .5);
+  bloc(2.3, .22, 2.2, G, x, 2.35, 0);
+  bloc(2.3, 1.8, .14, G, x, 1.45, 1.04);
+  bloc(2.3, 1.8, .14, G, x, 1.45, -1.04);
+  bloc(.14, 1.8, 2.2, G, x - sens * 1.08, 1.45, 0);
+  bloc(2.32, .18, 2.22, peint(5, 1), x, 2.16, 0);
+  for (let z = -.85; z <= .86; z += .21) bloc(.05, 1.35, .17, CAOUTCHOUC, x + sens * 1.12, 1.4, z).rotation.z = sens * .03;
+}
+capot(-10.5, 1);
+capot(10.5, -1);
+
+/* ---------- Bras articulé sur un rail, derrière les postes ---------- */
+const ORANGE = metal(acier("#e8860f", .7), .35, .42), NOIR = metal(acier("#2b3038"), .5, .5);
+const RAIL = -2.45;
+for (const dz of [-.55, .55]) bloc(13, .16, .18, CLAIR, 0, .14, RAIL + dz);
+for (let x = -6.2; x <= 6.2; x += .62) bloc(.24, .07, 1.6, SOMBRE, x, .04, RAIL);
+for (const x of [-6.55, 6.55]) bloc(.3, .45, 1.6, peint(1, 1), x, .25, RAIL);
+
+const v = (x, y, z) => new T.Vector3(x, y, z);
+/* Pièce allongée entre deux points, plus large au départ qu'à l'arrivée */
+function segment(a, b, l0, l1, ep, mat) {
+  const d = b.clone().sub(a), long = d.length();
+  const forme = new T.Shape();
+  forme.moveTo(-l0 / 2, 0); forme.lineTo(l0 / 2, 0); forme.lineTo(l1 / 2, long); forme.lineTo(-l1 / 2, long); forme.closePath();
+  const geo = new T.ExtrudeGeometry(forme, { depth: ep, bevelEnabled: true, bevelSize: .06, bevelThickness: .06, bevelSegments: 2 });
+  geo.translate(0, 0, -ep / 2);
+  const uv = geo.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * .45, uv.getY(i) * .45);
+  const m = objet(geo, mat, a.x, a.y, a.z);
+  const axeY = d.clone().normalize();
+  const axeZ = normale.clone().sub(axeY.clone().multiplyScalar(normale.dot(axeY))).normalize();
+  const axeX = axeY.clone().cross(axeZ);
+  m.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(axeX, axeY, axeZ));
+  return m;
+}
+function articulation(p, r, ep) {
+  const disque = (rayon, long, mat) => {
+    const m = cyl(rayon, long, mat, p.x, p.y, p.z, monde, 40);
+    m.quaternion.setFromUnitVectors(v(0, 1, 0), normale);
+    return m;
+  };
+  disque(r, ep, ORANGE); disque(r * .66, ep + .08, NOIR); disque(r * .46, ep + .14, ORANGE); disque(r * .13, ep + .22, CLAIR);
+  const cote = normale.clone().cross(v(0, 1, 0)).normalize();
+  for (let k = 0; k < 8; k++) {
+    const a = k * Math.PI / 4;
+    const q = p.clone().add(cote.clone().multiplyScalar(Math.cos(a) * r * .82)).add(v(0, Math.sin(a) * r * .82, 0))
+      .add(normale.clone().multiplyScalar(ep / 2 + .02));
+    objet(new T.SphereGeometry(.05, 10, 8), CLAIR, q.x, q.y, q.z);
+  }
+}
+
+/* Scène montrée : la pince tient la caisse C au-dessus de l'emplacement 2 */
+const cible = { x: 0, dessous: 3.0 };
+const sommet = cible.dessous + 1.1 + .02;
+const base = v(cible.x - 3.0, 2.15, RAIL);
+const poignet = v(cible.x, sommet + 1.35, 0);
+const horiz = v(poignet.x - base.x, 0, poignet.z - base.z), r = horiz.length(), u = horiz.normalize();
+const normale = u.clone().cross(v(0, 1, 0)).normalize();
+if (normale.z < 0) normale.negate();
+const L1 = 4.1, L2 = 3.7, dh = poignet.y - base.y, d = Math.min(Math.hypot(r, dh), L1 + L2 - .01);
+const a0 = Math.atan2(dh, r), a1 = a0 + Math.acos((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d));
+const coude = base.clone().add(u.clone().multiplyScalar(L1 * Math.cos(a1))).add(v(0, L1 * Math.sin(a1), 0));
+/* Chariot et colonne */
+bloc(2.1, .34, 1.55, NOIR, base.x, .39, RAIL);
+bloc(2.12, .12, 1.57, peint(6, 1), base.x, .52, RAIL);
+cyl(.82, .42, ORANGE, base.x, .79, RAIL, monde, 40);
+cyl(.86, .1, NOIR, base.x, 1.04, RAIL, monde, 40);
+cyl(.62, .36, ORANGE, base.x, 1.27, RAIL, monde, 40);
+segment(v(base.x, 1.35, RAIL), base, 1.05, .8, .62, ORANGE);
+/* Bras, avant-bras, poignet */
+segment(base, coude, .85, .6, .46, ORANGE);
+const milieu = coude.clone().lerp(poignet, .52);
+segment(coude, milieu, .62, .52, .52, NOIR);
+segment(milieu, poignet, .44, .3, .34, ORANGE);
+articulation(base, .66, .86);
+articulation(coude, .55, .78);
+articulation(poignet, .33, .52);
+/* Vérin le long du bras */
+const d0 = base.clone().lerp(coude, .12).add(normale.clone().multiplyScalar(.42));
+const d1 = base.clone().lerp(coude, .72).add(normale.clone().multiplyScalar(.42));
+segment(d0, d0.clone().lerp(d1, .55), .17, .17, .1, NOIR);
+segment(d0.clone().lerp(d1, .5), d1, .1, .1, .06, CLAIR);
+/* Câble */
+const courbe = new T.CatmullRomCurve3([base.clone().add(v(-.5, .2, -.3)), base.clone().lerp(coude, .5).add(v(-.75, .35, -.2)),
+  coude.clone().add(v(-.25, .75, -.1)), coude.clone().lerp(poignet, .55).add(v(0, .55, -.2)), poignet.clone().add(v(0, .3, -.25))]);
+objet(new T.TubeGeometry(courbe, 80, .06, 8), CAOUTCHOUC, 0, 0, 0);
+/* Pince verticale */
+cyl(.2, poignet.y - (sommet + .45), NOIR, cible.x, (poignet.y + sommet + .45) / 2, 0);
+cyl(.34, .18, CLAIR, cible.x, sommet + .52, 0);
+bloc(.9, .26, .6, ORANGE, cible.x, sommet + .34, 0);
+bloc(2.3, .18, .66, NOIR, cible.x, sommet + .13, 0);
+for (const s of [-1, 1]) {
+  bloc(.14, 1.0, .82, ORANGE, cible.x + s * 1.06, sommet - .36, 0);
+  bloc(.07, .55, .68, CAOUTCHOUC, cible.x + s * .975, sommet - .56, 0);
+  bloc(.26, .1, .82, NOIR, cible.x + s * .95, sommet - .89, 0);
+  objet(new T.SphereGeometry(.09, 16, 12), CLAIR, cible.x + s * 1.06, sommet + .06, .36);
+}
+
+/* ---------- Décor : armoire de commande et écran ---------- */
+const facade = texture(384, 640, (g, l, h) => {
+  g.fillStyle = "#46566b"; g.fillRect(0, 0, l, h); grain(g, l, h, 3000, .1);
+  g.strokeStyle = "#222b38"; g.lineWidth = 10; g.strokeRect(14, 14, l - 28, h - 28);
+  g.fillStyle = "#101820"; g.fillRect(52, 60, 280, 130);
+  g.strokeStyle = "#54e0a0"; g.lineWidth = 4; g.beginPath(); g.moveTo(66, 150);
+  for (let x = 66; x < 320; x += 18) g.lineTo(x, 150 - hasard() * 70);
+  g.stroke();
+  for (let i = 0; i < 4; i++) { g.fillStyle = ["#e8860f", "#54e0a0", "#d8453a", "#d9dee5"][i]; g.beginPath(); g.arc(85 + i * 72, 250, 22, 0, 7); g.fill(); }
+  g.fillStyle = "#222b38"; for (let y = 330; y < 450; y += 24) g.fillRect(60, y, 264, 10);
+  g.fillStyle = "#e0a81e"; g.beginPath(); g.moveTo(192, 480); g.lineTo(248, 575); g.lineTo(136, 575); g.fill();
+  g.fillStyle = "#222b38"; g.font = "700 56px Luciole, sans-serif"; g.textAlign = "center"; g.fillText("!", 192, 562);
+});
+const cote = metal(acier("#3d4a5c"), .4, .6);
+bloc(2.2, 3.7, 1.1, [cote, cote, cote, cote, new T.MeshStandardMaterial({ map: facade, roughness: .6 }), cote], 8.4, 1.85, -4.2);
+const message = texture(768, 300, (g, l, h) => {
+  g.fillStyle = "#0d1b22"; g.fillRect(0, 0, l, h);
+  g.fillStyle = "#7fd8e6"; g.textAlign = "center"; g.textBaseline = "middle";
+  g.font = "700 50px Luciole, sans-serif"; g.fillText("INSTRUCTION EN COURS", l / 2, 86);
+  g.fillStyle = "#ffffff"; g.font = "700 74px Luciole, sans-serif"; g.fillText("aller à l'emplacement 3", l / 2, 200, l - 60);
+});
+bloc(4.5, 1.9, .28, ORANGE, 4.3, 6.5, -4.4);
+objet(new T.PlaneGeometry(4.15, 1.6), new T.MeshBasicMaterial({ map: message, toneMapped: false }), 4.3, 6.5, -4.24);
+for (const dx of [-1.5, 1.5]) cyl(.05, 5, SOMBRE, 4.3 + dx, 9.9, -4.45);
+
+/* ---------- Caisses ---------- */
+const BLEU = "#2f66ad", ROUGE = "#b23b2e";
+caisse(-5.35, .66, ROUGE, "D", "rouge");
+caisse(-7.4, .66, BLEU, "E", "bleue");
+caisse(-9.45, .66, ROUGE, "F", "rouge");
+caisse(2.6, .66, BLEU, "A", "bleue");
+caisse(5.35, .66, ROUGE, "B", "rouge");
+caisse(cible.x, cible.dessous, BLEU, "C", "bleue");
+
+/* ---------- Lumières ---------- */
+monde.add(new T.HemisphereLight(0xdfe9f5, 0x40382c, .45));
+const soleil = new T.DirectionalLight(0xfff1dd, 1.35);
+soleil.position.set(-6, 14, 9); soleil.castShadow = true;
+soleil.shadow.mapSize.set(2048, 2048); soleil.shadow.bias = -.0004; soleil.shadow.radius = 4;
+Object.assign(soleil.shadow.camera, { left: -15, right: 15, top: 13, bottom: -6, near: 1, far: 40 });
+monde.add(soleil);
+const appoint = new T.PointLight(0x9fc4ff, .5, 30); appoint.position.set(9, 6, 5); monde.add(appoint);
+
+
+/* ---------- Caméra ---------- */
+const camera = new T.PerspectiveCamera(32, 1, .1, 120);
+let angle = .1, hauteur = .21;
+function dessiner() {
+  const l = innerWidth, h = innerHeight;
+  rendu.setSize(l, h);
+  camera.aspect = l / h;
+  const dist = Math.max(19, 40.5 / camera.aspect);
+  camera.position.set(Math.sin(angle) * dist * Math.cos(hauteur), 3.2 + Math.sin(hauteur) * dist, Math.cos(angle) * dist * Math.cos(hauteur));
+  camera.lookAt(0, 3.0, 0);
+  camera.updateProjectionMatrix();
+  rendu.render(monde, camera);
+}
+let glisse = null;
+rendu.domElement.addEventListener("pointerdown", (e) => { glisse = [e.clientX, e.clientY]; rendu.domElement.setPointerCapture(e.pointerId); });
+rendu.domElement.addEventListener("pointermove", (e) => {
+  if (!glisse) return;
+  angle = Math.max(-.7, Math.min(.7, angle - (e.clientX - glisse[0]) * .004));
+  hauteur = Math.max(.03, Math.min(.6, hauteur + (e.clientY - glisse[1]) * .003));
+  glisse = [e.clientX, e.clientY]; dessiner();
+});
+rendu.domElement.addEventListener("pointerup", () => { glisse = null; });
+addEventListener("resize", dessiner);
+dessiner();
+})();
+</script>
+</body>
+</html>

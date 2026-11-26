@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cody — Traçage</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="tortue.css">
+</head>
+<body>
+<header class="barre">
+  <h1>Cody</h1>
+  <nav class="onglets" aria-label="Ateliers">
+    <a href="index.html" aria-current="page">Traçage</a>
+    <a href="manutention.html">Manutention</a>
+  </nav>
+  <nav class="niveaux" id="niveaux" aria-label="Niveaux"></nav>
+</header>
+
+<main class="jeu">
+  <section class="carte" aria-labelledby="titre-prog">
+    <div class="carte-tete">
+      <h2 id="titre-prog">Ton programme</h2>
+      <span class="compteur" id="compteur">0 bloc</span>
+    </div>
+    <div id="blockly" class="zone-blocs"></div>
+  </section>
+
+  <section class="carte carte-travail" aria-labelledby="titre-niveau">
+    <div class="consigne">
+      <p class="niv-num" id="niv-num">Niveau 1</p>
+      <h2 id="titre-niveau">Le carré</h2>
+      <p id="texte-niveau"></p>
+      <ul class="bareme" id="bareme" aria-label="Barème"></ul>
+      <details class="indice" id="bloc-indice"><summary>Un indice ?</summary><p id="texte-indice"></p></details>
+    </div>
+    <div class="plateau">
+      <div class="scene" id="scene">
+        <canvas id="c-fond" width="800" height="800" aria-hidden="true"></canvas>
+        <canvas id="c-encre" width="800" height="800" aria-hidden="true"></canvas>
+        <canvas id="c-dessus" width="800" height="800" role="img" aria-label="Zone de dessin"></canvas>
+      </div>
+    </div>
+    <dl class="releve">
+      <div><dt>x</dt><dd id="etat-x">0</dd></div>
+      <div><dt>y</dt><dd id="etat-y">0</dd></div>
+      <div><dt>cap</dt><dd id="etat-cap">0°</dd></div>
+      <div><dt>crayon</dt><dd id="etat-stylo">baissé</dd></div>
+    </dl>
+    <div class="commandes">
+      <button class="btn btn-go" id="lancer" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>
+        <span>Exécuter</span>
+      </button>
+      <button class="btn btn-sec" id="effacer" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.6 4.7l1.9.6A5 5 0 1 0 12 7v3L7.5 6 12 2z"/></svg>
+        <span>Réinitialiser</span>
+      </button>
+      <button class="btn btn-sec btn-vider" id="vider" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12H7z"/></svg>
+        <span>Recommencer le niveau</span>
+      </button>
+      <label class="vitesse">Vitesse
+        <input type="range" id="vitesse" min="1" max="5" value="3">
+      </label>
+    </div>
+    <div class="verdict info" id="verdict" aria-live="polite"></div>
+    <details class="python">
+      <summary>Voir mon programme en Python</summary>
+      <div class="python-in">
+        <button class="btn btn-mini" id="copier" type="button">Copier</button>
+        <pre><code id="code-python"></code></pre>
+      </div>
+    </details>
+  </section>
+</main>
+
+<script src="js/blockly_compressed.js"></script>
+<script src="js/blockly-fr.js"></script>
+<script src="js/atelier.js"></script>
+<script src="js/tortue.js"></script>
+</body>
+</html>

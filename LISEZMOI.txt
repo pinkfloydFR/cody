@@ -1,0 +1,11 @@
+Maquette « Cody » pour PlayTP — tout fonctionne hors ligne.
+
+Ouvrir : double-cliquer sur index.html (Chrome, Edge ou Firefox).
+Ou, pour la tester sur le réseau du lycée :  python -m http.server 8000  dans ce dossier,
+puis http://<adresse-du-serveur>:8000/
+
+Deux ateliers, par les onglets : Traçage et Manutention.
+La progression (scores, programmes) est gardée dans le navigateur.
+Blockly 13 (Apache 2.0) · police Luciole (licence dans fonts/).
+
+Déploiement Docker : voir README.md.

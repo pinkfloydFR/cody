@@ -1,0 +1,38 @@
+# Cody : site statique servi par nginx, derrière Traefik.
+# Aucun port publié : tout passe par Traefik, donc par ses protections (voir deploy/traefik-cody.exemple.yml).
+name: cody
+
+services:
+  cody:
+    # Nom fixe : utilisé par la règle Traefik (http://cody:80)
+    container_name: cody
+    build: .
+    image: cody:latest
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Paris
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=false
+      - dockhand.update=false
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+      start_interval: 2s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:            # strict minimum pour nginx (écoute :80, passage à l'utilisateur nginx)
+      - CHOWN
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+
+networks:
+  traefik:
+    external: true

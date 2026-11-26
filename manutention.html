@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cody — Manutention</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="tortue.css">
+</head>
+<body>
+<header class="barre">
+  <h1>Cody</h1>
+  <nav class="onglets" aria-label="Ateliers">
+    <a href="index.html">Traçage</a>
+    <a href="manutention.html" aria-current="page">Manutention</a>
+  </nav>
+  <nav class="niveaux" id="niveaux" aria-label="Niveaux"></nav>
+</header>
+
+<!-- Page d'explications, avant le niveau 1 : du texte seulement, court et aéré -->
+<article class="intro" id="intro" aria-labelledby="intro-titre" hidden>
+  <div class="intro-page">
+    <h2 id="intro-titre">Avant de commencer</h2>
+    <p class="intro-chapeau">Assemble tes blocs sous <strong>DÉPART</strong>, puis clique sur <strong>Exécuter</strong>.</p>
+
+    <section class="intro-regle">
+      <h3>Ton programme doit gérer TOUS les cas</h3>
+      <p>Les caisses et l'état de la machine au départ peuvent changer à chaque essai.</p>
+      <p>D'autres cas sont testés en coulisses. Si l'un échoue, il t'est montré.</p>
+    </section>
+
+    <div class="intro-cartes">
+      <section class="carte">
+        <h3>Initialiser</h3>
+        <p>Tu ne sais pas dans quel état est la machine.</p>
+        <p><strong>PLACER</strong> d'abord le bras ou les plateaux comme il te les faut.</p>
+      </section>
+      <section class="carte">
+        <h3>Prendre une caisse</h3>
+        <ul class="intro-postes">
+          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="6" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="17" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text><rect x="31" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="42" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text><rect x="56" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="67" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><path d="M84 42 H102 M95 35 L102 42 L95 49" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Entrée</strong> : comme dans une file d'attente, la première arrivée passe en premier.</span></li>
+          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="30" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="41" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><rect x="30" y="12" width="22" height="19" rx="2" fill="#0e6b78"/><text x="41" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text><rect x="58" y="4" width="22" height="19" rx="2" fill="#0e6b78"/><text x="69" y="18" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text><path d="M42 8 Q50 0 56 6 M49 2 L57 6 L51 11" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>1, 2, 3</strong> : comme des assiettes empilées, on prend celle du dessus.</span></li>
+          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="52" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="63" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><path d="M10 42 H42 M35 35 L42 42 L35 49" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M84 16 L100 32 M100 16 L84 32" stroke="#d8453a" stroke-width="4" stroke-linecap="round"/></svg><span><strong>Sortie</strong> : une caisse partie ne revient pas.</span></li>
+        </ul>
+      </section>
+      <section class="carte">
+        <h3>Répéter et choisir</h3>
+        <dl>
+          <dt>répéter 3 fois</dt><dd>le nombre est connu</dd>
+          <dt>répéter tant que</dt><dd>il est inconnu</dd>
+          <dt>s'il y a, si</dt><dd>on vérifie une seule fois</dd>
+        </dl>
+      </section>
+    </div>
+
+    <p class="intro-etoiles"><span aria-hidden="true">★★★</span> Moins tu utilises de blocs, plus tu gagnes d'étoiles.</p>
+    <button class="btn btn-go" id="commencer" type="button">Commencer le niveau 1</button>
+  </div>
+</article>
+
+<main class="jeu">
+  <section class="carte" aria-labelledby="titre-prog">
+    <div class="carte-tete">
+      <h2 id="titre-prog">Ton programme</h2>
+      <span class="compteur" id="compteur">0 bloc</span>
+    </div>
+    <div id="blockly" class="zone-blocs"></div>
+  </section>
+
+  <section class="carte carte-travail" aria-labelledby="titre-niveau">
+    <div class="consigne-ligne">
+      <div class="consigne">
+        <p class="niv-num" id="niv-num">Niveau 1</p>
+        <h2 id="titre-niveau"></h2>
+        <p id="texte-niveau"></p>
+        <details class="indice" id="bloc-indice"><summary>Un indice ?</summary><p id="texte-indice"></p></details>
+      </div>
+      <figure class="objectif">
+        <canvas id="c-objectif" width="600" height="255" role="img" aria-labelledby="legende-objectif"></canvas>
+        <figcaption id="legende-objectif">Objectif</figcaption>
+        <ul class="bareme" id="bareme" aria-label="Barème"></ul>
+      </figure>
+    </div>
+    <div class="plateau">
+      <div class="scene scene-large">
+        <canvas id="c-scene" width="2400" height="1000" role="img" aria-label="Poste de manutention"></canvas>
+        <canvas id="c-3d" class="vue-3d" role="img" aria-label="Bras de manutention en 3D" hidden></canvas>
+        <canvas id="c-tri" class="vue-3d" role="img" aria-label="Centre de tri en 3D" hidden></canvas>
+        <p class="aide-3d" id="aide-3d" hidden>Glisser : tourner · double-clic : recentrer</p>
+      </div>
+    </div>
+    <dl class="releve" id="releve"></dl>
+    <div class="commandes">
+      <button class="btn btn-go" id="lancer" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>
+        <span>Exécuter</span>
+      </button>
+      <button class="btn btn-sec" id="effacer" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.6 4.7l1.9.6A5 5 0 1 0 12 7v3L7.5 6 12 2z"/></svg>
+        <span>Configuration</span>
+      </button>
+      <button class="btn btn-sec btn-vider" id="vider" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12H7z"/></svg>
+        <span>Recommencer le niveau</span>
+      </button>
+      <label class="vitesse">Vitesse
+        <input type="range" id="vitesse" min="1" max="5" value="3">
+      </label>
+    </div>
+    <div class="verdict info" id="verdict" aria-live="polite"></div>
+    <details class="python">
+      <summary>Voir mon programme en Python</summary>
+      <div class="python-in">
+        <button class="btn btn-mini" id="copier" type="button">Copier</button>
+        <pre><code id="code-python"></code></pre>
+      </div>
+    </details>
+  </section>
+</main>
+
+<script src="js/blockly_compressed.js"></script>
+<script src="js/blockly-fr.js"></script>
+<script src="js/atelier.js"></script>
+<script src="js/manutention-moteur.js"></script>
+<script src="js/three.min.js"></script>
+<script src="js/manutention-decors.js"></script>
+<script src="js/manutention-3d.js"></script>
+<script src="js/tri-3d.js"></script>
+<script src="js/tri-moteur.js"></script>
+<script src="js/tri.js"></script>
+<script src="js/manutention.js"></script>
+</body>
+</html>
