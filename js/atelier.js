@@ -59,6 +59,7 @@
   function injecter(id, boite) {
     const ws = B.inject(id, {
       toolbox: boite, renderer: "cody", theme: theme(), media: "media/", trashcan: true,
+      sounds: false, /* aucun son : en classe, cela devient vite pénible (demande de l'enseignant) */
       zoom: { controls: true, wheel: false, startScale: 1.1, maxScale: 2, minScale: 0.5 },
       move: { scrollbars: true, drag: true, wheel: true },
     });

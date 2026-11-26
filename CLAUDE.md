@@ -166,6 +166,8 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 
 ## Blocs (les deux ateliers, `js/atelier.js`)
 
+- **Aucun son** (demande de l'enseignant) : `sounds: false` à l'injection de Blockly et fichiers
+  `media/*.mp3` retirés. Ne pas les remettre lors d'une mise à jour de Blockly.
 - Rendu `cody` = thrasos + **prise femelle au fond des boucles et conditions** (surcharge de
   `drawStatementInput_`, Blockly 13.5 : à revérifier à chaque mise à jour de Blockly).
 - Contour clair sur chaque bloc ; couleurs distinctes pour répéter, tant que et si ; la partie
