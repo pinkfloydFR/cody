@@ -145,7 +145,7 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   `#intro` dans `manutention.html`, ouvert à la première visite (`manut-intro-vue`) puis par le
   bouton « Aide ». Le tenir à jour quand une règle de l'atelier change.
 
-- **Second écran** (demande de l'enseignant, 27/11/2026) : bouton « Second écran » en haut à gauche de
+- **Second écran** (demande de l'enseignant, 27/11/2026) : bouton « Second écran » (icône de deux moniteurs, demande de l'enseignant) en haut à gauche de
   la scène 3D, affiché **sauf** si `getScreenDetails()` (autorisation accordée) ne voit qu'un écran :
   `screen.isExtended` répond `false` à tort (Brave, constaté le 27/11/2026 ; même souci dans qcm_picker). Il ouvre
   `vue.html`, placée sur l'autre écran par `getScreenDetails()` (autorisation « gestion des fenêtres »

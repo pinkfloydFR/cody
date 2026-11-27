@@ -99,7 +99,9 @@
         <canvas id="c-rail" class="vue-3d" role="img" aria-label="Bras pivotant sur rail en 3D" hidden></canvas>
         <p class="aide-3d" id="aide-3d" hidden>Glisser : tourner · double-clic : recentrer</p>
         <button class="btn btn-mini vers-ecran" id="vers-ecran" type="button" hidden
-          title="Afficher la vue 3D dans une fenêtre sur ton autre écran">Second écran</button>
+          aria-label="Second écran" title="Second écran : afficher la vue 3D sur ton autre écran">
+          <svg viewBox="0 0 32 24" aria-hidden="true"><path d="M2 3h13v10H2zM17 3h13v10H17z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M6.5 20h4M8.5 13v7M21.5 20h4M23.5 13v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
       </div>
       <div class="deportee" id="deportee" hidden>
         <p>La vue 3D est affichée sur l'autre écran.</p>
