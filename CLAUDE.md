@@ -169,8 +169,9 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   aussi. Les pièces plates au sol ne projettent plus d'ombre. Pièces à plusieurs matières non fusionnées.
 - Animation plafonnée à **60 images/s** (30 en mode léger), `Commun3D.intervalle()`.
 - **Mode léger** : rendu logiciel détecté (SwiftShader, llvmpipe…), `?leger` dans l'adresse, ou
-  `localStorage["cody-3d"] = "leger"` ; `?complet` l'interdit. Résolution ×0,7, pas d'anticrénelage,
-  ombres PCF 1024, anisotropie 2. Bascule automatique (`alleger`, une fois) si l'animation tombe sous
+  `localStorage["cody-3d"] = "leger"` ; `?complet` l'interdit. Résolution ×1 (au plus celle de l'écran),
+  ombres PCF 1024, anticrénelage gardé (le couper ne gagnait rien). **Ne pas descendre sous ×1** : à ×0,7, chiffres et noms des caisses
+  illisibles (retour d'un élève, 27/11/2026). Bascule automatique (`alleger`, une fois) si l'animation tombe sous
   ~22 images/s. Gains mesurés : voir le message du commit.
 
 ## Centre de tri (niveaux 13 à 18, groupe « Convoyeurs », même page)

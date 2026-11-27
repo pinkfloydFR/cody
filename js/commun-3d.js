@@ -9,9 +9,10 @@ window.Commun3D = (() => {
   let choix = params.has("leger") ? "leger" : params.has("complet") ? "complet" : null;
   if (!choix) try { choix = localStorage.getItem("cody-3d"); } catch { /* stockage indisponible */ }
 
-  /* Mode léger : rendu à 70 % de la résolution. Sans carte graphique, c'est le remplissage des pixels
-     qui coûte (mesuré : pire image 153 ms à 100 %, 90 ms à 70 %) ; l'image reste lisible. */
-  const RESOLUTION_LEGERE = .7;
+  /* Mode léger : jamais sous la résolution de l'écran. Le rendu à 70 % (essayé le 27/11/2026) rendait
+     les numéros et les noms des caisses difficiles à lire (retour d'un élève) ; on garde aussi le
+     filtrage des textures au maximum, peu coûteux et nécessaire aux étiquettes vues de biais. */
+  const RESOLUTION_LEGERE = 1;
   let leger = null;
   /* Rendu logiciel : le navigateur n'utilise pas la carte graphique (pilote absent ou bloqué) */
   function logiciel() {
@@ -26,14 +27,20 @@ window.Commun3D = (() => {
     } catch { return false; }
   }
   const estLeger = () => {
-    if (leger === null) leger = choix === "leger" || (choix !== "complet" && logiciel());
+    if (leger === null) {
+      const sansCarte = choix !== "leger" && choix !== "complet" && logiciel();
+      leger = choix === "leger" || sansCarte;
+      if (choix === "leger") console.info("Vue 3D : mode léger demandé (?leger ou réglage cody-3d).");
+      else if (sansCarte) console.info("Vue 3D : mode léger, le navigateur dessine sans carte graphique (accélération matérielle désactivée ?).");
+    }
     return leger;
   };
 
   function creerRendu(toile) {
     const T = window.THREE, L = estLeger();
-    const rendu = new T.WebGLRenderer({ canvas: toile, antialias: !L });
-    rendu.setPixelRatio(L ? RESOLUTION_LEGERE : Math.min(devicePixelRatio, 1.5));
+    /* Anticrénelage gardé en mode léger : le couper ne faisait rien gagner (mesuré sans carte graphique) */
+    const rendu = new T.WebGLRenderer({ canvas: toile, antialias: true });
+    rendu.setPixelRatio(L ? Math.min(devicePixelRatio, RESOLUTION_LEGERE) : Math.min(devicePixelRatio, 1.5));
     rendu.shadowMap.enabled = true;
     rendu.shadowMap.type = L ? T.PCFShadowMap : T.PCFSoftShadowMap;
     rendu.outputEncoding = T.sRGBEncoding;
@@ -41,7 +48,7 @@ window.Commun3D = (() => {
     rendu.toneMappingExposure = .86;
     return rendu;
   }
-  const anisotropie = (rendu) => (estLeger() ? 2 : rendu.capabilities.getMaxAnisotropy());
+  const anisotropie = (rendu) => rendu.capabilities.getMaxAnisotropy();
 
   /* Chaque rendu inscrit son soleil : alleger() peut ensuite baisser la qualité en cours de route */
   const inscrits = [];
@@ -55,7 +62,7 @@ window.Commun3D = (() => {
     leger = true;
     const T = window.THREE;
     for (const { rendu, monde, soleil, redessiner } of inscrits) {
-      rendu.setPixelRatio(RESOLUTION_LEGERE);
+      rendu.setPixelRatio(Math.min(devicePixelRatio, RESOLUTION_LEGERE));
       rendu.shadowMap.type = T.PCFShadowMap;
       soleil.shadow.mapSize.set(1024, 1024);
       if (soleil.shadow.map) { soleil.shadow.map.dispose(); soleil.shadow.map = null; }
