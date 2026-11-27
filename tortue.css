@@ -108,9 +108,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .aide-3d[hidden]{display:none}
 
 /* Vue 3D sur un second écran : bouton dans la scène, encart à sa place, fenêtre vue.html */
-.vers-ecran{position:absolute;left:8px;top:6px;min-height:2.75rem;width:3.25rem;padding:0;justify-content:center;background:rgba(15,20,28,.72);color:#fff;border-color:#46556b}
+.vers-ecran{position:absolute;left:8px;top:6px;min-height:2.75rem;width:3.75rem;padding:0;justify-content:center;background:rgba(15,20,28,.72);color:#fff;border-color:#46556b}
 .vers-ecran:hover{background:rgba(15,20,28,.9)}
-.btn.vers-ecran svg{width:30px;height:22px;fill:none}
+.btn.vers-ecran svg{width:40px;height:24px;fill:none}
 .vers-ecran[hidden],.deportee[hidden]{display:none}
 .carte-travail>.plateau:has(.deportee:not([hidden])){flex:none;min-height:0;container-type:normal}
 .deportee{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;width:100%;
