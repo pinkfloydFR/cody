@@ -175,8 +175,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .objectif{margin:0;flex:0 0 min(23rem,45%)}
 .objectif canvas{display:block;width:100%;height:auto;border:1px solid var(--trait);border-radius:4px}
 .objectif figcaption{font-size:14px;color:var(--doux);text-align:center;font-weight:700}
-/* « Objectif » et le barème sur une seule ligne sous la vignette */
-.objectif-pied{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 12px;margin-top:3px}
+/* « Objectif » et le barème sur une seule ligne, sous la consigne */
+.objectif-pied{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:2px 12px;margin-top:6px;font-size:14px;color:var(--doux);font-weight:700}
 .objectif-pied .bareme{margin:0;gap:2px 8px;font-size:13px;font-weight:400}
 .objectif-pied .bareme .etoiles i{font-size:13px}
 

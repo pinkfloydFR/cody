@@ -233,7 +233,7 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   colonnes 5/7 (`.jeu-scene`) et blocs à l'échelle 1/1,2, soit un cran de « zoom moins » (choix de l'enseignant ; 1,1 au traçage).
   **Indice** : bouton « ? » ambre à droite du titre du niveau (`A.boutonIndice`), texte dans une
   fenêtre au milieu de l'écran (les deux ateliers ; remplace « Un indice ? »). Manutention : « Objectif »
-  et le barème sur une seule ligne sous la vignette (`.objectif-pied`).
+  et le barème sur une seule ligne directement sous la consigne (`.objectif-pied`), vignette seule à droite.
   La caméra du rail est limitée par la hauteur (`max(29.5, 56 / aspect)`) : gagner de la hauteur
   agrandit la scène plus que gagner de la largeur.
 
