@@ -64,6 +64,9 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   « Aide », un menu par groupe nommé « LVL1 », « LVL2 »… pour la place ; nom du groupe et étoiles
   gagnées en tête du menu ouvert et dans l'infobulle).
 - **Indice** : bouton « ? » ambre à droite du titre (`A.boutonIndice`), fenêtre au milieu de l'écran.
+- « Exécuter » joue le départ affiché tant qu'il n'a pas été joué (à l'ouverture du niveau et après
+  « Configuration », où l'élève peut en chercher un précis : retour de l'enseignant, 27/11/2026) ; sinon
+  il en tire un nouveau (variable `neuf`, `manutention.js`).
 - Sous la scène : « Exécuter » ; « Configuration » (manutention : nouveau départ ; « Réinitialiser » au
   traçage) ; « Recommencer le niveau » (efface le programme après confirmation, garde les étoiles).
 - En-tête « Ton programme » : « Supprimer les blocs grisés » (`A.boutonNettoyer`) efface les blocs non
@@ -72,6 +75,10 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   barème sur une ligne sous la consigne (`.objectif-pied`), vignette seule à droite.
 
 ## Blocs (`js/atelier.js`)
+
+- Bloc en cours : cadre jaune 6 px + halo (`.blocklyHighlighted`). Bloc où le programme s'arrête :
+  cadre rouge clignotant (`A.marquerErreur`, classe `.bloc-fautif`), retiré au prochain essai, au
+  changement de niveau ou dès que le programme change (demande de l'enseignant, 27/11/2026).
 
 - **Aucun son** : `sounds: false` et `media/*.mp3` retirés ; ne pas les remettre en mettant Blockly à jour.
 - Rendu `cody` = thrasos + **prise femelle au fond des boucles et conditions** (surcharge de
@@ -206,6 +213,7 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 - **Espace prof** (bouton « Prof ») : mot de passe, puis niveaux à cocher par groupe ; une page par
   solution (`prog` converti en blocs par `versBlocs`, dans `tortue.js` et `manutention.js`, une règle
   par machine). Création libre : « Pas de solution ». Accès retenu pour l'onglet (« cody-prof »).
+  « Visualiser » affiche dans la fenêtre les solutions des niveaux cochés (images des blocs, sans PDF).
   « Appliquer la correction du niveau N » (deux clics) remplace le programme du niveau courant par la
   solution (option `appliquer(etat)` d'`Atelier.exports`) ; grisé en création libre.
 - **Mot de passe** : seule son empreinte SHA-256 est dans le code (`EMPREINTE_PROF`, `atelier.js`) ;

@@ -207,7 +207,12 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .prof-boutons{display:flex;flex-wrap:wrap;gap:10px}
 .prof-etat{margin:10px 0 0;color:var(--doux)}
 .prof-etat:empty{display:none}
-.prof-choix[hidden],.prof-acces[hidden]{display:none}
+.prof-choix[hidden],.prof-acces[hidden],.prof-apercu[hidden]{display:none}
+.prof-planches{max-height:66vh;overflow:auto;margin-top:12px;display:grid;gap:18px}
+.prof-planches figure{margin:0;border:1px solid var(--trait);border-radius:8px;padding:10px 14px;background:#fff;color:#1c2532}
+.prof-planches h3{margin:0 0 2px;font-size:17px}
+.prof-planches figcaption{margin-bottom:8px;color:#4a5568;font-size:14px}
+.prof-planches img{display:block;max-width:100%;height:auto}
 .prof-fermer{margin-top:16px}
 .menu-python .menu-liste{position:absolute;left:0;right:auto;width:min(46rem,92vw);padding:8px;display:block}
 .python-in{position:relative}
@@ -280,10 +285,15 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .blocklyText,.blocklyFlyoutLabelText{font-family:Luciole,system-ui,sans-serif!important}
 .blocklyMainBackground{stroke:none}
 .cody-sinon{fill:#701c42;stroke:rgba(255,255,255,.85);stroke-width:1.6px}
-.blocklyHighlighted>.cody-sinon{stroke:#ffd23f;stroke-width:4.5px}
 .blocklyDisabled>.cody-sinon,.blocklyDisabledPattern>.cody-sinon{display:none}
 /* Contour clair autour de chaque bloc : les imbrications se voient, même entre blocs de même couleur */
 .blocklyDraggable:not(.blocklyDisabled)>.blocklyPath{stroke:rgba(255,255,255,.85);stroke-width:1.6px}
 .blocklyFlyout .blocklyDraggable>.blocklyPath{stroke:rgba(255,255,255,.55)}
-/* Bloc en cours ou fautif : cadre jaune épais, texte toujours lisible (le voile par défaut l'effaçait) */
-.blocklyHighlighted>.blocklyPath{filter:none!important;stroke:#ffd23f!important;stroke-width:4.5px!important}
+/* Bloc en cours : cadre jaune épais et halo (demande de l'enseignant : le cadre seul se voyait mal) */
+.blocklyHighlighted>.blocklyPath{filter:drop-shadow(0 0 5px #ffd23f) drop-shadow(0 0 2px #ffd23f)!important;stroke:#ffd23f!important;stroke-width:6px!important}
+.blocklyHighlighted>.cody-sinon{stroke-width:6px}
+/* Bloc où le programme s'est arrêté : cadre rouge clignotant */
+.bloc-fautif>.blocklyPath,.bloc-fautif>.cody-sinon{stroke:#ff2d20!important;stroke-width:6px!important;
+  filter:drop-shadow(0 0 6px #ff2d20)!important;animation:fautif 1s ease-in-out infinite}
+@keyframes fautif{50%{stroke:#ffd0cc;filter:none}}
+@media (prefers-reduced-motion:reduce){.bloc-fautif>.blocklyPath,.bloc-fautif>.cody-sinon{animation:none}}

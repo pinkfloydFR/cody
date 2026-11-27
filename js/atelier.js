@@ -72,6 +72,24 @@
   }
 
   /* Au chargement d'un programme : DÉPART (et le reste avec lui) en haut à gauche, vue au début */
+  /* Bloc où le programme s'est arrêté : cadre rouge clignotant (demande de l'enseignant).
+     null : retire la marque. La marque tient tant que le bloc existe ; elle part au prochain essai,
+     au changement de niveau ou dès que le programme est modifié. */
+  const fautifs = new WeakMap();
+  function marquerErreur(ws, id) {
+    const avant = fautifs.get(ws);
+    if (avant) { const r = avant.getSvgRoot && avant.getSvgRoot(); if (r) r.classList.remove("bloc-fautif"); }
+    fautifs.delete(ws);
+    const bloc = id && ws.getBlockById(id);
+    if (!bloc) return;
+    bloc.getSvgRoot().classList.add("bloc-fautif");
+    fautifs.set(ws, bloc);
+    if (!ws.codyFautif) {
+      ws.codyFautif = true;
+      ws.addChangeListener((e) => { if (!e.isUiEvent && fautifs.has(ws)) marquerErreur(ws, null); });
+    }
+  }
+
   function cadrer(ws) {
     const MARGE = 16, blocs = ws.getTopBlocks(false);
     if (blocs.length) {
@@ -473,10 +491,17 @@
        remplacé par la solution ; deux clics, comme « Recommencer le niveau » */
     const appliquer = creer("button", "btn btn-sec prof-appliquer"); appliquer.type = "button";
     appliquer.append(creer("span"));
-    const boutonsProf = creer("div", "prof-boutons"); boutonsProf.append(sortir, appliquer);
+    /* « Visualiser » (demande de l'enseignant) : les solutions cochées, à l'écran, sans PDF */
+    const voir = creer("button", "btn btn-sec", "Visualiser"); voir.type = "button";
+    voir.title = "Afficher ici les solutions des niveaux cochés";
+    const boutonsProf = creer("div", "prof-boutons"); boutonsProf.append(voir, sortir, appliquer);
     choix.append(creer("p", "prof-aide", "Coche un ou plusieurs niveaux : une page par solution."), actions, liste, boutonsProf, etat);
+    const apercu = creer("div", "prof-apercu"); apercu.hidden = true;
+    const retour = creer("button", "btn btn-sec", "← Retour aux niveaux"); retour.type = "button";
+    const planches = creer("div", "prof-planches");
+    apercu.append(retour, planches);
     const fermer = creer("button", "btn btn-sec prof-fermer", "Fermer"); fermer.type = "button";
-    d.append(titre, acces, choix, fermer);
+    d.append(titre, acces, choix, apercu, fermer);
     document.body.append(d);
 
     const ouvert = () => { try { return sessionStorage.getItem("cody-prof") === "1"; } catch { return false; } };
@@ -503,8 +528,36 @@
       appliquer.dataset.normal = appliquer.querySelector("span").textContent;
       appliquer.disabled = !(ici && ici.etat && o.appliquer);
       appliquer.title = appliquer.disabled ? "Pas de solution pour ce niveau" : "Efface ton programme et le remplace par la solution";
-      acces.hidden = true; choix.hidden = false; etat.textContent = "";
+      acces.hidden = true; choix.hidden = false; apercu.hidden = true; planches.replaceChildren(); etat.textContent = "";
     }
+    const cochees = () => {
+      const voulus = new Set([...liste.querySelectorAll("input:checked")].map((c) => +c.value));
+      return o.solutions().filter((s) => voulus.has(s.num));
+    };
+    voir.addEventListener("click", () => occupe(voir, async () => {
+      const choisis = cochees();
+      if (!choisis.length) { etat.textContent = "Coche au moins un niveau."; return; }
+      const figures = [];
+      for (const [i, s] of choisis.entries()) {
+        etat.textContent = `Préparation : ${i + 1} sur ${choisis.length}…`;
+        const f = creer("figure");
+        f.append(creer("h3", "", `${s.groupe ? s.groupe + " · " : ""}Niveau ${s.num} · ${s.titre}`));
+        if (s.etat) {
+          const { toile, nb } = await imageBlocs(s.etat, o.apres);
+          const img = creer("img");
+          img.src = toile.toDataURL("image/png");
+          img.alt = `Solution du niveau ${s.num} en blocs`;
+          img.width = Math.round(toile.width / 2); /* la toile est dessinée à ×2 : taille réelle des blocs */
+          f.append(creer("figcaption", "", `Solution en ${nbBlocs(s.nb ?? nb)} · ${texteBareme(s.opt)}`), img);
+        } else f.append(creer("figcaption", "", "Pas de solution : niveau de création libre."));
+        figures.push(f);
+      }
+      planches.replaceChildren(...figures);
+      etat.textContent = "";
+      choix.hidden = true; apercu.hidden = false;
+      planches.scrollTop = 0; retour.focus();
+    }));
+    retour.addEventListener("click", () => { apercu.hidden = true; choix.hidden = false; voir.focus(); });
     let attenteAppliquer = 0;
     function annulerAppliquer() {
       clearTimeout(attenteAppliquer); attenteAppliquer = 0;
@@ -542,8 +595,7 @@
     tout.addEventListener("click", () => cocher(true));
     rien.addEventListener("click", () => cocher(false));
     sortir.addEventListener("click", () => occupe(sortir, async () => {
-      const voulus = new Set([...liste.querySelectorAll("input:checked")].map((c) => +c.value));
-      const choisis = o.solutions().filter((s) => voulus.has(s.num));
+      const choisis = cochees();
       if (!choisis.length) { etat.textContent = "Coche au moins un niveau."; return; }
       const pages = [];
       for (const [i, s] of choisis.entries()) {
@@ -559,5 +611,5 @@
     }));
   }
 
-  window.Atelier = { memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, boutonIndice, boutonExecuter, cadrer };
+  window.Atelier = { memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, marquerErreur, boutonIndice, boutonExecuter, cadrer };
 }

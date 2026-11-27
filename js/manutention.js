@@ -278,6 +278,10 @@
   };
   /* Départ affiché : tiré au hasard aux niveaux qui le permettent, sinon le seul du niveau */
   let tirage = null;
+  /* Départ affiché (caisses et état de la machine) pas encore joué : « Exécuter » le garde. Il est
+     neuf à l'ouverture du niveau et après « Configuration » (l'élève a pu en chercher un précis) ;
+     après une exécution, l'essai suivant en tire un autre. */
+  let neuf = false;
   const tirerDepart = () => {
     if (!niv.hasard) { tirage = niv.configs[0]; return; }
     const avant = tirage && JSON.stringify(tirage.depart);
@@ -392,6 +396,7 @@
     if (anim) cancelAnimationFrame(anim.demande);
     anim = null;
     ws.highlightBlock(null);
+    A.marquerErreur(ws, null);
     A.boutonExecuter($("lancer"), false);
   }
   function reinitialiser() { arreter(); montrer(); }
@@ -402,9 +407,9 @@
     reinitialiser();
     const prog = programme();
     if (!prog.length) { dire("ko", "Aucune instruction", "Accroche des blocs sous « DÉPART »."); return; }
-    tirerPince();
-    if (impose) tirage = impose;
-    else tirerDepart();
+    if (impose) { tirerPince(); tirage = impose; }
+    else if (!neuf) { tirerPince(); tirerDepart(); }
+    neuf = false;
     const bilan = kit.moteur.verifier(niv, prog, pince, niv.hasard ? tirage : undefined);
     /* En cas d'échec, on rejoue le départ et la position de pince qui ont échoué ;
        en cas de réussite, on part d'une position tirée au hasard. */
@@ -446,11 +451,11 @@
     const ou = autreDepart ? "Ton programme réussit sur le premier départ tiré, mais pas sur celui qui est maintenant affiché : "
       : niv.hasard ? "Sur le départ affiché : " : "";
     if (initialisation) {
-      if (resultat.erreur && resultat.erreur.id) ws.highlightBlock(resultat.erreur.id);
+      if (resultat.erreur && resultat.erreur.id) A.marquerErreur(ws, resultat.erreur.id);
       dire("ko", "Défaut d'initialisation",
         kit.defaut(bilan.reussiDepuis, bilan.pos) + (autreDepart ? " Le départ affiché a changé pour te montrer ce cas." : ""));
     } else if (motif === "erreur") {
-      if (resultat.erreur.id) ws.highlightBlock(resultat.erreur.id);
+      if (resultat.erreur.id) A.marquerErreur(ws, resultat.erreur.id);
       dire("ko", "Arrêt du programme", ou + kit.moteur.ERREURS[resultat.erreur.code]);
     } else {
       dire("ko", "Objectif non atteint", ou + kit.echec(motif, resultat.etat, bilan.cas));
@@ -535,6 +540,7 @@
     tirerPince();
     tirage = null;
     tirerDepart();
+    neuf = true;
     montrer();
     majProgramme();
     construireNav();
@@ -549,7 +555,7 @@
 
   const redessiner = () => { if (!anim) { scene(kit.fixe(vu)); dessinerObjectif(montre); } };
   $("lancer").addEventListener("click", () => lancer());
-  $("effacer").addEventListener("click", () => { tirerPince(); tirerDepart(); reinitialiser(); attente(); });
+  $("effacer").addEventListener("click", () => { tirerPince(); tirerDepart(); neuf = true; reinitialiser(); attente(); });
   A.boutonCopier($("copier"), $("code-python"));
   A.boutonNettoyer($("nettoyer"), ws, "manut_depart");
   A.sombre.addEventListener("change", () => { redessiner(); dessinerObjectif(montre); });
@@ -733,7 +739,7 @@
     appliquer: (etat) => { memo.ecrire("manut-prog-" + numNiv, etat); ouvrir(numNiv); },
   });
 
-  window.manutTest = { NIVEAUX, ouvrir, ws, departMaximum, nombreCaisses, get en3D() { return !!rendu3D(); } };
+  window.manutTest = { NIVEAUX, ouvrir, ws, departMaximum, nombreCaisses, get en3D() { return !!rendu3D(); }, get tirage() { return tirage; }, get pince() { return pince; } };
   $("commencer").addEventListener("click", () => ouvrir(0));
   ouvrir(Math.min(+memo.lire("manut-niveau", 0) || 0, NIVEAUX.length - 1));
   /* À la première visite sur ce navigateur, on commence par les explications */
