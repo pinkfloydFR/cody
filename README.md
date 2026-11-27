@@ -23,11 +23,11 @@ Autres points :
 
 ## Captures
 
-| Traçage | Manutention |
+| Traçage : l'étoile | Manutention : tri à trois couleurs (tapis) |
 |---|---|
-| ![Atelier Traçage : blocs à gauche, dessin à droite](docs/captures/tracage.png) | ![Atelier Manutention : bras robot en 3D](docs/captures/manutention.png) |
-| ![Centre de tri à plateaux tournants](docs/captures/centre-de-tri.png) | ![Bras pivotant sur rail](docs/captures/pivot-rail.png) |
-| ![Indice ouvert au milieu de l'écran](docs/captures/indice.png) | ![Écran de réussite avec les étoiles](docs/captures/reussite.png) |
+| ![Atelier Traçage, niveau 6 : tracer une étoile à 5 branches](docs/captures/tracage.png) | ![Atelier Manutention, niveau 10 : bras robot qui trie les caisses par couleur](docs/captures/manutention.png) |
+| **Centre de tri : rouges à part (convoyeurs)** | **Bras pivotant : la navette** |
+| ![Centre de tri, niveau 14 : plateaux tournants qui envoient les caisses rouges vers la sortie A](docs/captures/centre-de-tri.png) | ![Bras pivotant, niveau 20 : transférer toutes les caisses sur le tapis nord](docs/captures/pivot.png) |
 
 ## Inspiration
 
