@@ -533,12 +533,21 @@
     if (ecarts[20] > 45) C3.alleger();
     ecarts = [];
   }
+  /* Avertissement « 3D sans carte graphique » : fermé, il ne revient pas avant la prochaine visite */
+  let alerteFermee = false;
+  try { alerteFermee = sessionStorage.getItem("cody-alerte-3d") === "1"; } catch { /* stockage indisponible */ }
+  $("fermer-alerte-3d").addEventListener("click", () => {
+    alerteFermee = true;
+    try { sessionStorage.setItem("cody-alerte-3d", "1"); } catch { /* stockage indisponible */ }
+    $("alerte-3d").hidden = true;
+  });
   /* N'affiche que la toile utile : 3D de la machine du niveau, sinon dessin 2D */
   function basculer() {
     const actif = rendu3D() ? machine(niv) : null;
     for (const [nom, id] of Object.entries(TOILES)) $(id).hidden = nom !== actif;
     $("c-scene").hidden = !!actif;
     $("aide-3d").hidden = !actif;
+    $("alerte-3d").hidden = !(actif && C3.sansCarte && !alerteFermee);
     /* Vue sur l'autre écran : un encart remplace la scène */
     $("deportee").hidden = !(actif && ecran);
     document.querySelector(".scene").hidden = !!(actif && ecran);

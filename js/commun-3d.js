@@ -13,7 +13,7 @@ window.Commun3D = (() => {
      les numéros et les noms des caisses difficiles à lire (retour d'un élève) ; on garde aussi le
      filtrage des textures au maximum, peu coûteux et nécessaire aux étiquettes vues de biais. */
   const RESOLUTION_LEGERE = 1;
-  let leger = null;
+  let leger = null, sansCarte = false;
   /* Rendu logiciel : le navigateur n'utilise pas la carte graphique (pilote absent ou bloqué) */
   function logiciel() {
     try {
@@ -28,7 +28,7 @@ window.Commun3D = (() => {
   }
   const estLeger = () => {
     if (leger === null) {
-      const sansCarte = choix !== "leger" && choix !== "complet" && logiciel();
+      sansCarte = choix !== "leger" && choix !== "complet" && logiciel();
       leger = choix === "leger" || sansCarte;
       if (choix === "leger") console.info("Vue 3D : mode léger demandé (?leger ou réglage cody-3d).");
       else if (sansCarte) console.info("Vue 3D : mode léger, le navigateur dessine sans carte graphique (accélération matérielle désactivée ?).");
@@ -124,5 +124,7 @@ window.Commun3D = (() => {
     return racine;
   }
 
-  return { creerRendu, anisotropie, ombres, alleger, intervalle, fusionner, get leger() { return estLeger(); } };
+  return { creerRendu, anisotropie, ombres, alleger, intervalle, fusionner, get leger() { return estLeger(); },
+    /* vrai si le navigateur dessine sans carte graphique (avertissement affiché par l'atelier) */
+    get sansCarte() { estLeger(); return sansCarte; } };
 })();

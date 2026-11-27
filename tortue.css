@@ -106,6 +106,12 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .vue-3d:active{cursor:grabbing}
 .aide-3d{position:absolute;right:8px;top:6px;margin:0;font-size:13px;color:#fff;background:rgba(15,20,28,.65);border-radius:4px;padding:1px 8px;pointer-events:none}
 .aide-3d[hidden]{display:none}
+/* Le navigateur dessine la 3D sans carte graphique (accélération matérielle coupée) */
+.alerte-3d{position:absolute;left:8px;right:8px;bottom:8px;display:flex;align-items:center;gap:12px;padding:8px 12px;
+  border-left:4px solid #e5a50a;border-radius:4px;background:rgba(40,32,10,.93);color:#fff;font-size:15px;line-height:1.35}
+.alerte-3d p{margin:0;flex:1}
+.alerte-3d strong{color:#ffd23f}
+.alerte-3d[hidden]{display:none}
 
 /* Vue 3D sur un second écran : bouton dans la scène, encart à sa place, fenêtre vue.html */
 .vers-ecran{position:absolute;left:8px;top:6px;min-height:2.75rem;width:3.75rem;padding:0;justify-content:center;background:rgba(15,20,28,.72);color:#fff;border-color:#46556b}

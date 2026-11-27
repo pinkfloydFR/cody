@@ -171,7 +171,10 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 - **Mode léger** : rendu logiciel détecté (SwiftShader, llvmpipe…), `?leger` dans l'adresse, ou
   `localStorage["cody-3d"] = "leger"` ; `?complet` l'interdit. Résolution ×1 (au plus celle de l'écran),
   ombres PCF 1024, anticrénelage gardé (le couper ne gagnait rien). **Ne pas descendre sous ×1** : à ×0,7, chiffres et noms des caisses
-  illisibles (retour d'un élève, 27/11/2026). Bascule automatique (`alleger`, une fois) si l'animation tombe sous
+  illisibles (retour d'un élève, 27/11/2026).
+- **Avertissement** (`#alerte-3d`, demande de l'enseignant) : si le navigateur dessine sans carte graphique
+  (`Commun3D.sansCarte`), un bandeau en bas de la scène dit où activer l'accélération matérielle (cas
+  réel : option coupée dans Chrome sur un portable d'élève). « Fermer » le masque pour la session. Bascule automatique (`alleger`, une fois) si l'animation tombe sous
   ~22 images/s. Gains mesurés : voir le message du commit.
 
 ## Centre de tri (niveaux 13 à 18, groupe « Convoyeurs », même page)

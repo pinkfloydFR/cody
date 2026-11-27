@@ -98,6 +98,12 @@
         <canvas id="c-pivot" class="vue-3d" role="img" aria-label="Bras pivotant en 3D" hidden></canvas>
         <canvas id="c-rail" class="vue-3d" role="img" aria-label="Bras pivotant sur rail en 3D" hidden></canvas>
         <p class="aide-3d" id="aide-3d" hidden>Glisser : tourner · double-clic : recentrer</p>
+        <div class="alerte-3d" id="alerte-3d" role="status" hidden>
+          <p><strong>3D sans carte graphique : animation moins fluide.</strong>
+            Active l'accélération dans ton navigateur : Paramètres → Système → « Utiliser l'accélération
+            graphique si disponible », puis relance-le. (Firefox : Paramètres → Général → Performances.)</p>
+          <button class="btn btn-mini" id="fermer-alerte-3d" type="button">Fermer</button>
+        </div>
         <button class="btn btn-mini vers-ecran" id="vers-ecran" type="button" hidden
           aria-label="Second écran" title="Second écran : afficher la vue 3D sur ton autre écran">
           <svg viewBox="0 0 44 26" aria-hidden="true"><rect x="1.5" y="2" width="15" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="27.5" y="2" width="15" height="11" rx="1.5" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="2"/><path d="M9 13v6M5 20h8M35 13v6M31 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 7.5h6M22.5 5l2.5 2.5-2.5 2.5" fill="none" stroke="#5fc8d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
