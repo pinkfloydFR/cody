@@ -37,7 +37,7 @@
     kind: "flyoutToolbox",
     contents: noms.map((n) => ({ kind: "block", type: prefixe + n })),
   });
-  const ws = A.injecter("blockly", boiteOutils(NIVEAUX[0].blocs), 1);
+  const ws = A.injecter("blockly", boiteOutils(NIVEAUX[0].blocs), 1 / 1.2); /* un cran de « zoom moins » : choix de l'enseignant */
   const indice = A.boutonIndice($("indice"));
   const debut = () => ws.getTopBlocks(false).find((b) => b.type === "manut_depart");
 

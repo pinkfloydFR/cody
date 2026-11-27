@@ -230,7 +230,7 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 - 27/11/2026, la scène du niveau 26 était trop petite (remarque de l'enseignant) : barre du haut
   ramenée à 52 px, **programme Python dans un menu « Python » de la barre** (les deux ateliers ;
   `.menu-python`, même fermeture que les menus de niveaux), marges réduites. Manutention seulement :
-  colonnes 5/7 (`.jeu-scene`) et blocs à l'échelle 1 (`A.injecter(…, 1)`, 1,1 au traçage).
+  colonnes 5/7 (`.jeu-scene`) et blocs à l'échelle 1/1,2, soit un cran de « zoom moins » (choix de l'enseignant ; 1,1 au traçage).
   **Indice** : bouton « ? » ambre à droite du titre du niveau (`A.boutonIndice`), texte dans une
   fenêtre au milieu de l'écran (les deux ateliers ; remplace « Un indice ? »). Manutention : « Objectif »
   et le barème sur une seule ligne sous la vignette (`.objectif-pied`).
