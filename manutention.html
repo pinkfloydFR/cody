@@ -80,14 +80,14 @@
     <div class="consigne-ligne">
       <div class="consigne">
         <p class="niv-num" id="niv-num">Niveau 1</p>
-        <h2 id="titre-niveau"></h2>
+        <div class="titre-ligne"><h2 id="titre-niveau"></h2>
+          <button class="btn-indice" id="indice" type="button" aria-label="Un indice ?" title="Un indice ?"><span aria-hidden="true">?</span></button></div>
         <p id="texte-niveau"></p>
-        <details class="indice" id="bloc-indice"><summary>Un indice ?</summary><p id="texte-indice"></p></details>
       </div>
       <figure class="objectif">
         <canvas id="c-objectif" width="600" height="255" role="img" aria-labelledby="legende-objectif"></canvas>
-        <figcaption id="legende-objectif">Objectif</figcaption>
-        <ul class="bareme" id="bareme" aria-label="Barème"></ul>
+        <figcaption class="objectif-pied"><span id="legende-objectif">Objectif</span>
+          <ul class="bareme" id="bareme" aria-label="Barème"></ul></figcaption>
       </figure>
     </div>
     <div class="plateau">

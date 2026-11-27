@@ -108,6 +108,7 @@
 
   const A = window.Atelier, memo = A.memo;
   const ws = A.injecter("blockly", boiteOutils(BASE));
+  const indice = A.boutonIndice(document.getElementById("indice"));
 
   let etoiles = memo.lire("tortue-etoiles", {});
   /* Les niveaux « couleurs » se sont insérés avant la création libre (ex-niveau 8) */
@@ -501,8 +502,7 @@
     document.getElementById("titre-niveau").textContent = niv.titre;
     A.consigne(document.getElementById("texte-niveau"), niv.verbe, niv.texte);
     A.bareme(document.getElementById("bareme"), niv.opt);
-    document.getElementById("texte-indice").textContent = niv.indice;
-    document.getElementById("bloc-indice").open = false;
+    indice(niv.indice);
     ws.updateToolbox(boiteOutils(niv.blocs));
     chargement = true;
     ws.clear();

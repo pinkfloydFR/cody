@@ -231,6 +231,9 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   ramenée à 52 px, **programme Python dans un menu « Python » de la barre** (les deux ateliers ;
   `.menu-python`, même fermeture que les menus de niveaux), marges réduites. Manutention seulement :
   colonnes 5/7 (`.jeu-scene`) et blocs à l'échelle 1 (`A.injecter(…, 1)`, 1,1 au traçage).
+  **Indice** : bouton « ? » ambre à droite du titre du niveau (`A.boutonIndice`), texte dans une
+  fenêtre au milieu de l'écran (les deux ateliers ; remplace « Un indice ? »). Manutention : « Objectif »
+  et le barème sur une seule ligne sous la vignette (`.objectif-pied`).
   La caméra du rail est limitée par la hauteur (`max(29.5, 56 / aspect)`) : gagner de la hauteur
   agrandit la scène plus que gagner de la largeur.
 

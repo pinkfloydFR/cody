@@ -193,6 +193,28 @@
     });
   }
 
+  /* Indice : bouton « ? » à droite du titre du niveau ; le texte s'ouvre dans une fenêtre au milieu
+     de l'écran (Échap, « Compris » ou un clic à côté la ferment). Rend la fonction qui change le texte. */
+  function boutonIndice(bouton) {
+    const fenetre = creer("dialog", "indice-fenetre"), carte = creer("div", "indice-carte");
+    const texte = creer("p"), ok = creer("button", "btn btn-go", "Compris");
+    const titre = creer("h2", "", "Un indice");
+    titre.id = "indice-titre";
+    fenetre.setAttribute("aria-labelledby", "indice-titre");
+    ok.type = "button";
+    ok.addEventListener("click", () => fenetre.close());
+    fenetre.addEventListener("click", (e) => { if (e.target === fenetre) fenetre.close(); });
+    carte.append(titre, texte, ok);
+    fenetre.append(carte);
+    document.body.append(fenetre);
+    bouton.addEventListener("click", () => fenetre.showModal());
+    return (t) => {
+      texte.textContent = t || "";
+      bouton.hidden = !t;
+      if (fenetre.open) fenetre.close();
+    };
+  }
+
   function boutonExecuter(bouton, enCours) {
     bouton.setAttribute("aria-pressed", enCours ? "true" : "false");
     bouton.querySelector("span").textContent = enCours ? "Arrêter" : "Exécuter";
@@ -275,5 +297,5 @@
     }, delai);
   }
 
-  window.Atelier = { memo, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonExecuter };
+  window.Atelier = { memo, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonIndice, boutonExecuter };
 }

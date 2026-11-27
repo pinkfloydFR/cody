@@ -79,8 +79,21 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .niv-num{margin:0;color:var(--doux);font-size:14px;text-transform:uppercase;letter-spacing:.06em}
 .consigne h2{font-size:22px}
 .consigne>p{margin:4px 0 0;max-width:70ch}
-.indice summary{cursor:pointer;color:var(--accent);font-weight:700;min-height:2.75rem;display:flex;align-items:center}
-.indice p{margin:0 0 4px;color:var(--doux)}
+/* Indice : « ? » coloré à droite du titre. Cible de 2,75rem, mais marges négatives : la ligne
+   garde la hauteur du titre. */
+.titre-ligne{display:flex;align-items:center;gap:6px}
+.btn-indice{flex:none;display:grid;place-items:center;width:2.75rem;height:2.75rem;margin:-.6rem 0;padding:0;
+  border:0;background:transparent;cursor:pointer}
+.btn-indice span{display:grid;place-items:center;width:1.85rem;height:1.85rem;border-radius:50%;
+  background:#e5a50a;color:#1c2532;font-weight:700;font-size:19px;line-height:1;box-shadow:0 0 0 2px light-dark(#fff,#181f29),0 0 0 3px #b98500}
+.btn-indice:hover span{background:#f2b633}
+.btn-indice[hidden]{display:none}
+.indice-fenetre{border:0;padding:0;background:transparent;color:var(--ink);max-width:min(40rem,92vw)}
+.indice-fenetre::backdrop{background:rgba(8,12,18,.6)}
+.indice-carte{background:var(--carte);border:1px solid var(--trait);border-top:6px solid #e5a50a;border-radius:12px;
+  padding:22px 30px 24px;text-align:center}
+.indice-carte h2{font-size:24px}
+.indice-carte p{margin:12px 0 20px;font-size:20px;line-height:1.5}
 
 /* La scène prend toute la place restante */
 .carte-travail>.plateau{flex:1 1 0;min-height:300px;container-type:size;display:grid;place-items:center}
@@ -159,9 +172,13 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
   font:15px/1.5 ui-monospace,Consolas,monospace;min-height:80px;max-height:70vh}
 
 /* Manutention : vignette de l'objectif */
-.objectif{margin:0;flex:0 0 min(22rem,45%)}
+.objectif{margin:0;flex:0 0 min(23rem,45%)}
 .objectif canvas{display:block;width:100%;height:auto;border:1px solid var(--trait);border-radius:4px}
 .objectif figcaption{font-size:14px;color:var(--doux);text-align:center;font-weight:700}
+/* « Objectif » et le barème sur une seule ligne sous la vignette */
+.objectif-pied{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 12px;margin-top:3px}
+.objectif-pied .bareme{margin:0;gap:2px 8px;font-size:13px;font-weight:400}
+.objectif-pied .bareme .etoiles i{font-size:13px}
 
 @media (max-width:1000px){
   body{height:auto;display:block}

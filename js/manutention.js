@@ -38,6 +38,7 @@
     contents: noms.map((n) => ({ kind: "block", type: prefixe + n })),
   });
   const ws = A.injecter("blockly", boiteOutils(NIVEAUX[0].blocs), 1);
+  const indice = A.boutonIndice($("indice"));
   const debut = () => ws.getTopBlocks(false).find((b) => b.type === "manut_depart");
 
   /* La partie « sinon » du bloc conditionnel prend un ton plus foncé. Un bloc Blockly n'a qu'une
@@ -456,8 +457,7 @@
     $("titre-niveau").textContent = niv.titre;
     A.consigne($("texte-niveau"), niv.verbe, niv.texte);
     A.bareme($("bareme"), niv.opt);
-    $("texte-indice").textContent = niv.indice;
-    $("bloc-indice").open = false;
+    indice(niv.indice);
     chargement = true;
     ws.clear();
     ws.updateToolbox(boiteOutils(niv.blocs, kit.prefixe));
