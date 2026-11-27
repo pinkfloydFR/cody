@@ -170,14 +170,21 @@
       if (!groupes.has(n.groupe)) groupes.set(n.groupe, []);
       groupes.get(n.groupe).push(i);
     });
-    nav.replaceChildren(...[...groupes].map(([nom, indices]) => {
+    /* Bouton court « LVL1 », « LVL2 »… (place dans la barre, demande de l'enseignant) ;
+       le nom du groupe et le score sont en tête du menu ouvert */
+    nav.replaceChildren(...[...groupes].map(([nom, indices], g) => {
       const menu = creer("details", "menu"), titre = creer("summary"), liste = creer("div", "menu-liste");
       menu.name = "niveaux"; /* un seul menu ouvert à la fois */
       const ici = indices.includes(courant);
       if (ici) menu.classList.add("menu-courant");
       const gagnees = indices.reduce((t, i) => t + (notes[i] || 0), 0);
-      titre.append(creer("span", "menu-nom", ici ? `${nom} · niveau ${courant + 1}` : nom),
-        creer("span", "menu-score", `★ ${gagnees}/${indices.length * 3}`));
+      const complet = ici ? `${nom} · niveau ${courant + 1}` : nom, score = `★ ${gagnees}/${indices.length * 3}`;
+      titre.append(creer("span", "menu-nom", `LVL${g + 1}`));
+      titre.title = `${complet} (${score})`;
+      titre.setAttribute("aria-label", `${complet}, score ${gagnees} sur ${indices.length * 3}`);
+      const tete = creer("div", "menu-tete");
+      tete.append(creer("span", "menu-groupe", complet), creer("span", "menu-score", score));
+      liste.append(tete);
       liste.append(...indices.map((i) => boutonNiveau(niveaux[i], i, courant, notes, (k) => { menu.open = false; ouvrir(k); }, true)));
       menu.append(titre, liste);
       return menu;
@@ -211,6 +218,22 @@
       attente = setTimeout(annuler, 4000);
     });
     return annuler;
+  }
+
+  /* « Supprimer les blocs grisés » (demande de l'enseignant) : efface tous les blocs non accrochés
+     au bloc DÉPART, en une seule étape (Ctrl+Z les rend). Grisé quand il n'y a rien à supprimer. */
+  function boutonNettoyer(bouton, ws, typeDepart) {
+    const orphelins = () => ws.getTopBlocks(false).filter((b) => b.type !== typeDepart);
+    const maj = () => { bouton.disabled = !orphelins().length; };
+    ws.addChangeListener((e) => { if (!e.isUiEvent) maj(); });
+    bouton.addEventListener("click", () => {
+      const liste = orphelins();
+      if (!liste.length) return;
+      B.Events.setGroup(true);
+      try { for (const b of liste) b.dispose(false); } finally { B.Events.setGroup(false); }
+      maj();
+    });
+    maj();
   }
 
   function boutonCopier(bouton, source) {
@@ -398,7 +421,8 @@
   const ICONE_PROF = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg>`;
 
   /* o : { atelier, fichier, ws, niveau() -> { num, total, titre, verbe, texte, opt }, compter(),
-          solutions() -> [{ groupe, num, titre, verbe, texte, opt, etat|null }], apres(espace) } */
+          solutions() -> [{ groupe, num, titre, verbe, texte, opt, etat|null }], apres(espace),
+          appliquer(etat) : remplace le programme du niveau courant (espace prof) } */
   function exports(o) {
     const place = document.getElementById("outils-export");
     if (!place) return;
@@ -444,7 +468,12 @@
     const sortir = creer("button", "btn btn-go", "Exporter les solutions (PDF)"); sortir.type = "button";
     const etat = creer("p", "prof-etat"); etat.setAttribute("aria-live", "polite");
     const actions = creer("div", "prof-actions"); actions.append(tout, rien);
-    choix.append(creer("p", "prof-aide", "Coche un ou plusieurs niveaux : une page par solution."), actions, liste, sortir, etat);
+    /* « Appliquer la correction » (demande de l'enseignant) : le programme du niveau courant est
+       remplacé par la solution ; deux clics, comme « Recommencer le niveau » */
+    const appliquer = creer("button", "btn btn-sec prof-appliquer"); appliquer.type = "button";
+    appliquer.append(creer("span"));
+    const boutonsProf = creer("div", "prof-boutons"); boutonsProf.append(sortir, appliquer);
+    choix.append(creer("p", "prof-aide", "Coche un ou plusieurs niveaux : une page par solution."), actions, liste, boutonsProf, etat);
     const fermer = creer("button", "btn btn-sec prof-fermer", "Fermer"); fermer.type = "button";
     d.append(titre, acces, choix, fermer);
     document.body.append(d);
@@ -467,8 +496,34 @@
         }
         return f;
       }));
+      annulerAppliquer();
+      const ici = o.solutions().find((s) => s.num === courant);
+      appliquer.querySelector("span").textContent = `Appliquer la correction du niveau ${courant}`;
+      appliquer.dataset.normal = appliquer.querySelector("span").textContent;
+      appliquer.disabled = !(ici && ici.etat && o.appliquer);
+      appliquer.title = appliquer.disabled ? "Pas de solution pour ce niveau" : "Efface ton programme et le remplace par la solution";
       acces.hidden = true; choix.hidden = false; etat.textContent = "";
     }
+    let attenteAppliquer = 0;
+    function annulerAppliquer() {
+      clearTimeout(attenteAppliquer); attenteAppliquer = 0;
+      if (appliquer.dataset.normal) appliquer.querySelector("span").textContent = appliquer.dataset.normal;
+      appliquer.classList.remove("a-confirmer");
+    }
+    appliquer.addEventListener("click", () => {
+      if (!attenteAppliquer) {
+        appliquer.querySelector("span").textContent = "Confirmer : effacer le code ?";
+        appliquer.classList.add("a-confirmer");
+        attenteAppliquer = setTimeout(annulerAppliquer, 4000);
+        return;
+      }
+      annulerAppliquer();
+      const courant = o.niveau().num, ici = o.solutions().find((s) => s.num === courant);
+      if (!ici || !ici.etat) return;
+      o.appliquer(ici.etat);
+      d.close();
+    });
+    d.addEventListener("close", annulerAppliquer);
     document.getElementById("espace-prof").addEventListener("click", () => {
       champ.value = ""; erreur.textContent = "";
       if (ouvert()) remplir(); else { acces.hidden = false; choix.hidden = true; }
@@ -503,5 +558,5 @@
     }));
   }
 
-  window.Atelier = { memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonIndice, boutonExecuter, cadrer };
+  window.Atelier = { memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, boutonIndice, boutonExecuter, cadrer };
 }

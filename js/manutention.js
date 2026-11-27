@@ -492,6 +492,7 @@
   $("lancer").addEventListener("click", () => lancer());
   $("effacer").addEventListener("click", () => { tirerPince(); tirerDepart(); reinitialiser(); attente(); });
   A.boutonCopier($("copier"), $("code-python"));
+  A.boutonNettoyer($("nettoyer"), ws, "manut_depart");
   A.sombre.addEventListener("change", () => { redessiner(); dessinerObjectif(montre); });
   document.fonts.ready.then(redessiner);
 
@@ -668,6 +669,7 @@
     solutions: () => NIVEAUX.map((n, i) => ({ ...infosNiveau(n, i), etat: versBlocs(n), nb: KITS()[machine(n)].moteur.compter(n.prog) })),
     /* la partie « sinon », plus foncée, est dessinée par cette page */
     apres: (espace) => { for (const b of espace.getAllBlocks(false)) if (b.getInput("SINON")) teinterSinon(b); },
+    appliquer: (etat) => { memo.ecrire("manut-prog-" + numNiv, etat); ouvrir(numNiv); },
   });
 
   window.manutTest = { NIVEAUX, ouvrir, ws, departMaximum, nombreCaisses, get en3D() { return !!rendu3D(); } };

@@ -60,11 +60,14 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   (départ avec le plus de caisses, `departMaximum`), « Niveau suivant » (absent au dernier niveau ;
   rien en création libre ni en cas d'échec ; Échap ferme).
 - **Barre du haut** (52 px) : onglets, logo Python (menu du code, `.menu-python`, avec Copier),
-  boutons **PDF** et **Prof**, puis les niveaux (rangée au traçage ; un menu par groupe avec les
-  étoiles gagnées à la manutention, après le bouton « Aide »).
+  boutons **PDF** et **Prof**, puis les niveaux (rangée au traçage ; à la manutention, après le bouton
+  « Aide », un menu par groupe nommé « LVL1 », « LVL2 »… pour la place ; nom du groupe et étoiles
+  gagnées en tête du menu ouvert et dans l'infobulle).
 - **Indice** : bouton « ? » ambre à droite du titre (`A.boutonIndice`), fenêtre au milieu de l'écran.
 - Sous la scène : « Exécuter » ; « Configuration » (manutention : nouveau départ ; « Réinitialiser » au
   traçage) ; « Recommencer le niveau » (efface le programme après confirmation, garde les étoiles).
+- En-tête « Ton programme » : « Supprimer les blocs grisés » (`A.boutonNettoyer`) efface les blocs non
+  accrochés à DÉPART en un seul groupe d'événements (Ctrl+Z les rend) ; grisé s'il n'y a rien.
 - Manutention : colonnes 5/7 (`.jeu-scene`), blocs à l'échelle 1/1,2 (1,1 au traçage), « Objectif » et
   barème sur une ligne sous la consigne (`.objectif-pied`), vignette seule à droite.
 
@@ -186,6 +189,8 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 - **Espace prof** (bouton « Prof ») : mot de passe, puis niveaux à cocher par groupe ; une page par
   solution (`prog` converti en blocs par `versBlocs`, dans `tortue.js` et `manutention.js`, une règle
   par machine). Création libre : « Pas de solution ». Accès retenu pour l'onglet (« cody-prof »).
+  « Appliquer la correction du niveau N » (deux clics) remplace le programme du niveau courant par la
+  solution (option `appliquer(etat)` d'`Atelier.exports`) ; grisé en création libre.
 - **Mot de passe** : seule son empreinte SHA-256 est dans le code (`EMPREINTE_PROF`, `atelier.js`) ;
   **ne jamais l'écrire en clair**. Pour le changer, remplacer l'empreinte. C'est un rideau, pas un verrou.
 - Rendu : `Atelier.imageBlocs` charge l'état dans un espace Blockly caché (`.export-blocs`), copie le

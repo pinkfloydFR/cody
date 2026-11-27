@@ -537,6 +537,7 @@
   ui.lancer.addEventListener("click", lancer);
   ui.effacer.addEventListener("click", () => { effacer(); attente(); });
   A.boutonCopier(ui.copier, ui.python);
+  A.boutonNettoyer(document.getElementById("nettoyer"), ws, "tortue_depart");
   A.sombre.addEventListener("change", () => { effacer(); dessinerFond(niv); attente(); });
   /* La police des graduations peut arriver après le premier dessin */
   document.fonts.ready.then(() => dessinerFond(niv));
@@ -562,6 +563,7 @@
     niveau: () => infosNiveau(niv, numNiv),
     compter: () => parseInt(ui.compteur.textContent, 10) || 0,
     solutions: () => NIVEAUX.map((n, i) => ({ ...infosNiveau(n, i), etat: n.prog ? versBlocs(n.prog) : null })),
+    appliquer: (etat) => { memo.ecrire("tortue-prog-" + numNiv, etat); ouvrir(numNiv); },
   });
 
   window.tortueTest = { NIVEAUX, ouvrir, ws, comparer, tracer, aplatir, get niv() { return niv; } };
