@@ -92,6 +92,27 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .aide-3d{position:absolute;right:8px;top:6px;margin:0;font-size:13px;color:#fff;background:rgba(15,20,28,.65);border-radius:4px;padding:1px 8px;pointer-events:none}
 .aide-3d[hidden]{display:none}
 
+/* Vue 3D sur un second écran : bouton dans la scène, encart à sa place, fenêtre vue.html */
+.vers-ecran{position:absolute;left:8px;top:6px;min-height:2.75rem;background:rgba(15,20,28,.72);color:#fff;border-color:#46556b}
+.vers-ecran:hover{background:rgba(15,20,28,.9)}
+.vers-ecran[hidden],.deportee[hidden]{display:none}
+.carte-travail>.plateau:has(.deportee:not([hidden])){flex:none;min-height:0;container-type:normal}
+.deportee{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;width:100%;
+  padding:8px 12px;border:1px dashed var(--trait);border-radius:4px;background:var(--fond2)}
+.deportee p{margin:0;color:var(--doux)}
+.page-vue{background:#1a2029}
+.vue-seule{position:relative;flex:1;overflow:hidden}
+.vue-seule canvas{position:absolute;inset:0;width:100%;height:100%}
+.vue-seule canvas[hidden]{display:none}
+.vue-titre{position:absolute;left:12px;top:8px;margin:0;color:#fff;font-weight:700;font-size:20px;
+  background:rgba(15,20,28,.65);border-radius:4px;padding:2px 10px;pointer-events:none}
+.vue-titre:empty{display:none}
+.vue-message{position:absolute;inset:0;margin:0;display:grid;place-items:center;color:#e5eaf1;font-size:20px;text-align:center;padding:20px}
+.vue-message[hidden]{display:none}
+.vue-outils{position:absolute;right:8px;top:6px;display:flex;align-items:center;gap:10px}
+.vue-outils .aide-3d{position:static}
+.vue-outils .btn-mini{background:rgba(15,20,28,.72);color:#fff;border-color:#46556b}
+
 .releve{display:flex;flex-wrap:wrap;margin:0;border:1px solid var(--trait);border-radius:4px;background:var(--fond2)}
 .releve div{flex:1 1 auto;display:flex;gap:7px;justify-content:center;white-space:nowrap;padding:5px 10px;border-left:1px solid var(--trait)}
 .releve dd{white-space:pre}

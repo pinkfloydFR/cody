@@ -299,7 +299,8 @@
   let kit = KitBras;
   function scene(vue) {
     const moteur3D = vue.tri ? troisDTri : vue.rail ? troisDRail : vue.pivot ? troisDPivot : troisD;
-    if (moteur3D) moteur3D.dessiner({ ...vue, decor: numNiv });
+    if (moteur3D && ecran) envoyerVue({ ...vue, decor: numNiv });
+    else if (moteur3D) moteur3D.dessiner({ ...vue, decor: numNiv });
     else kit.dessin2D(toile, vue, palette());
   }
   function dessinerObjectif(cas) {
@@ -497,7 +498,64 @@
     for (const [nom, id] of Object.entries(TOILES)) $(id).hidden = nom !== actif;
     $("c-scene").hidden = !!actif;
     $("aide-3d").hidden = !actif;
+    /* Vue sur l'autre écran : un encart remplace la scène */
+    $("deportee").hidden = !(actif && ecran);
+    document.querySelector(".scene").hidden = !!(actif && ecran);
+    $("vers-ecran").hidden = !(actif && deuxEcrans());
   }
+
+  /* ---------- Vue 3D sur un second écran (demande de l'enseignant) ----------
+     Fenêtre vue.html, placée sur l'autre écran quand le navigateur le permet (API Window Management,
+     Chrome et Edge). Elle dessine les vues reçues par postMessage ; l'atelier ne dessine plus la 3D. */
+  let ecran = null, ecranPret = false, guetteur = 0;
+  /* screen.isExtended n'existe que dans Chrome et Edge : ailleurs, le bouton n'apparaît pas */
+  const deuxEcrans = () => window.screen.isExtended === true;
+  if ("isExtended" in window.screen) window.screen.addEventListener("change", basculer);
+  const machineVue = (vue) => (vue.tri ? "tri" : vue.rail ? "rail" : vue.pivot ? "pivot" : "bras");
+  function envoyerVue(vue) {
+    if (ecranPret) ecran.postMessage({ type: "vue", machine: machineVue(vue), vue, titre: `Niveau ${numNiv + 1} · ${niv.titre}` }, "*");
+  }
+  async function deporter() {
+    let place = "width=1280,height=720";
+    try {
+      /* Demande l'autorisation « gestion des fenêtres » la première fois */
+      const details = await window.getScreenDetails();
+      const autre = details.screens.find((s) => s !== details.currentScreen);
+      if (autre) place = `left=${autre.availLeft},top=${autre.availTop},width=${autre.availWidth},height=${autre.availHeight}`;
+    } catch { /* refusé ou non pris en charge : la fenêtre s'ouvre où le navigateur veut, on la déplace à la main */ }
+    const f = window.open("vue.html", "cody-vue-3d", "popup," + place);
+    if (!f) {
+      dire("alerte", "Fenêtre bloquée", "Le navigateur a bloqué la fenêtre de la vue 3D. Autorise les fenêtres surgissantes pour ce site, puis clique à nouveau sur « Second écran ».");
+      return;
+    }
+    ecran = f; ecranPret = false;
+    clearInterval(guetteur);
+    guetteur = setInterval(() => { if (ecran && ecran.closed) ramener(); }, 700);
+    basculer();
+  }
+  function ramener() {
+    clearInterval(guetteur);
+    if (ecran && !ecran.closed) ecran.close();
+    ecran = null; ecranPret = false;
+    basculer();
+    if (!anim) scene(kit.fixe(vu));
+  }
+  window.addEventListener("message", (e) => {
+    if (!ecran || e.source !== ecran || !e.data) return;
+    if (e.data.type === "prete") {
+      ecranPret = true;
+      ecran.postMessage({ type: "init", geo: {
+        bras: { centres: CENTRE, sol: SOL, haut: HAUT }, pivot: window.KitPivot.geometrie, rail: window.KitRail.geometrie,
+      } }, "*");
+      if (!anim) scene(kit.fixe(vu));
+    } else if (e.data.type === "echec") {
+      ramener();
+      dire("alerte", "Vue 3D ramenée", "La fenêtre du second écran n'a pas pu afficher la 3D.");
+    }
+  });
+  window.addEventListener("pagehide", () => { if (ecran && !ecran.closed) ecran.close(); });
+  $("vers-ecran").addEventListener("click", deporter);
+  $("ramener").addEventListener("click", ramener);
   async function activer3D() {
     if (!window.THREE || new URLSearchParams(location.search).has("2d")) return;
     /* La police doit être prête avant de dessiner les étiquettes des caisses */

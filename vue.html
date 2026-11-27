@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cody — Vue 3D</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="tortue.css">
+</head>
+<!-- Vue 3D de l'atelier Manutention, ouverte sur un second écran par manutention.html (bouton « Second écran ») -->
+<body class="page-vue">
+<main class="vue-seule" id="vue">
+  <canvas id="v-bras" class="vue-3d" role="img" aria-label="Bras de manutention en 3D" hidden></canvas>
+  <canvas id="v-tri" class="vue-3d" role="img" aria-label="Centre de tri en 3D" hidden></canvas>
+  <canvas id="v-pivot" class="vue-3d" role="img" aria-label="Bras pivotant en 3D" hidden></canvas>
+  <canvas id="v-rail" class="vue-3d" role="img" aria-label="Bras pivotant sur rail en 3D" hidden></canvas>
+  <p class="vue-titre" id="vue-titre"></p>
+  <p class="vue-message" id="vue-message">Connexion à l'atelier…</p>
+  <div class="vue-outils">
+    <p class="aide-3d">Glisser : tourner · double-clic : recentrer</p>
+    <button class="btn btn-mini" id="plein-ecran" type="button">Plein écran</button>
+  </div>
+</main>
+<script src="js/three.min.js"></script>
+<script src="js/manutention-decors.js"></script>
+<script src="js/manutention-3d.js"></script>
+<script src="js/tri-3d.js"></script>
+<script src="js/pivot-3d.js"></script>
+<script src="js/vue-ecran.js"></script>
+</body>
+</html>

@@ -23,12 +23,14 @@ PlayTP (dépôt `pinkfloydFR/PlayTP`). Testée et validée par l'enseignant le 2
 ```
 index.html          atelier Traçage        (aucun JS ni style inline : CSP de PlayTP)
 manutention.html    atelier Manutention    (les onglets sont de simples liens)
+vue.html            vue 3D seule, pour un second écran (ouverte par manutention.html)
 tortue.css          styles des deux pages (« atelier technique », clair/sombre)
 js/atelier.js       commun : thème Blockly, mémoire, verdict, étoiles
 js/tortue.js        traçage
 js/manutention-moteur.js   règles, niveaux, vérification (sans DOM, testable avec Node)
 js/manutention.js          blocs, animation, dessin 2D de secours
 js/manutention-3d.js       rendu 3D du bras et des tapis (textures dessinées dans le code)
+js/vue-ecran.js            fenêtre vue.html : reçoit les vues par postMessage et les dessine en 3D
 js/manutention-decors.js   12 fonds peints dans le code, un par niveau (atelier -> Mars) ; chacun
                            fixe aussi la teinte du sol. Remplacent la tôle ondulée (« rideau »).
                            3D seulement ; le 2D de secours garde son fond quadrillé.
@@ -142,6 +144,14 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 - **Page d'explications (bouton « Aide »)** (texte seul, sans score ; demande de l'enseignant) :
   `#intro` dans `manutention.html`, ouvert à la première visite (`manut-intro-vue`) puis par le
   bouton « Aide ». Le tenir à jour quand une règle de l'atelier change.
+
+- **Second écran** (demande de l'enseignant, 27/11/2026) : bouton « Second écran » en haut à gauche de
+  la scène 3D, affiché seulement si `screen.isExtended` (Chrome, Edge ; absent dans Firefox). Il ouvre
+  `vue.html`, placée sur l'autre écran par `getScreenDetails()` (autorisation « gestion des fenêtres »
+  demandée au premier clic ; refusée : fenêtre à déplacer à la main). L'atelier envoie la géométrie
+  (`init`) puis chaque vue (`vue`) par postMessage et ne dessine plus la 3D ; un encart « Ramener la vue
+  ici » remplace la scène. Fermer la fenêtre ramène la vue. Bouton « Plein écran » dans la fenêtre.
+  Non testé dans un vrai navigateur à deux écrans.
 
 ## Centre de tri (niveaux 13 à 18, groupe « Convoyeurs », même page)
 
