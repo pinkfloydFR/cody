@@ -120,7 +120,8 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   ici »), sicaisse (« s'il y a une caisse ici … sinon », demandé par l'enseignant : sans lui, les
   élèves prenaient la boucle pour une condition ; proposé partout où `tantque` l'est), si (couleur).
 - 12 niveaux, groupes « Piles » (1 à 7) et « Tapis » (8 à 12), optima
-  4, 12, 20, 12, 6, 6, 8, 6, 6, 10, 12, 20. Niveau 10 = tri à trois couleurs (`si` imbriqués) :
+  4, 12, 20, 14, 6, 6, 8, 6, 6, 10, 12, 20 (niveau 4 : solution en 12, objectif assoupli de 2 le
+  27/11/2026, champ `marge` ; demande de l'enseignant). Niveau 10 = tri à trois couleurs (`si` imbriqués) :
   l'ancien « Tri à la réception » doublait le niveau 7 (remarque de l'enseignant).
 - **Départs aléatoires** (demande de l'enseignant) aux niveaux 6, 7 et 9 à 12 : `niv.hasard(alea)`
   tire un départ à chaque essai ; il est vérifié **en plus** des `configs` fixes (cas limites).

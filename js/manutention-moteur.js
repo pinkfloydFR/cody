@@ -110,7 +110,9 @@
       indice: "Déplacer une pile caisse par caisse l'inverse. Et si tu la déplaces deux fois ?",
       blocs: [...BASE, "repeter"], configs: [cas({ 1: [A, B, C] }, { 3: [A, B, C] })],
       prog: [aller("1"), repeter(3, saisir(), aller("2"), poser(), aller("1")),
-        aller("2"), repeter(3, saisir(), aller("3"), poser(), aller("2"))], opt: 12 },
+        aller("2"), repeter(3, saisir(), aller("3"), poser(), aller("2"))],
+      /* La solution fait 12 blocs ; objectif assoupli de 2 (jugé trop dur à l'essai, 27/11/2026) */
+      opt: 14, marge: 2 },
     { titre: "Vider la pile", verbe: "LIVRER", texte: "les 4 caisses à la sortie.",
       indice: "Écris les actions pour une seule caisse, en finissant là où tu as commencé, puis répète-les.",
       blocs: [...BASE, "repeter"], configs: [vider([A, B, C, D])],

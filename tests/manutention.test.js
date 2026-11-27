@@ -13,15 +13,15 @@ test("il y a 12 niveaux : 7 sur les piles, 5 avec les tapis", () => {
 });
 
 M.NIVEAUX.forEach((niv, i) => {
-  test(`niveau ${i + 1} : la solution réussit avec le nombre optimal de blocs`, () => {
+  test(`niveau ${i + 1} : la solution réussit avec le nombre optimal de blocs (marge éventuelle comprise)`, () => {
     const r = M.verifier(niv, niv.prog);
     assert.equal(r.reussi, true, JSON.stringify(r));
-    assert.equal(M.compter(niv.prog), niv.opt);
+    assert.equal(M.compter(niv.prog) + (niv.marge || 0), niv.opt);
   });
   test(`niveau ${i + 1} : un programme vide échoue`, () => assert.equal(M.verifier(niv, []).reussi, false));
 });
 
-test("optima attendus (initialisation comprise)", () => assert.deepEqual(M.NIVEAUX.map((n) => n.opt), [4, 12, 20, 12, 6, 6, 8, 6, 6, 10, 12, 20]));
+test("optima attendus (initialisation comprise)", () => assert.deepEqual(M.NIVEAUX.map((n) => n.opt), [4, 12, 20, 14, 6, 6, 8, 6, 6, 10, 12, 20]));
 
 /* La pince part d'une position inconnue : sans initialisation, le programme doit échouer. */
 M.NIVEAUX.forEach((niv, i) => {
