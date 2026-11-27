@@ -146,12 +146,13 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   bouton « Aide ». Le tenir à jour quand une règle de l'atelier change.
 
 - **Second écran** (demande de l'enseignant, 27/11/2026) : bouton « Second écran » en haut à gauche de
-  la scène 3D, affiché seulement si `screen.isExtended` (Chrome, Edge ; absent dans Firefox). Il ouvre
+  la scène 3D, affiché **sauf** si `getScreenDetails()` (autorisation accordée) ne voit qu'un écran :
+  `screen.isExtended` répond `false` à tort (Brave, constaté le 27/11/2026 ; même souci dans qcm_picker). Il ouvre
   `vue.html`, placée sur l'autre écran par `getScreenDetails()` (autorisation « gestion des fenêtres »
   demandée au premier clic ; refusée : fenêtre à déplacer à la main). L'atelier envoie la géométrie
   (`init`) puis chaque vue (`vue`) par postMessage et ne dessine plus la 3D ; un encart « Ramener la vue
   ici » remplace la scène. Fermer la fenêtre ramène la vue. Bouton « Plein écran » dans la fenêtre.
-  Non testé dans un vrai navigateur à deux écrans.
+  Sans l'API (Firefox), fenêtre 1280 x 720 à glisser sur l'autre écran.
 
 ## Centre de tri (niveaux 13 à 18, groupe « Convoyeurs », même page)
 

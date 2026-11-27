@@ -508,9 +508,23 @@
      Fenêtre vue.html, placée sur l'autre écran quand le navigateur le permet (API Window Management,
      Chrome et Edge). Elle dessine les vues reçues par postMessage ; l'atelier ne dessine plus la 3D. */
   let ecran = null, ecranPret = false, guetteur = 0;
-  /* screen.isExtended n'existe que dans Chrome et Edge : ailleurs, le bouton n'apparaît pas */
-  const deuxEcrans = () => window.screen.isExtended === true;
+  /* Détection peu fiable : screen.isExtended répond false à tort (Brave, portable + écran HDMI en
+     « Étendre » ; déjà constaté sur une autre appli) et n'existe pas dans Firefox. Le bouton est donc
+     affiché sauf si getScreenDetails(), une fois l'autorisation accordée, ne voit qu'un écran. */
+  let nbEcrans = null;
+  const deuxEcrans = () => window.screen.isExtended === true || nbEcrans !== 1;
   if ("isExtended" in window.screen) window.screen.addEventListener("change", basculer);
+  (async () => {
+    try {
+      if (!("getScreenDetails" in window)) return;
+      const etat = await navigator.permissions.query({ name: "window-management" });
+      if (etat.state !== "granted") return;
+      const details = await window.getScreenDetails();
+      const compter = () => { nbEcrans = details.screens.length; basculer(); };
+      details.addEventListener("screenschange", compter);
+      compter();
+    } catch { /* API absente ou refusée : bouton affiché */ }
+  })();
   const machineVue = (vue) => (vue.tri ? "tri" : vue.rail ? "rail" : vue.pivot ? "pivot" : "bras");
   function envoyerVue(vue) {
     if (ecranPret) ecran.postMessage({ type: "vue", machine: machineVue(vue), vue, titre: `Niveau ${numNiv + 1} · ${niv.titre}` }, "*");
