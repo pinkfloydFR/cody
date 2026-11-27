@@ -53,7 +53,7 @@ Docker : `docker-compose.yml` + `Dockerfile` (nginx, en-têtes dans `deploy/ngin
 contient que les fichiers servis). **Aucun port publié** : accès par Traefik seulement, avec **le
 géoblocage et CrowdSec, et rien d'autre** (demande de l'enseignant ; modèle
 `deploy/traefik-cody.exemple.yml`, la vraie règle reste sur le serveur). Le dossier du serveur est
-un clone du dépôt : `./deploy/deployer.sh`. Ne déployer que sur demande de l'enseignant.
+un clone du dépôt : `./deploy/deployer.sh`.
 Les solutions des exercices sont dans les moteurs, donc visibles dans le dépôt public
 et dans le navigateur : à traiter avant tout usage noté.
 
