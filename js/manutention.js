@@ -157,7 +157,7 @@
   const toile = $("c-scene").getContext("2d");
   toile.setTransform(2, 0, 0, 2, 0, 0);
   /* Rendu 3D quand le poste le permet ; sinon (ou avec ?2d dans l'adresse) le dessin 2D ci-dessous */
-  let troisD = null;
+  const C3 = window.Commun3D;
 
   /* vue du bras : abscisse de la pince, sa hauteur, caisse tenue, piles, avance des tapis, instruction */
   function sceneBras(vue) {
@@ -299,7 +299,7 @@
   };
   let kit = KitBras;
   function scene(vue) {
-    const moteur3D = vue.tri ? troisDTri : vue.rail ? troisDRail : vue.pivot ? troisDPivot : troisD;
+    const moteur3D = moteur(machineVue(vue));
     if (moteur3D && ecran) envoyerVue({ ...vue, decor: numNiv });
     else if (moteur3D) moteur3D.dessiner({ ...vue, decor: numNiv });
     else kit.dessin2D(toile, vue, palette());
@@ -315,7 +315,12 @@
     if (!ev) { terminer(); return; }
     if (anim.t0 === null) { anim.t0 = t; ws.highlightBlock(ev.id); }
     const u = d ? Math.min((t - anim.t0) / d, 1) : 1;
-    scene(kit.image(vu, ev, u));
+    /* Au plus 60 images par seconde (30 en mode léger) : un écran à 144 Hz n'en demande pas plus */
+    if (u >= 1 || anim.rendu === undefined || t - anim.rendu >= C3.intervalle() - 2) {
+      scene(kit.image(vu, ev, u));
+      surveiller(t - anim.rendu);
+      anim.rendu = t;
+    }
     if (u >= 1) { vu = ev.etat; anim.i++; anim.t0 = null; releve(vu, anim.i); }
     anim.demande = requestAnimationFrame(pas);
   }
@@ -490,9 +495,44 @@
   A.sombre.addEventListener("change", () => { redessiner(); dessinerObjectif(montre); });
   document.fonts.ready.then(redessiner);
 
-  let troisDTri = null, troisDPivot = null, troisDRail = null;
-  const rendu3D = () => ({ bras: troisD, tri: troisDTri, pivot: troisDPivot, rail: troisDRail })[machine(niv)];
+  /* Un moteur 3D par machine, créé à la première ouverture d'un de ses niveaux (et non les quatre au
+     chargement : temps de chargement et mémoire graphique divisés d'autant). null : 3D impossible. */
+  let actif3D = false;
+  const moteurs = {};
   const TOILES = { bras: "c-3d", tri: "c-tri", pivot: "c-pivot", rail: "c-rail" };
+  const FABRIQUES = {
+    bras: (c) => window.Rendu3D.creer(c, { centres: CENTRE, sol: SOL, haut: HAUT }),
+    tri: (c) => window.Rendu3DTri.creer(c),
+    pivot: (c) => window.Rendu3DPivot.creer(c, window.KitPivot.geometrie),
+    rail: (c) => window.Rendu3DPivot.creer(c, window.KitRail.geometrie),
+  };
+  function moteur(nom) {
+    if (!actif3D) return null;
+    if (!(nom in moteurs)) {
+      moteurs[nom] = null;
+      const c = $(TOILES[nom]);
+      try {
+        /* la toile doit être visible pendant la création ; basculer() la cache ensuite si besoin */
+        c.hidden = false;
+        moteurs[nom] = FABRIQUES[nom](c);
+        c.addEventListener("webglcontextlost", () => { moteurs[nom] = null; basculer(); scene(kit.fixe(vu)); });
+      } catch (e) {
+        console.warn("Affichage 3D impossible, dessin 2D utilisé.", e);
+      }
+    }
+    return moteurs[nom];
+  }
+  const rendu3D = () => moteur(machine(niv));
+  /* Animation trop lente (moins de 22 images par seconde) : mode léger, une fois */
+  let ecarts = [];
+  function surveiller(ecart) {
+    if (!rendu3D() || ecran || C3.leger || !(ecart > 0 && ecart < 1000)) return;
+    ecarts.push(ecart);
+    if (ecarts.length < 40) return;
+    ecarts.sort((a, b) => a - b);
+    if (ecarts[20] > 45) C3.alleger();
+    ecarts = [];
+  }
   /* N'affiche que la toile utile : 3D de la machine du niveau, sinon dessin 2D */
   function basculer() {
     const actif = rendu3D() ? machine(niv) : null;
@@ -575,22 +615,7 @@
     if (!window.THREE || new URLSearchParams(location.search).has("2d")) return;
     /* La police doit être prête avant de dessiner les étiquettes des caisses */
     await document.fonts.load("700 40px Luciole").catch(() => {});
-    const essayer = (id, creerRendu, perdre) => {
-      try {
-        /* la toile doit être visible pendant la création */
-        $(id).hidden = false;
-        const r = creerRendu($(id));
-        $(id).addEventListener("webglcontextlost", () => { perdre(); basculer(); scene(kit.fixe(vu)); });
-        return r;
-      } catch (e) {
-        console.warn("Affichage 3D impossible, dessin 2D utilisé.", e);
-        return null;
-      }
-    };
-    troisD = essayer("c-3d", (c) => window.Rendu3D.creer(c, { centres: CENTRE, sol: SOL, haut: HAUT }), () => { troisD = null; });
-    troisDTri = essayer("c-tri", (c) => window.Rendu3DTri.creer(c), () => { troisDTri = null; });
-    troisDPivot = essayer("c-pivot", (c) => window.Rendu3DPivot.creer(c, window.KitPivot.geometrie), () => { troisDPivot = null; });
-    troisDRail = essayer("c-rail", (c) => window.Rendu3DPivot.creer(c, window.KitRail.geometrie), () => { troisDRail = null; });
+    actif3D = true;
     basculer();
     scene(kit.fixe(vu));
   }

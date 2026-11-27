@@ -36,6 +36,7 @@ js/manutention-decors.js   12 fonds peints dans le code, un par niveau (atelier 
                            3D seulement ; le 2D de secours garde son fond quadrillé.
                            Volontairement flous et atténués (`adoucir` : FLOU, DOUCEUR, VOILE).
 js/three.min.js            three.js r128 (MIT), copié depuis cdnjs le 26/11/2026
+js/commun-3d.js            commun aux rendus 3D : qualité (mode léger), fusion des pièces fixes
 js/blockly_compressed.js, js/blockly-fr.js   Blockly 13.5.0 (npm), messages français
 tests/              voir « Tests »
 docs/superpowers/   designs et plan du 26/11/2026
@@ -153,6 +154,23 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   (`init`) puis chaque vue (`vue`) par postMessage et ne dessine plus la 3D ; un encart « Ramener la vue
   ici » remplace la scène. Fermer la fenêtre ramène la vue. Bouton « Plein écran » dans la fenêtre.
   Sans l'API (Firefox), fenêtre 1280 x 720 à glisser sur l'autre écran.
+
+## Rendu 3D : performances (27/11/2026)
+
+- Mesures (niveau 26, bras en mouvement) : le coût venait du **nombre d'appels de dessin** (~800 par
+  image, ombres comprises) et des **4 scènes créées au chargement**, bien plus que des ombres ou de
+  l'anticrénelage. Scripts de mesure : non versionnés (CDP sur Brave, carte graphique et SwiftShader).
+- `manutention.js` crée la scène 3D d'une machine **à la première ouverture d'un de ses niveaux**
+  (`moteur(nom)`), comme `vue-ecran.js` le faisait déjà.
+- `Commun3D.fusionner(racine, mobiles)` : à la fin de chaque `creer`, les pièces fixes sont fusionnées
+  (une par matière et réglage d'ombre) ; chaque caisse aussi. **Toute nouvelle pièce qui bouge doit être
+  ajoutée à la liste `mobiles`** (sinon elle reste figée dans le décor) ; ses sous-groupes mobiles
+  aussi. Les pièces plates au sol ne projettent plus d'ombre. Pièces à plusieurs matières non fusionnées.
+- Animation plafonnée à **60 images/s** (30 en mode léger), `Commun3D.intervalle()`.
+- **Mode léger** : rendu logiciel détecté (SwiftShader, llvmpipe…), `?leger` dans l'adresse, ou
+  `localStorage["cody-3d"] = "leger"` ; `?complet` l'interdit. Résolution ×0,7, pas d'anticrénelage,
+  ombres PCF 1024, anisotropie 2. Bascule automatique (`alleger`, une fois) si l'animation tombe sous
+  ~22 images/s. Gains mesurés : voir le message du commit.
 
 ## Centre de tri (niveaux 13 à 18, groupe « Convoyeurs », même page)
 

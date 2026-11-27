@@ -4,13 +4,8 @@
 window.Rendu3DTri = {
 creer(toile) {
 const T = window.THREE;
-const rendu = new T.WebGLRenderer({ canvas: toile, antialias: true });
-rendu.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-rendu.shadowMap.enabled = true;
-rendu.shadowMap.type = T.PCFSoftShadowMap;
-rendu.outputEncoding = T.sRGBEncoding;
-rendu.toneMapping = T.ACESFilmicToneMapping;
-rendu.toneMappingExposure = .86;
+const C = window.Commun3D;
+const rendu = C.creerRendu(toile);
 const monde = new T.Scene();
 monde.background = new T.Color(0x1a2029);
 monde.fog = new T.Fog(0x1a2029, 28, 55);
@@ -23,7 +18,7 @@ function texture(l, h, dessin, rx = 1, ry = 1, couleur = true) {
   dessin(c.getContext("2d"), l, h);
   const t = new T.CanvasTexture(c);
   t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rx, ry);
-  t.anisotropy = rendu.capabilities.getMaxAnisotropy();
+  t.anisotropy = C.anisotropie(rendu);
   if (couleur) t.encoding = T.sRGBEncoding;
   return t;
 }
@@ -105,7 +100,7 @@ function decorer(i) {
   if (!t) {
     t = new T.CanvasTexture(window.Decors.peindre(n));
     t.encoding = T.sRGBEncoding;
-    t.anisotropy = rendu.capabilities.getMaxAnisotropy();
+    t.anisotropy = C.anisotropie(rendu);
     fonds.set(n, t);
   }
   matFond.map = t;
@@ -181,7 +176,7 @@ function fabriquerCaisse(teinte, lettre, nom) {
     bloc(e, H, e, SOMBRE, sx, H / 2, sz, g);
     for (const sy of [e / 2, H - e / 2]) objet(new T.SphereGeometry(.042, 12, 10), CLAIR, sx, sy, sz + Math.sign(sz) * .052, g);
   }
-  return g;
+  return C.fusionner(g);
 }
 
 /* ---------- Caisses : fabriquées à la première utilisation, puis réutilisées ---------- */
@@ -317,9 +312,10 @@ function poserCaisse(c, x, z) {
 monde.add(new T.HemisphereLight(0xdfe9f5, 0x40382c, .45));
 const soleil = new T.DirectionalLight(0xfff1dd, 1.35);
 soleil.position.set(-6, 14, 9); soleil.castShadow = true;
-soleil.shadow.mapSize.set(2048, 2048); soleil.shadow.bias = -.0004; soleil.shadow.radius = 4;
+soleil.shadow.bias = -.0004; soleil.shadow.radius = 4;
 Object.assign(soleil.shadow.camera, { left: -17, right: 17, top: 15, bottom: -12, near: 1, far: 40 });
 monde.add(soleil);
+C.ombres(rendu, monde, soleil, () => afficher());
 const appoint = new T.PointLight(0x9fc4ff, .5, 30); appoint.position.set(9, 6, 5); monde.add(appoint);
 
 
@@ -365,6 +361,10 @@ toile.addEventListener("pointermove", (e) => {
 for (const nom of ["pointerup", "pointercancel"]) toile.addEventListener(nom, () => { glisse = null; });
 toile.addEventListener("dblclick", () => { ({ angle, hauteur } = DEPART); afficher(); });
 new ResizeObserver(afficher).observe(toile);
+
+/* Pièces fixes fusionnées (moins d'appels de dessin) ; les plateaux tournants restent à part */
+C.fusionner(monde, tournants);
+for (const g of tournants) C.fusionner(g);
 
 return { dessiner };
 },
