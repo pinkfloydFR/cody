@@ -172,6 +172,36 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 
 /* Python : menu de la barre du haut */
 .menu-python{align-self:center}
+.menu-python summary{padding:0 10px 0 12px}
+.logo-python{width:26px;height:26px;display:block}
+/* PDF de l'élève et espace prof : boutons de la barre */
+.outils-export{display:flex;gap:8px;align-self:center}
+.barre .btn-icone{background:transparent;color:#fff;border-color:#46556b;padding:0 12px;gap:6px}
+.barre .btn-icone:hover{border-color:#9fb2cb}
+.barre .btn-icone[aria-busy=true]{opacity:.6;cursor:progress}
+.btn-icone svg{width:22px;height:22px}
+/* Espace de travail caché qui dessine les blocs pour l'export */
+.export-blocs{position:fixed;left:-10000px;top:0;width:1600px;height:1600px;visibility:hidden}
+/* Espace prof */
+.prof{border:1px solid var(--trait);border-top:6px solid var(--accent-plein);border-radius:12px;padding:22px 28px 20px;
+  background:var(--carte);color:var(--ink);width:min(44rem,92vw);max-height:90vh}
+.prof::backdrop{background:rgba(8,12,18,.6)}
+.prof h2{margin:0 0 14px;font-size:24px}
+.prof-acces{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.prof-acces input{min-height:2.75rem;padding:0 12px;font:inherit;border:1px solid var(--trait);border-radius:6px;background:var(--fond2);color:var(--ink)}
+.prof-erreur{flex-basis:100%;margin:0;color:var(--ko);font-weight:700}
+.prof-erreur:empty{display:none}
+.prof-aide{margin:0 0 10px;color:var(--doux)}
+.prof-actions{display:flex;gap:8px;margin-bottom:10px}
+.prof-liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:10px;max-height:52vh;overflow:auto;margin-bottom:14px}
+.prof-liste fieldset{margin:0;border:1px solid var(--trait);border-radius:8px;padding:8px 12px}
+.prof-liste legend{font-weight:700;padding:0 4px}
+.prof-liste label{display:flex;align-items:center;gap:8px;min-height:2rem;cursor:pointer}
+.prof-liste input{width:1.15rem;height:1.15rem;accent-color:var(--accent-plein)}
+.prof-etat{margin:10px 0 0;color:var(--doux)}
+.prof-etat:empty{display:none}
+.prof-choix[hidden],.prof-acces[hidden]{display:none}
+.prof-fermer{margin-top:16px}
 .menu-python .menu-liste{position:absolute;left:0;right:auto;width:min(46rem,92vw);padding:8px;display:block}
 .python-in{position:relative}
 .python-in .btn-mini{position:absolute;top:16px;right:20px;background:#26313f;color:#fff;border-color:#46556b}

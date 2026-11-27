@@ -541,6 +541,29 @@
   /* La police des graduations peut arriver après le premier dessin */
   document.fonts.ready.then(() => dessinerFond(niv));
 
+  /* PDF de l'élève et solutions de l'espace prof : programme modèle -> blocs */
+  const blocModele = (c) => {
+    if (c.rep) return { type: "tortue_repeter", fields: { N: c.rep }, inputs: { FAIRE: { block: chaineModele(c.corps) } } };
+    if (c.t === "av") return { type: "tortue_avancer", fields: { N: c.d } };
+    if (c.t === "tr") return { type: "tortue_tourner", fields: { S: c.a < 0 ? "D" : "G", A: Math.abs(c.a) } };
+    if (c.t === "co") return { type: "tortue_couleur", fields: { C: c.c } };
+    return { type: "tortue_stylo", fields: { E: c.bas ? "B" : "H" } };
+  };
+  const chaineModele = (l) => l.reduceRight((suite, c) => {
+    const b = blocModele(c);
+    if (suite) b.next = { block: suite };
+    return b;
+  }, null);
+  const versBlocs = (prog) => ({ blocks: { languageVersion: 0, blocks: [{ type: "tortue_depart", x: 30, y: 30, deletable: false,
+    ...(prog.length ? { next: { block: chaineModele(prog) } } : {}) }] } });
+  const infosNiveau = (n, i) => ({ num: i + 1, total: NIVEAUX.length, titre: n.titre, verbe: n.verbe, texte: n.texte, opt: n.opt });
+  A.exports({
+    atelier: "Traçage", fichier: "tracage", ws,
+    niveau: () => infosNiveau(niv, numNiv),
+    compter: () => parseInt(ui.compteur.textContent, 10) || 0,
+    solutions: () => NIVEAUX.map((n, i) => ({ ...infosNiveau(n, i), etat: n.prog ? versBlocs(n.prog) : null })),
+  });
+
   window.tortueTest = { NIVEAUX, ouvrir, ws, comparer, tracer, aplatir, get niv() { return niv; } };
   ouvrir(Math.min(+memo.lire("tortue-niveau", 0) || 0, NIVEAUX.length - 1));
 }

@@ -17,6 +17,11 @@ Autres points :
 
 - **3 étoiles** par niveau : moins le programme a de blocs, plus il en gagne ; écran de réussite.
 - **Indice** : bouton « ? » à côté du titre du niveau, le texte s'ouvre au milieu de l'écran.
+- **PDF** : l'élève exporte l'image de ses blocs avec le rappel du niveau (numéro, nom, consigne,
+  barème) et l'adresse du jeu.
+- **Espace prof** (bouton « Prof », mot de passe) : PDF des solutions d'un, de plusieurs ou de tous
+  les niveaux de l'atelier. Les solutions restent lisibles dans le code du site : à ne pas considérer
+  comme secrètes.
 - **Second écran** (Chrome, Edge, Brave) : la vue 3D de la manutention s'ouvre dans une fenêtre sur
   l'autre écran, ce qui laisse toute la place aux blocs.
 - **PC modestes** : la 3D passe d'elle-même en mode léger (ombres plus simples, 30 images/s) si le

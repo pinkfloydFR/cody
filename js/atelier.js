@@ -325,5 +325,183 @@
     }, delai);
   }
 
-  window.Atelier = { memo, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonIndice, boutonExecuter, cadrer };
+  /* ---------- Export PDF : programme de l'élève, solutions pour l'espace prof (demande de l'enseignant) ---------- */
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  /* Empreinte SHA-256 du mot de passe prof (le dépôt est public : jamais le mot de passe en clair).
+     Simple rideau : les solutions sont de toute façon dans le code envoyé au navigateur. */
+  const EMPREINTE_PROF = "92d33d2803174c930c8da4e8b03613e7e152e955e80cc72e7590163e1d705317";
+  let espaceExport = null, policesExport = null;
+  /* Polices intégrées à l'image : une image SVG ne charge aucune ressource extérieure */
+  async function polices() {
+    if (!policesExport) {
+      const lire = async (f) => {
+        const b = await (await fetch(f)).blob();
+        return new Promise((ok) => { const l = new FileReader(); l.onload = () => ok(l.result); l.readAsDataURL(b); });
+      };
+      const [r, g] = await Promise.all([lire("fonts/Luciole-Regular.woff2"), lire("fonts/Luciole-Bold.woff2")]);
+      policesExport = `@font-face{font-family:Luciole;src:url(${r}) format("woff2");font-weight:400}`
+        + `@font-face{font-family:Luciole;src:url(${g}) format("woff2");font-weight:700}`;
+    }
+    return policesExport;
+  }
+  /* Styles de Blockly et de la page (teinte des « sinon »…), sans les @font-face à adresse relative */
+  function feuilles() {
+    let css = "";
+    for (const f of document.styleSheets) {
+      try { for (const r of f.cssRules) if (!(r instanceof CSSFontFaceRule)) css += r.cssText + "\n"; } catch { /* autre origine */ }
+    }
+    return css;
+  }
+  /* Blocs d'un état sérialisé -> { toile (2 pixels par pixel d'écran), nb } ; toujours en thème clair.
+     « apres(espace) » : retouches propres à l'atelier une fois les blocs dessinés. */
+  async function imageBlocs(etat, apres) {
+    if (!espaceExport) {
+      const boite = creer("div", "export-blocs");
+      document.body.append(boite);
+      espaceExport = B.inject(boite, { renderer: "cody", theme: THEME_CLAIR, media: "media/", readOnly: true, sounds: false });
+    }
+    const ws = espaceExport;
+    ws.clear();
+    B.serialization.workspaces.load(etat, ws);
+    await B.renderManagement.finishQueuedRenders();
+    if (apres) await apres(ws);
+    const nb = ws.getAllBlocks(false).length - ws.getTopBlocks(false).filter((b) => !b.isDeletable()).length;
+    if (!ws.getTopBlocks(false).length) return { toile: null, nb: 0 };
+    const calque = ws.getCanvas(), cadre = calque.getBBox(), m = 10;
+    const svg = document.createElementNS(SVG_NS, "svg");
+    const l = cadre.width + 2 * m, h = cadre.height + 2 * m;
+    svg.setAttribute("xmlns", SVG_NS);
+    svg.setAttribute("width", l); svg.setAttribute("height", h);
+    svg.setAttribute("viewBox", `${cadre.x - m} ${cadre.y - m} ${l} ${h}`);
+    svg.setAttribute("class", ws.getInjectionDiv().className + " blocklySvg");
+    const style = document.createElementNS(SVG_NS, "style");
+    style.textContent = (await polices()) + "\n" + feuilles();
+    const defs = ws.getParentSvg().querySelector("defs");
+    const copie = calque.cloneNode(true);
+    copie.removeAttribute("transform");
+    svg.append(style, ...(defs ? [defs.cloneNode(true)] : []), copie);
+    const img = new Image();
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(new XMLSerializer().serializeToString(svg))));
+    await img.decode();
+    const toile = document.createElement("canvas");
+    toile.width = Math.ceil(l * 2); toile.height = Math.ceil(h * 2);
+    const g = toile.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, toile.width, toile.height);
+    g.drawImage(img, 0, 0, toile.width, toile.height);
+    return { toile, nb };
+  }
+  const texteBareme = (opt) => (opt ? `★★★ ${opt} blocs max. · ★★ ${opt + 1} à ${opt + 2} · ★ ${opt + 3} et plus` : "");
+  const adresse = () => location.origin + location.pathname;
+  const nbBlocs = (n) => `${n} bloc${n > 1 ? "s" : ""}`;
+
+  const ICONE_PDF = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8l5 5V21a.5.5 0 0 1-.5.5h-12A.5.5 0 0 1 6 21z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 2.5V8h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 11v6m-2.6-2.6L12 17l2.6-2.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const ICONE_PROF = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg>`;
+
+  /* o : { atelier, fichier, ws, niveau() -> { num, total, titre, verbe, texte, opt }, compter(),
+          solutions() -> [{ groupe, num, titre, verbe, texte, opt, etat|null }], apres(espace) } */
+  function exports(o) {
+    const place = document.getElementById("outils-export");
+    if (!place) return;
+    const bouton = (id, icone, texte, titre) => {
+      const b = creer("button", "btn btn-mini btn-icone");
+      b.type = "button"; b.id = id; b.title = titre;
+      b.innerHTML = icone;
+      b.append(creer("span", "", texte));
+      return b;
+    };
+    const pdf = bouton("exporter-pdf", ICONE_PDF, "PDF", "Exporter ton programme en PDF (image des blocs et rappel du niveau)");
+    const prof = bouton("espace-prof", ICONE_PROF, "Prof", "Espace prof : solutions des niveaux (mot de passe)");
+    place.replaceChildren(pdf, prof);
+
+    const occupe = async (b, travail) => {
+      if (b.disabled) return;
+      b.disabled = true; b.setAttribute("aria-busy", "true");
+      try { await travail(); } catch (e) { console.error("Export PDF impossible.", e); alert("L'export PDF a échoué : " + e.message); }
+      finally { b.disabled = false; b.removeAttribute("aria-busy"); }
+    };
+    pdf.addEventListener("click", () => occupe(pdf, async () => {
+      const n = o.niveau(), etat = B.serialization.workspaces.save(o.ws);
+      const { toile } = await imageBlocs(etat, o.apres);
+      const pages = window.ExportPDF.composer({ ...n, atelier: o.atelier, bareme: texteBareme(n.opt),
+        detail: `Mon programme : ${nbBlocs(o.compter())}`, url: adresse(), vide: "Ton programme est vide." }, toile);
+      window.ExportPDF.telecharger(await window.ExportPDF.fabriquer(pages), `cody-${o.fichier}-niveau-${n.num}.pdf`);
+    }));
+
+    /* Espace prof : mot de passe, puis choix des niveaux */
+    const d = creer("dialog", "prof");
+    d.setAttribute("aria-labelledby", "prof-titre");
+    const titre = creer("h2", "", "Espace prof : solutions"); titre.id = "prof-titre";
+    const acces = creer("form", "prof-acces");
+    const etiquette = creer("label", "", "Mot de passe"); etiquette.htmlFor = "prof-mdp";
+    const champ = creer("input"); champ.type = "password"; champ.id = "prof-mdp"; champ.autocomplete = "current-password";
+    const erreur = creer("p", "prof-erreur"); erreur.setAttribute("role", "alert");
+    const entrer = creer("button", "btn btn-go", "Valider"); entrer.type = "submit";
+    acces.append(etiquette, champ, entrer, erreur);
+    const choix = creer("div", "prof-choix"); choix.hidden = true;
+    const liste = creer("div", "prof-liste");
+    const tout = creer("button", "btn btn-mini", "Tout cocher"); tout.type = "button";
+    const rien = creer("button", "btn btn-mini", "Tout décocher"); rien.type = "button";
+    const sortir = creer("button", "btn btn-go", "Exporter les solutions (PDF)"); sortir.type = "button";
+    const etat = creer("p", "prof-etat"); etat.setAttribute("aria-live", "polite");
+    const actions = creer("div", "prof-actions"); actions.append(tout, rien);
+    choix.append(creer("p", "prof-aide", "Coche un ou plusieurs niveaux : une page par solution."), actions, liste, sortir, etat);
+    const fermer = creer("button", "btn btn-sec prof-fermer", "Fermer"); fermer.type = "button";
+    d.append(titre, acces, choix, fermer);
+    document.body.append(d);
+
+    const ouvert = () => { try { return sessionStorage.getItem("cody-prof") === "1"; } catch { return false; } };
+    function remplir() {
+      const courant = o.niveau().num, groupes = new Map();
+      for (const s of o.solutions()) {
+        const nom = s.groupe || "Niveaux";
+        if (!groupes.has(nom)) groupes.set(nom, []);
+        groupes.get(nom).push(s);
+      }
+      liste.replaceChildren(...[...groupes].map(([nom, niveaux]) => {
+        const f = creer("fieldset"); f.append(creer("legend", "", nom));
+        for (const s of niveaux) {
+          const l = creer("label"), c = creer("input");
+          c.type = "checkbox"; c.value = s.num; c.checked = s.num === courant;
+          l.append(c, ` ${s.num} · ${s.titre}`);
+          f.append(l);
+        }
+        return f;
+      }));
+      acces.hidden = true; choix.hidden = false; etat.textContent = "";
+    }
+    document.getElementById("espace-prof").addEventListener("click", () => {
+      champ.value = ""; erreur.textContent = "";
+      if (ouvert()) remplir(); else { acces.hidden = false; choix.hidden = true; }
+      d.showModal();
+      (ouvert() ? sortir : champ).focus();
+    });
+    acces.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (window.ExportPDF.sha256(champ.value) !== EMPREINTE_PROF) { erreur.textContent = "Mot de passe incorrect."; champ.select(); return; }
+      try { sessionStorage.setItem("cody-prof", "1"); } catch { /* stockage indisponible */ }
+      remplir(); sortir.focus();
+    });
+    fermer.addEventListener("click", () => d.close());
+    const cocher = (v) => liste.querySelectorAll("input").forEach((c) => { c.checked = v; });
+    tout.addEventListener("click", () => cocher(true));
+    rien.addEventListener("click", () => cocher(false));
+    sortir.addEventListener("click", () => occupe(sortir, async () => {
+      const voulus = new Set([...liste.querySelectorAll("input:checked")].map((c) => +c.value));
+      const choisis = o.solutions().filter((s) => voulus.has(s.num));
+      if (!choisis.length) { etat.textContent = "Coche au moins un niveau."; return; }
+      const pages = [];
+      for (const [i, s] of choisis.entries()) {
+        etat.textContent = `Préparation : ${i + 1} sur ${choisis.length}…`;
+        const { toile, nb } = s.etat ? await imageBlocs(s.etat, o.apres) : { toile: null, nb: 0 };
+        pages.push(...window.ExportPDF.composer({ ...s, atelier: o.atelier, solution: true, bareme: texteBareme(s.opt),
+          detail: s.etat ? `Solution en ${nbBlocs(s.nb ?? nb)}` : "", url: adresse(), vide: "Pas de solution : niveau de création libre." }, toile));
+      }
+      etat.textContent = "Écriture du PDF…";
+      const nom = choisis.length === 1 ? `cody-${o.fichier}-niveau-${choisis[0].num}-solution.pdf` : `cody-${o.fichier}-solutions.pdf`;
+      window.ExportPDF.telecharger(await window.ExportPDF.fabriquer(pages), nom);
+      etat.textContent = `PDF prêt : ${choisis.length} niveau${choisis.length > 1 ? "x" : ""}.`;
+    }));
+  }
+
+  window.Atelier = { memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonIndice, boutonExecuter, cadrer };
 }

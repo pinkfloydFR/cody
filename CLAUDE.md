@@ -37,6 +37,7 @@ js/manutention-decors.js   12 fonds peints dans le code, un par niveau (atelier 
                            Volontairement flous et atténués (`adoucir` : FLOU, DOUCEUR, VOILE).
 js/three.min.js            three.js r128 (MIT), copié depuis cdnjs le 26/11/2026
 js/commun-3d.js            commun aux rendus 3D : qualité (mode léger), fusion des pièces fixes
+js/export-pdf.js           PDF sans bibliothèque : pages dessinées sur toile, empreinte SHA-256
 js/blockly_compressed.js, js/blockly-fr.js   Blockly 13.5.0 (npm), messages français
 tests/              voir « Tests »
 docs/superpowers/   designs et plan du 26/11/2026
@@ -155,6 +156,25 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   (`init`) puis chaque vue (`vue`) par postMessage et ne dessine plus la 3D ; un encart « Ramener la vue
   ici » remplace la scène. Fermer la fenêtre ramène la vue. Bouton « Plein écran » dans la fenêtre.
   Sans l'API (Firefox), fenêtre 1280 x 720 à glisser sur l'autre écran.
+
+## Export PDF et espace prof (27/11/2026, demande de l'enseignant)
+
+- Barre des deux ateliers : logo Python (menu du code), bouton **PDF**, bouton **Prof** (créés par
+  `Atelier.exports`, dans `#outils-export`).
+- **PDF de l'élève** : image de ses blocs (thème clair, police Luciole intégrée), atelier, numéro et nom
+  du niveau, consigne, barème, nombre de blocs, adresse du jeu (lien cliquable), date.
+- **Espace prof** : mot de passe, puis cases à cocher (un, plusieurs ou tous les niveaux, par groupe) ;
+  une page par solution (programme modèle `prog` converti en blocs : `versBlocs` dans `tortue.js` et
+  `manutention.js`, une règle par machine). Création libre : « Pas de solution ».
+- **Mot de passe** : seule son empreinte SHA-256 est dans le code (`EMPREINTE_PROF`, `atelier.js`) ;
+  **ne jamais l'écrire en clair** (dépôt public). Pour le changer : calculer l'empreinte du nouveau
+  mot de passe et remplacer la constante. C'est un **rideau**, pas un verrou : les solutions restent
+  lisibles dans le JavaScript envoyé au navigateur (voir « Intégration prévue dans PlayTP »).
+  Accès retenu pour l'onglet (`sessionStorage` « cody-prof »).
+- Rendu : `Atelier.imageBlocs` charge l'état dans un espace Blockly caché (`.export-blocs`), copie le
+  calque des blocs dans un SVG autonome (styles de la page + `defs`), puis le dessine sur une toile.
+  `export-pdf.js` compose des pages A4 à 150 ppp et écrit un PDF minimal (image compressée par
+  `CompressionStream`, sans perte). CSP : `img-src data:` suffit.
 
 ## Rendu 3D : performances (27/11/2026)
 

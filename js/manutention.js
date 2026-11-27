@@ -629,6 +629,47 @@
     scene(kit.fixe(vu));
   }
 
+  /* PDF de l'élève et solutions de l'espace prof : programme modèle -> blocs (une règle par machine) */
+  const PREFIXES = { bras: "manut_", tri: "tri_", pivot: "pivot_", rail: "pivot_" };
+  function blocModele(c, m) {
+    const b = { type: PREFIXES[m] + c.t, fields: {}, inputs: {} };
+    if (c.t === "repeter") b.fields.N = c.n;
+    if (m === "bras") {
+      if (c.t === "aller") b.fields.P = c.p;
+      if (c.t === "si") b.fields.C = c.c;
+    } else if (m === "tri") {
+      if (c.t === "orienter") { b.fields.N = String(c.n); b.fields.D = c.d; }
+      if (c.t === "envoyer") b.fields.N = String(c.n);
+      if (c.t === "tantque" || c.t === "sicaisse") b.fields.O = c.ou;
+      if (c.t === "si") { b.fields.N = String(c.n); b.fields.C = c.c; }
+    } else {
+      if (c.t === "tourner" || c.t === "glisser") b.fields.S = c.s;
+      if (c.t === "si") b.fields.C = c.c;
+      if (c.t === "jusqua" && m === "rail") { b.type = "pivot_jusquarail"; b.fields.BUT = c.but || "ouest"; }
+    }
+    for (const [nom, liste] of [["FAIRE", c.corps || c.alors], ["SINON", c.sinon]]) {
+      if (liste && liste.length) b.inputs[nom] = { block: chaineModele(liste, m) };
+    }
+    return b;
+  }
+  const chaineModele = (l, m) => l.reduceRight((suite, c) => {
+    const b = blocModele(c, m);
+    if (suite) b.next = { block: suite };
+    return b;
+  }, null);
+  const versBlocs = (n) => ({ blocks: { languageVersion: 0, blocks: [{ type: "manut_depart", x: 30, y: 30, deletable: false,
+    ...(n.prog.length ? { next: { block: chaineModele(n.prog, machine(n)) } } : {}) }] } });
+  const KITS = () => ({ bras: KitBras, tri: window.KitTri, pivot: window.KitPivot, rail: window.KitRail });
+  const infosNiveau = (n, i) => ({ num: i + 1, total: NIVEAUX.length, titre: n.titre, verbe: n.verbe, texte: n.texte, opt: n.opt, groupe: n.groupe });
+  A.exports({
+    atelier: "Manutention", fichier: "manutention", ws,
+    niveau: () => infosNiveau(niv, numNiv),
+    compter: () => kit.moteur.compter(programme()),
+    solutions: () => NIVEAUX.map((n, i) => ({ ...infosNiveau(n, i), etat: versBlocs(n), nb: KITS()[machine(n)].moteur.compter(n.prog) })),
+    /* la partie « sinon », plus foncée, est dessinée par cette page */
+    apres: (espace) => { for (const b of espace.getAllBlocks(false)) if (b.getInput("SINON")) teinterSinon(b); },
+  });
+
   window.manutTest = { NIVEAUX, ouvrir, ws, departMaximum, nombreCaisses, get en3D() { return !!rendu3D(); } };
   $("commencer").addEventListener("click", () => ouvrir(0));
   ouvrir(Math.min(+memo.lire("manut-niveau", 0) || 0, NIVEAUX.length - 1));
