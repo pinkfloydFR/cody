@@ -261,13 +261,15 @@ toileEcran.width = 768; toileEcran.height = 300;
 const carteEcran = new T.CanvasTexture(toileEcran);
 carteEcran.encoding = T.sRGBEncoding;
 let affiche = null;
-function ecran(texte) {
-  if (texte === affiche) return;
-  affiche = texte;
+/* « variables » (groupe « Variables ») : leurs valeurs remplacent le titre de l'écran */
+function ecran(texte, variables) {
+  const cle = texte + "|" + (variables || "");
+  if (cle === affiche) return;
+  affiche = cle;
   const g = toileEcran.getContext("2d");
   g.fillStyle = "#0d1b22"; g.fillRect(0, 0, 768, 300);
   g.textAlign = "center"; g.textBaseline = "middle";
-  g.fillStyle = "#7fd8e6"; g.font = "700 50px Luciole, sans-serif"; g.fillText("INSTRUCTION EN COURS", 384, 86);
+  g.fillStyle = "#7fd8e6"; g.font = "700 50px Luciole, sans-serif"; g.fillText(variables || "INSTRUCTION EN COURS", 384, 86, 708);
   g.fillStyle = "#ffffff"; g.font = "700 74px Luciole, sans-serif"; g.fillText(texte, 384, 200, 708);
   carteEcran.needsUpdate = true;
 }
@@ -431,7 +433,7 @@ function disposer(vue) {
   poserBras(x, bas + H + .02);
   /* Pince ouverte quand elle est vide */
   for (const [d, s] of doigts) d.position.x = vue.main ? 0 : s * .13;
-  ecran(vue.instruction);
+  ecran(vue.instruction, vue.variables);
   decorer(vue.decor);
 }
 

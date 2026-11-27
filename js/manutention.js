@@ -3,7 +3,8 @@
   const B = window.Blockly, A = window.Atelier, M = window.Manutention, memo = A.memo;
   /* Niveaux 1 à 12 : bras sur rail ; 13 à 18 : centre de tri (tri.js) ; 19 à 23 : bras pivotant ;
      24 à 27 : bras pivotant sur rail (pivot.js) */
-  const NIVEAUX = [...M.NIVEAUX, ...window.Tri.NIVEAUX, ...window.Pivot.NIVEAUX, ...window.PivotRail.NIVEAUX];
+  /* 28 à 34 : bras sur rail avec des variables (groupe « Variables », manutention-moteur.js) */
+  const NIVEAUX = [...M.NIVEAUX, ...window.Tri.NIVEAUX, ...window.Pivot.NIVEAUX, ...window.PivotRail.NIVEAUX, ...M.VARIABLES];
   /* La machine d'un niveau, d'après son groupe */
   const machine = (n) => ({ Convoyeurs: "tri", Pivot: "pivot", "Pivot + rail": "rail" })[n.groupe] || "bras";
   const $ = (id) => document.getElementById(id);
@@ -12,6 +13,39 @@
   const lien = { previousStatement: null, nextStatement: null };
   const nombre = { type: "field_number", name: "N", value: 3, min: 0, max: 100, precision: 1 };
   const corps = (name) => ({ type: "input_statement", name });
+
+  /* Liste des variables : celles du niveau ouvert. Dans un espace caché (PDF des solutions d'autres
+     niveaux), toutes celles de l'atelier, pour que chaque nom reste valable. */
+  const TOUTES_VARIABLES = [...new Set(M.VARIABLES.flatMap((n) => n.variables))];
+  function optionsVariables() {
+    const bloc = this && this.getSourceBlock && this.getSourceBlock();
+    const visible = bloc && (bloc.workspace === ws || bloc.workspace === ws.getFlyout().getWorkspace());
+    const ici = niv.variables || [];
+    const noms = visible && ici.length ? ici : [...ici, ...TOUTES_VARIABLES.filter((v) => !ici.includes(v))];
+    return noms.map((v) => [v, v]);
+  }
+  class ChampVariable extends B.FieldDropdown {
+    constructor() { super(optionsVariables); }
+    static fromJson() { return new ChampVariable(); }
+  }
+  B.fieldRegistry.register("field_variable_cody", ChampVariable);
+  const variable = { type: "field_variable_cody", name: "V" };
+  const valeur = (v, min = 0) => ({ type: "field_number", name: "N", value: v, min, max: 100, precision: 1 });
+  const comparaison = { type: "field_dropdown", name: "OP", options: [[">", "gt"], ["<", "lt"], ["=", "eq"], ["≠", "ne"]] };
+  B.defineBlocksWithJsonArray([
+    { type: "manut_mettre", message0: "mettre %1 à %2", args0: [variable, valeur(0)], ...lien, style: "variable",
+      tooltip: "Donne une valeur à la variable." },
+    { type: "manut_ajouter", message0: "ajouter %1 à %2", args0: [valeur(1, 1), variable], ...lien, style: "variable",
+      tooltip: "Augmente la variable (incrémenter)." },
+    { type: "manut_retirer", message0: "retirer %1 à %2", args0: [valeur(1, 1), variable], ...lien, style: "variable",
+      tooltip: "Diminue la variable (décrémenter)." },
+    { type: "manut_tantquevar", message0: "répéter tant que %1 %2 %3 %4 %5",
+      args0: [variable, comparaison, valeur(0), { type: "input_dummy" }, corps("FAIRE")], ...lien, style: "tantque",
+      tooltip: "Répète tant que la comparaison est vraie (elle est testée avant chaque tour)." },
+    { type: "manut_sivar", message0: "si %1 %2 %3 %4 %5",
+      args0: [variable, comparaison, valeur(0), { type: "input_dummy" }, corps("FAIRE")],
+      message1: "sinon %1", args1: [corps("SINON")], ...lien, style: "condition" },
+  ]);
   B.defineBlocksWithJsonArray([
     { type: "manut_depart", message0: "DÉPART", nextStatement: null, style: "depart", hat: "cap",
       tooltip: "Le programme commence ici. Accroche tes blocs dessous." },
@@ -85,6 +119,12 @@
       const t = b.type.slice("manut_".length), c = { t, id: b.id };
       const dedans = (nom) => compiler(b.getInputTargetBlock(nom));
       if (t === "aller") c.p = b.getFieldValue("P");
+      else if (t === "mettre" || t === "ajouter" || t === "retirer") { c.v = b.getFieldValue("V"); c.n = +b.getFieldValue("N"); }
+      else if (t === "tantquevar") { c.v = b.getFieldValue("V"); c.op = b.getFieldValue("OP"); c.n = +b.getFieldValue("N"); c.corps = dedans("FAIRE"); }
+      else if (t === "sivar") {
+        c.v = b.getFieldValue("V"); c.op = b.getFieldValue("OP"); c.n = +b.getFieldValue("N");
+        c.alors = dedans("FAIRE"); c.sinon = dedans("SINON");
+      }
       else if (t === "repeter") { c.n = +b.getFieldValue("N"); c.corps = dedans("FAIRE"); }
       else if (t === "tantque") c.corps = dedans("FAIRE");
       else if (t === "si" || t === "sicaisse") {
@@ -177,9 +217,17 @@
       rect(toile, s < 0 ? x - 8 : x - 4, vue.y + 28, 12, 6, t.repere);
     }
     if (vue.main) caisse(toile, vue.x, vue.y, vue.main);
+    if (vue.variables) {
+      toile.textAlign = "left";
+      toile.fillStyle = t.repere; toile.font = "bold 22px Luciole, system-ui, sans-serif";
+      toile.fillText(vue.variables, 40, 70);
+    }
   }
+  /* Valeurs des variables du niveau, pour l'écran de la scène (« ? » : pas encore définie) */
+  const valeursVariables = (etat) => (niv.variables && etat.vars
+    ? niv.variables.map((v) => `${v} : ${etat.vars[v] ?? "?"}`).join(" · ") : null);
   const fixe = (etat) => ({ x: CENTRE[etat.pos], y: REPOS, main: etat.main, piles: etat.piles,
-    tapis: { E: 0, S: 0 }, instruction: "en attente", decor: numNiv });
+    tapis: { E: 0, S: 0 }, instruction: "en attente", decor: numNiv, variables: valeursVariables(etat) });
 
   /* Vignette « Objectif » : un schéma qui montre toutes les caisses attendues. Les piles à gauche ;
      la sortie comme sur le tapis : dernière livrée à gauche, première livrée à droite. */
@@ -208,6 +256,10 @@
       ecrire(g, "dernière", 272, BAS - 62, 15, t.texte, false);
       ecrire(g, "première", 272 + (cible.S.length - 1) * 57, BAS - 62, 15, t.texte, false);
     }
+    /* Variables : données de l'exercice, valeurs attendues à la fin */
+    const liste = (o) => Object.entries(o).map(([v, n]) => `${v} = ${n}`).join(" · ");
+    if (niv.donnees && cas.vars) ecrire(g, `Départ : ${liste(cas.vars)}`, 415, 36, 19, t.repere);
+    if (cas.varsFin) ecrire(g, `Fin : ${liste(cas.varsFin)}`, 415, niv.donnees ? 68 : 36, 19, t.repere);
   }
 
   /* ---------- Animation ---------- */
@@ -255,7 +307,7 @@
       return d;
     }));
   }
-  const etatDepart = (cas, pos) => ({ pos, main: null, piles: { 1: [], 2: [], 3: [], S: [], E: [], ...cas.depart } });
+  const etatDepart = (cas, pos) => ({ pos, main: null, piles: { 1: [], 2: [], 3: [], S: [], E: [], ...cas.depart }, vars: { ...(cas.vars || {}) } });
 
   function montrer(cas = tirage, pos = pince) {
     montre = cas;
@@ -266,7 +318,9 @@
   }
 
   const VERS = { E: "à l'entrée", 1: "à l'emplacement 1", 2: "à l'emplacement 2", 3: "à l'emplacement 3", S: "à la sortie" };
-  const libelle = (ev) => (ev.t === "aller" ? `aller ${VERS[ev.etat.pos]}` : `${ev.t} la caisse`);
+  const OPERATION = { mettre: (ev) => `${ev.v} = ${ev.etat.vars[ev.v]}`, ajouter: (ev) => `${ev.v} augmente : ${ev.etat.vars[ev.v]}`,
+    retirer: (ev) => `${ev.v} diminue : ${ev.etat.vars[ev.v]}` };
+  const libelle = (ev) => (ev.t === "aller" ? `aller ${VERS[ev.etat.pos]}` : OPERATION[ev.t] ? OPERATION[ev.t](ev) : `${ev.t} la caisse`);
 
   /* Image intermédiaire entre l'état « avant » et l'événement ; u va de 0 à 1 */
   function image(avant, ev, u) {
@@ -275,6 +329,7 @@
       const x = CENTRE[avant.pos] + (CENTRE[ev.etat.pos] - CENTRE[avant.pos]) * doux(u);
       return { ...fixe(avant), x, instruction: libelle(ev) };
     }
+    if (OPERATION[ev.t]) return { ...fixe(u < 0.5 ? avant : ev.etat), instruction: libelle(ev) };
     const tapis = avant.pos === "E" || avant.pos === "S";
     const hauteur = tapis ? 1 : (ev.t === "saisir" ? avant.piles[avant.pos] : ev.etat.piles[ev.etat.pos]).length;
     const bas = SOL - HAUT * hauteur;
@@ -289,12 +344,16 @@
   /* ---------- Les quatre machines : même interface ---------- */
   const KitBras = {
     prefixe: "manut_", moteur: M, compiler, etatDepart, fixe, image, libelle, dessin2D: (g, vue) => sceneBras(vue), objectif: objectifBras,
-    releve: (e) => [["pince", NOM[e.pos]], ["caisse tenue", e.main ? e.main.l : "aucune"], ["livrées", e.piles.S.map((c) => c.l).join(", ") || "aucune"]],
+    releve: (e) => [["pince", NOM[e.pos]], ["caisse tenue", e.main ? e.main.l : "aucune"], ["livrées", e.piles.S.map((c) => c.l).join(", ") || "aucune"],
+      ...(niv.variables || []).map((v) => [v, e.vars && v in e.vars ? e.vars[v] : "?"])],
     attente: (n) => (n.hasard ? "Les caisses et la position de la pince sont tirées au hasard. Ton programme est aussi vérifié sur d'autres départs."
       : "La pince ne démarre pas toujours au même endroit : ton programme est vérifié depuis toutes ses positions."),
     enCours: (pos) => `La pince part ${LIEU[pos]}`,
     defaut: (bonne, mauvaise) => `Ton programme réussit quand la pince part ${LIEU[bonne]}, mais pas quand elle part ${LIEU[mauvaise]}. Place-la toi-même avant d'agir.`,
-    echec: (motif, e) => (motif === "pince" ? `la pince tient encore la caisse ${e.main.l}.` : "les piles ne correspondent pas à l'objectif."),
+    echec: (motif, e, cas) => (motif === "pince" ? `la pince tient encore la caisse ${e.main.l}.`
+      : motif === "variables" ? `les caisses sont bien placées, mais ${Object.entries(cas.varsFin).filter(([v, n]) => (e.vars[v] || 0) !== n)
+        .map(([v, n]) => `${v} vaut ${e.vars[v] ?? 0} au lieu de ${n}`).join(" et ")}.`
+      : "les piles ne correspondent pas à l'objectif."),
     verifie: " · vérifié depuis toutes les positions de la pince",
   };
   let kit = KitBras;
@@ -350,7 +409,7 @@
     /* En cas d'échec, on rejoue le départ et la position de pince qui ont échoué ;
        en cas de réussite, on part d'une position tirée au hasard. */
     const pos = bilan.reussi ? pince : bilan.pos;
-    const resultat = bilan.reussi ? kit.moteur.executer(prog, tirage.depart, pos) : bilan.resultat;
+    const resultat = bilan.reussi ? kit.moteur.executer(prog, tirage.depart, pos, tirage.vars) : bilan.resultat;
     pince = pos;
     /* L'échec vient d'un cas vérifié en coulisses : la scène passe sur ce départ, et on le dit */
     const autreDepart = bilan.cas !== tirage;
@@ -394,7 +453,7 @@
       if (resultat.erreur.id) ws.highlightBlock(resultat.erreur.id);
       dire("ko", "Arrêt du programme", ou + kit.moteur.ERREURS[resultat.erreur.code]);
     } else {
-      dire("ko", "Objectif non atteint", ou + kit.echec(motif, resultat.etat));
+      dire("ko", "Objectif non atteint", ou + kit.echec(motif, resultat.etat, bilan.cas));
     }
   }
 
@@ -637,6 +696,8 @@
     if (c.t === "repeter") b.fields.N = c.n;
     if (m === "bras") {
       if (c.t === "aller") b.fields.P = c.p;
+      if (c.v !== undefined) { b.fields.V = c.v; b.fields.N = c.n; }
+      if (c.op) b.fields.OP = c.op;
       if (c.t === "si") b.fields.C = c.c;
     } else if (m === "tri") {
       if (c.t === "orienter") { b.fields.N = String(c.n); b.fields.D = c.d; }

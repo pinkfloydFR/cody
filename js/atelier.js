@@ -17,6 +17,7 @@
     tantque: style("#3d7128", "#659650", "#274c18"),
     condition: style("#a32f63", "#c25a88", "#701e43"),
     stylo: style("#5d4e8c", "#8071ab", "#3f3463"),
+    variable: style("#2457a6", "#5079bd", "#173d78"),
   };
   const fabriquer = (nom, fond, boite, barre, texte) => B.Theme.defineTheme(nom, {
     base: B.Themes.Classic,

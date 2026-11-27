@@ -26,6 +26,15 @@
   const repeter = (n, ...corps) => ({ t: "repeter", n, corps });
   const tantque = (...corps) => ({ t: "tantque", corps });
   const si = (c, alors, sinon) => ({ t: "si", c, alors, sinon });
+  /* Variables (groupe « Variables ») : une ou plusieurs par niveau, nommées (« compteur », « rouges »…).
+     La mettre à une valeur, l'augmenter, la diminuer, la tester (op : lt <, gt >, eq =, ne ≠). */
+  const mettre = (v, n) => ({ t: "mettre", v, n });
+  const ajouter = (v, n = 1) => ({ t: "ajouter", v, n });
+  const retirer = (v, n = 1) => ({ t: "retirer", v, n });
+  const tantquevar = (v, op, n, ...corps) => ({ t: "tantquevar", v, op, n, corps });
+  const sivar = (v, op, n, alors, sinon) => ({ t: "sivar", v, op, n, alors, sinon });
+  const OPS = { lt: (a, b) => a < b, gt: (a, b) => a > b, eq: (a, b) => a === b, ne: (a, b) => a !== b };
+  const OPS_PY = { lt: "<", gt: ">", eq: "==", ne: "!=" };
   /* Prendre la caisse du dessus en « de » et la poser en « vers » ; la pince est en « ici »
      (null : position inconnue, il faut donc y aller). */
   const porter = (ici, de, vers) => [...(ici === de ? [] : [aller(de)]), saisir(), aller(vers), poser()];
@@ -163,17 +172,128 @@
     if (n.blocs.includes("tantque")) n.blocs = [...n.blocs, "sicaisse"];
   });
 
+  /* ---------- Groupe « Variables » (niveaux 28 à 34 de l'atelier) : le même bras, plus des variables ----------
+     Chaque niveau nomme ses variables (« variables ») ; chaque cas donne leurs valeurs au lancement
+     (« vars ») et, quand elles sont contrôlées, leurs valeurs attendues à la fin (« varsFin »).
+     Une variable qui n'est pas une donnée de l'exercice contient au lancement un nombre quelconque :
+     il faut l'initialiser, comme la pince. « donnees » : les valeurs au lancement sont l'énoncé
+     (affichées dans l'objectif). */
+  const arrivage = (motif) => [...motif].map((m, i) => caisse(String(i + 1), COULEUR[m]));
+  const avec = (c, vars, varsFin) => ({ ...c, vars, ...(varsFin ? { varsFin } : {}) });
+  const quelconque = (alea) => entier(alea, 1, 9);
+  const RBJ = "RBJ";
+  /* Tout livrer en comptant les caisses */
+  const compterTout = (motif, compteur) => {
+    const E = arrivage(motif);
+    return avec(cas({ E }, { S: [...E] }), { compteur }, { compteur: E.length });
+  };
+  /* Commande : livrer « n » caisses sur les 6 de l'entrée */
+  const commande = (motif, n) => {
+    const E = arrivage(motif);
+    return avec(cas({ E }, { S: E.slice(0, n), E: E.slice(n) }), { compteur: n });
+  };
+  /* Les 4 premières sur la pile 1, les suivantes sur la pile 2 */
+  const deuxPiles = (motif, compteur) => {
+    const E = arrivage(motif);
+    return avec(cas({ E }, { 1: E.slice(0, 4), 2: E.slice(4) }), { compteur });
+  };
+  /* Piles sur mesure : « pile1 » caisses à l'emplacement 1, puis « pile2 » à l'emplacement 2 */
+  const surMesure = (motif, pile1, pile2) => {
+    const E = arrivage(motif);
+    return avec(cas({ E }, { 1: E.slice(0, pile1), 2: E.slice(pile1, pile1 + pile2), E: E.slice(pile1 + pile2) }), { pile1, pile2 });
+  };
+  /* Tout livrer en comptant les rouges et les bleues */
+  const rougesBleues = (motif, rouges, bleues) => {
+    const E = arrivage(motif), nb = (c) => E.filter((x) => x.c === c).length;
+    return avec(cas({ E }, { S: [...E] }), { rouges, bleues }, { rouges: nb("rouge"), bleues: nb("bleu") });
+  };
+  /* Une caisse sur trois (la 3e, la 6e…) au contrôle, à l'emplacement 3 ; les autres à la sortie */
+  const uneSurTrois = (motif, compteur) => {
+    const E = arrivage(motif);
+    return avec(cas({ E }, { S: E.filter((_, i) => i % 3 !== 2), 3: E.filter((_, i) => i % 3 === 2) }), { compteur });
+  };
+  /* Autant de vertes : toute l'entrée part, puis autant de vertes de l'emplacement 1 (pile de 4).
+     L'ordre de la sortie interdit d'alterner : il faut retenir le nombre. */
+  const VERTES = Array.from({ length: 4 }, (_, i) => caisse(String(i + 1), "vert"));
+  const autant = (motif, compteur) => {
+    const E = arrivage(motif), P = [...VERTES], n = E.length;
+    return avec(cas({ 1: P, E }, { S: [...E, ...[...P].reverse().slice(0, n)], 1: P.slice(0, 4 - n) }), { compteur });
+  };
+  const QUELCONQUE = "Au lancement, le compteur contient un nombre quelconque.";
+
+  const VARIABLES = [
+    { titre: "Compter les caisses", verbe: "LIVRER", variables: ["compteur"],
+      texte: `toutes les caisses de l'entrée et les COMPTER : à la fin, le compteur doit valoir le nombre de caisses livrées. Il en arrive de 1 à 6. ${QUELCONQUE}`,
+      indice: "Mets d'abord le compteur à 0, puis ajoute 1 à chaque caisse livrée.",
+      blocs: [...BASE, "tantque", "mettre", "ajouter"],
+      configs: [["JVB", 5], ["R", 0], ["BRJVRB", 9], ["VJ", 3]].map(([m, c]) => compterTout(m, c)),
+      hasard: (alea = Math.random) => compterTout(motifAlea(alea, 1, 6, "RBJV"), quelconque(alea)),
+      prog: [mettre("compteur", 0), aller("E"), tantque(saisir(), aller("S"), poser(), ajouter("compteur"), aller("E"))], opt: 8 },
+    { titre: "La commande", verbe: "LIVRER", variables: ["compteur"], donnees: true,
+      texte: "autant de caisses que la commande en demande. Au lancement, le compteur contient le nombre de caisses commandées, de 1 à 5 ; l'entrée en contient 6. Les autres restent à l'entrée.",
+      indice: "Après chaque caisse livrée, retire 1 au compteur. Il reste des caisses à livrer tant que le compteur est plus grand que 0.",
+      blocs: [...BASE, "repeter", "tantque", "retirer", "tantquevar"],
+      configs: [["JVBRBJ", 3], ["RBJVRB", 1], ["BBRJVR", 5], ["VJRBVJ", 2]].map(([m, n]) => commande(m, n)),
+      hasard: (alea = Math.random) => commande(motifAlea(alea, 6, 6, "RBJV"), entier(alea, 1, 5)),
+      prog: [tantquevar("compteur", "gt", 0, aller("E"), saisir(), aller("S"), poser(), retirer("compteur"))], opt: 6 },
+    { titre: "Deux piles", verbe: "EMPILER", variables: ["compteur"],
+      texte: `les caisses de l'entrée : les 4 premières arrivées à l'emplacement 1, les suivantes à l'emplacement 2. Il en arrive de 1 à 8. ${QUELCONQUE}`,
+      indice: "Compte les caisses déjà posées : tant qu'il y en a moins de 4, la suivante va à l'emplacement 1.",
+      blocs: [...BASE, "tantque", "mettre", "ajouter", "sivar"],
+      configs: [["JVBRBJ", 6], ["R", 2], ["BBRJVRJB", 0], ["VJRB", 7], ["JVRBV", 4]].map(([m, c]) => deuxPiles(m, c)),
+      hasard: (alea = Math.random) => deuxPiles(motifAlea(alea, 1, 8, "RBJV"), quelconque(alea)),
+      prog: [mettre("compteur", 0), aller("E"), tantque(saisir(), sivar("compteur", "lt", 4, [aller("1")], [aller("2")]), poser(), ajouter("compteur"), aller("E"))], opt: 10 },
+    { titre: "Piles sur mesure", verbe: "EMPILER", variables: ["pile1", "pile2"], donnees: true,
+      texte: "les caisses de l'entrée dans l'ordre d'arrivée : d'abord autant de caisses à l'emplacement 1 que l'indique la variable pile1, puis autant à l'emplacement 2 que l'indique pile2. Ces nombres vont de 0 à 4 et changent d'un essai à l'autre. L'entrée contient 8 caisses ; les autres y restent.",
+      indice: "Deux boucles, une par variable : tant que pile1 est plus grand que 0, une caisse va à l'emplacement 1 et pile1 diminue de 1.",
+      blocs: [...BASE, "repeter", "tantque", "retirer", "tantquevar"],
+      configs: [["RBJVRBJV", 3, 2], ["JJBBRRVV", 0, 4], ["BRJVBRJV", 4, 0], ["VRBJVRBJ", 1, 1], ["RRBBJJVV", 4, 4]].map(([m, a, b]) => surMesure(m, a, b)),
+      hasard: (alea = Math.random) => surMesure(motifAlea(alea, 8, 8, "RBJV"), entier(alea, 0, 4), entier(alea, 0, 4)),
+      prog: [tantquevar("pile1", "gt", 0, aller("E"), saisir(), aller("1"), poser(), retirer("pile1")),
+        tantquevar("pile2", "gt", 0, aller("E"), saisir(), aller("2"), poser(), retirer("pile2"))], opt: 12 },
+    { titre: "Rouges et bleues", verbe: "LIVRER", variables: ["rouges", "bleues"],
+      texte: "toutes les caisses de l'entrée et les COMPTER par couleur : à la fin, la variable rouges doit valoir le nombre de caisses rouges, et bleues celui des bleues. Il arrive de 1 à 6 caisses. Au lancement, les deux variables contiennent un nombre quelconque.",
+      indice: "Mets les deux variables à 0. Après avoir saisi une caisse, choisis laquelle augmenter selon sa couleur.",
+      blocs: [...BASE, "tantque", "si", "mettre", "ajouter"],
+      configs: [["RBBR", 3, 1], ["B", 6, 0], ["RRRBRR", 0, 7], ["BRB", 8, 8]].map(([m, r, b]) => rougesBleues(m, r, b)),
+      hasard: (alea = Math.random) => rougesBleues(motifAlea(alea, 1, 6, "RB"), quelconque(alea), quelconque(alea)),
+      prog: [mettre("rouges", 0), mettre("bleues", 0), aller("E"),
+        tantque(saisir(), si("rouge", [ajouter("rouges")], [ajouter("bleues")]), aller("S"), poser(), aller("E"))], opt: 11 },
+    { titre: "Contrôle qualité", verbe: "EXPÉDIER", variables: ["compteur"],
+      texte: `les caisses de l'entrée, sauf une sur trois : la 3e, la 6e… arrivée part au contrôle, à l'emplacement 3. Il en arrive de 1 à 8. ${QUELCONQUE}`,
+      indice: "Compte les caisses : quand le compteur arrive à 3, la caisse part au contrôle et le compteur repart de 0.",
+      blocs: [...BASE, "tantque", "mettre", "ajouter", "sivar"],
+      configs: [["RBJVRBJV", 4], ["JV", 0], ["BRJ", 7], ["RBJVRB", 2], ["V", 3]].map(([m, c]) => uneSurTrois(m, c)),
+      hasard: (alea = Math.random) => uneSurTrois(motifAlea(alea, 1, 8, RBJ), quelconque(alea)),
+      prog: [mettre("compteur", 0), aller("E"), tantque(saisir(), ajouter("compteur"),
+        sivar("compteur", "eq", 3, [aller("3"), mettre("compteur", 0)], [aller("S")]), poser(), aller("E"))], opt: 11 },
+    { titre: "Autant de vertes", verbe: "LIVRER", variables: ["compteur"],
+      texte: `toutes les caisses de l'entrée, PUIS autant de caisses vertes de l'emplacement 1. Il arrive de 1 à 3 caisses. ${QUELCONQUE}`,
+      indice: "Compte les caisses de l'entrée pendant que tu les livres. Ensuite, livre une verte et retire 1 au compteur, tant qu'il est plus grand que 0.",
+      blocs: [...BASE, "tantque", "mettre", "ajouter", "retirer", "tantquevar"],
+      configs: [["RBJ", 5], ["J", 0], ["BR", 8], ["RRJ", 2]].map(([m, c]) => autant(m, c)),
+      hasard: (alea = Math.random) => autant(motifAlea(alea, 1, 3, RBJ), quelconque(alea)),
+      prog: [mettre("compteur", 0), aller("E"), tantque(saisir(), aller("S"), poser(), ajouter("compteur"), aller("E")),
+        tantquevar("compteur", "gt", 0, aller("1"), saisir(), aller("S"), poser(), retirer("compteur"))], opt: 14 },
+  ];
+  VARIABLES.forEach((n) => {
+    n.groupe = "Variables";
+    if (n.blocs.includes("tantque")) n.blocs = [...n.blocs, "sicaisse"];
+  });
+
   /* ---------- Exécution ---------- */
   const copier = (p) => Object.fromEntries(POSITIONS.map((k) => [k, [...(p[k] || [])]]));
 
-  function executer(prog, depart, position = "1") {
-    const etat = { piles: copier(depart), pos: position, main: null };
+  function executer(prog, depart, position = "1", vars = {}) {
+    const etat = { piles: copier(depart), pos: position, main: null, vars: { ...vars } };
     const trace = [];
     let compte = 0;
     const arret = (code, id) => { throw { arret: { code, id } }; };
     const user = (id) => { if (++compte > LIMITE) arret("limite", id); };
-    const noter = (c) => trace.push({ t: c.t, id: c.id, etat: { piles: copier(etat.piles), pos: etat.pos, main: etat.main } });
+    const noter = (c) => trace.push({ t: c.t, id: c.id, ...(c.v === undefined ? {} : { v: c.v }), etat: { piles: copier(etat.piles), pos: etat.pos, main: etat.main, vars: { ...etat.vars } } });
 
+    /* Variable jamais définie (programme d'un autre niveau) : 0 */
+    const valeur = (v) => etat.vars[v] || 0;
     function bloc(liste) {
       for (const c of liste) {
         user(c.id);
@@ -199,6 +319,13 @@
         } else if (c.t === "si") {
           if (!etat.main) arret("si_vide", c.id);
           bloc(etat.main.c === c.c ? c.alors : c.sinon);
+        } else if (c.t === "mettre") { etat.vars[c.v] = c.n; noter(c); }
+        else if (c.t === "ajouter") { etat.vars[c.v] = valeur(c.v) + c.n; noter(c); }
+        else if (c.t === "retirer") { etat.vars[c.v] = valeur(c.v) - c.n; noter(c); }
+        else if (c.t === "tantquevar") {
+          while (OPS[c.op](valeur(c.v), c.n)) { user(c.id); bloc(c.corps); }
+        } else if (c.t === "sivar") {
+          bloc(OPS[c.op](valeur(c.v), c.n) ? c.alors : c.sinon);
         }
       }
     }
@@ -227,10 +354,11 @@
   function verifier(niv, prog, montree, tirage) {
     const liste = tirage ? [tirage, ...niv.configs] : niv.configs;
     const essai = (i, pos) => {
-      const { depart, objectif } = liste[i];
-      const resultat = executer(prog, depart, pos);
+      const { depart, objectif, vars, varsFin } = liste[i];
+      const resultat = executer(prog, depart, pos, vars);
       const motif = resultat.erreur ? "erreur" : resultat.etat.main ? "pince"
-        : memesPiles(resultat.etat.piles, objectif) ? null : "piles";
+        : !memesPiles(resultat.etat.piles, objectif) ? "piles"
+        : varsFin && Object.entries(varsFin).some(([v, n]) => (resultat.etat.vars[v] || 0) !== n) ? "variables" : null;
       return { config: i, pos, resultat, motif };
     };
     /* Premier essai raté depuis chaque position (undefined : tout réussit depuis celle-là) */
@@ -261,6 +389,14 @@
       else if (c.t === "saisir" || c.t === "poser") out.push(`${p}${c.t}()`);
       else if (c.t === "repeter") { out.push(`${p}for ${"ijk"[prof] || "n" + prof} in range(${c.n}):`); corps(c.corps, 1); }
       else if (c.t === "tantque") { out.push(`${p}while caisse_presente():`); corps(c.corps); }
+      else if (c.t === "mettre") out.push(`${p}${c.v} = ${c.n}`);
+      else if (c.t === "ajouter") out.push(`${p}${c.v} = ${c.v} + ${c.n}`);
+      else if (c.t === "retirer") out.push(`${p}${c.v} = ${c.v} - ${c.n}`);
+      else if (c.t === "tantquevar") { out.push(`${p}while ${c.v} ${OPS_PY[c.op]} ${c.n}:`); corps(c.corps); }
+      else if (c.t === "sivar") {
+        out.push(`${p}if ${c.v} ${OPS_PY[c.op]} ${c.n}:`); corps(c.alors);
+        out.push(`${p}else:`); corps(c.sinon);
+      }
       else if (c.t === "si" || c.t === "sicaisse") {
         out.push(c.t === "si" ? `${p}if couleur_tenue() == "${c.c}":` : `${p}if caisse_presente():`); corps(c.alors);
         out.push(`${p}else:`); corps(c.sinon);
@@ -274,7 +410,7 @@
     ...(prog.length ? lignes(prog, 0, 0, []) : ["# (aucun bloc)"]),
   ].join("\n");
 
-  const M = { HAUTEUR, CAPACITE_SORTIE, LIMITE, POSITIONS, ERREURS, NIVEAUX, executer, compter, verifier, python };
+  const M = { HAUTEUR, CAPACITE_SORTIE, LIMITE, POSITIONS, ERREURS, NIVEAUX, VARIABLES, executer, compter, verifier, python };
   if (typeof module !== "undefined" && module.exports) module.exports = M;
   else window.Manutention = M;
 }
