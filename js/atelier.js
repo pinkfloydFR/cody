@@ -57,12 +57,40 @@
   B.blockRendering.register("cody", RenduCody);
 
   /* « echelle » : taille de départ des blocs (manutention un peu plus petite : la scène 3D a besoin de place) */
+  /* Pas de marge au-dessus ni à gauche du programme : les ascenseurs ne vont que vers la droite et
+     le bas (demande de l'enseignant). Un bloc posé plus haut ou plus à gauche reste atteignable. */
+  class MetriquesCody extends B.MetricsManager {
+    getPaddedContent_(vue, contenu) {
+      const p = super.getPaddedContent_(vue, contenu);
+      p.top = Math.min(0, contenu.top);
+      p.left = Math.min(0, contenu.left);
+      p.bottom = Math.max(p.bottom, p.top + vue.height);
+      p.right = Math.max(p.right, p.left + vue.width);
+      return p;
+    }
+  }
+
+  /* Au chargement d'un programme : DÉPART (et le reste avec lui) en haut à gauche, vue au début */
+  function cadrer(ws) {
+    const MARGE = 16, blocs = ws.getTopBlocks(false);
+    if (blocs.length) {
+      const r = ws.getBlocksBoundingBox(), dx = MARGE - r.left, dy = MARGE - r.top;
+      if (dx || dy) {
+        B.Events.disable();
+        try { for (const b of blocs) b.moveBy(dx, dy); } finally { B.Events.enable(); }
+      }
+    }
+    const m = ws.getMetrics();
+    ws.scroll(-m.scrollLeft, -m.scrollTop);
+  }
+
   function injecter(id, boite, echelle = 1.1) {
     const ws = B.inject(id, {
       toolbox: boite, renderer: "cody", theme: theme(), media: "media/", trashcan: true,
       sounds: false, /* aucun son : en classe, cela devient vite pénible (demande de l'enseignant) */
       zoom: { controls: true, wheel: false, startScale: echelle, maxScale: 2, minScale: 0.5 },
       move: { scrollbars: true, drag: true, wheel: true },
+      plugins: { metricsManager: MetriquesCody },
     });
     ws.addChangeListener(B.Events.disableOrphans);
     new ResizeObserver(() => B.svgResize(ws)).observe(document.getElementById(id));
@@ -297,5 +325,5 @@
     }, delai);
   }
 
-  window.Atelier = { memo, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonIndice, boutonExecuter };
+  window.Atelier = { memo, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonIndice, boutonExecuter, cadrer };
 }

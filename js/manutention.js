@@ -464,6 +464,7 @@
     const sauve = memo.lire("manut-prog-" + i, null);
     try { if (sauve) B.serialization.workspaces.load(sauve, ws); } catch { ws.clear(); }
     if (!debut()) B.serialization.blocks.append({ type: "manut_depart", x: 30, y: 30, deletable: false }, ws);
+    A.cadrer(ws);
     chargement = false;
     teinterProgramme();
     teinterBoite();

@@ -511,6 +511,7 @@
     if (!debut()) {
       B.serialization.blocks.append({ type: "tortue_depart", x: 30, y: 30, deletable: false }, ws);
     }
+    A.cadrer(ws);
     chargement = false;
     dessinerFond(niv);
     etatVu = etatInitial(niv);

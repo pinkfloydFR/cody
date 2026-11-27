@@ -224,6 +224,10 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
 - Contour clair sur chaque bloc ; couleurs distinctes pour répéter, tant que et si ; la partie
   « sinon » est plus foncée (copie découpée du contour, `teinterSinon`).
 - Bloc de départ : « DÉPART ».
+- Au chargement d'un programme, `A.cadrer` place le programme (DÉPART en tête) à 16 px du coin haut
+  gauche et y ramène la vue ; `MetriquesCody` (surcharge de `getPaddedContent_`, Blockly 13.5 : à
+  revérifier à chaque mise à jour) supprime la marge au-dessus et à gauche : les ascenseurs ne vont
+  que vers la droite et le bas (demande de l'enseignant).
 
 ## Place à l'écran (1920 x 1080)
 
