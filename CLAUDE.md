@@ -225,6 +225,15 @@ l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « 
   « sinon » est plus foncée (copie découpée du contour, `teinterSinon`).
 - Bloc de départ : « DÉPART ».
 
+## Place à l'écran (1920 x 1080)
+
+- 27/11/2026, la scène du niveau 26 était trop petite (remarque de l'enseignant) : barre du haut
+  ramenée à 52 px, **programme Python dans un menu « Python » de la barre** (les deux ateliers ;
+  `.menu-python`, même fermeture que les menus de niveaux), marges réduites. Manutention seulement :
+  colonnes 5/7 (`.jeu-scene`) et blocs à l'échelle 1 (`A.injecter(…, 1)`, 1,1 au traçage).
+  La caméra du rail est limitée par la hauteur (`max(29.5, 56 / aspect)`) : gagner de la hauteur
+  agrandit la scène plus que gagner de la largeur.
+
 ## Boutons sous la scène
 
 - « Exécuter » ; « **Configuration** » (manutention : tire un nouveau départ et remet la scène ;

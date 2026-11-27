@@ -14,6 +14,14 @@
     <a href="index.html" aria-current="page">Traçage</a>
     <a href="manutention.html">Manutention</a>
   </nav>
+  <!-- Le programme en Python : dans la barre, pour laisser la place à la scène -->
+  <details class="menu menu-python">
+    <summary>Python</summary>
+    <div class="menu-liste python-in">
+      <button class="btn btn-mini" id="copier" type="button">Copier</button>
+      <pre><code id="code-python"></code></pre>
+    </div>
+  </details>
   <nav class="niveaux" id="niveaux" aria-label="Niveaux"></nav>
 </header>
 
@@ -65,13 +73,6 @@
       </label>
     </div>
     <div class="verdict info" id="verdict" aria-live="polite"></div>
-    <details class="python">
-      <summary>Voir mon programme en Python</summary>
-      <div class="python-in">
-        <button class="btn btn-mini" id="copier" type="button">Copier</button>
-        <pre><code id="code-python"></code></pre>
-      </div>
-    </details>
   </section>
 </main>
 

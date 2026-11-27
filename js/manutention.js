@@ -37,7 +37,7 @@
     kind: "flyoutToolbox",
     contents: noms.map((n) => ({ kind: "block", type: prefixe + n })),
   });
-  const ws = A.injecter("blockly", boiteOutils(NIVEAUX[0].blocs));
+  const ws = A.injecter("blockly", boiteOutils(NIVEAUX[0].blocs), 1);
   const debut = () => ws.getTopBlocks(false).find((b) => b.type === "manut_depart");
 
   /* La partie « sinon » du bloc conditionnel prend un ton plus foncé. Un bloc Blockly n'a qu'une

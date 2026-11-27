@@ -56,11 +56,12 @@
   }
   B.blockRendering.register("cody", RenduCody);
 
-  function injecter(id, boite) {
+  /* « echelle » : taille de départ des blocs (manutention un peu plus petite : la scène 3D a besoin de place) */
+  function injecter(id, boite, echelle = 1.1) {
     const ws = B.inject(id, {
       toolbox: boite, renderer: "cody", theme: theme(), media: "media/", trashcan: true,
       sounds: false, /* aucun son : en classe, cela devient vite pénible (demande de l'enseignant) */
-      zoom: { controls: true, wheel: false, startScale: 1.1, maxScale: 2, minScale: 0.5 },
+      zoom: { controls: true, wheel: false, startScale: echelle, maxScale: 2, minScale: 0.5 },
       move: { scrollbars: true, drag: true, wheel: true },
     });
     ws.addChangeListener(B.Events.disableOrphans);

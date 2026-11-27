@@ -14,6 +14,14 @@
     <a href="index.html">Traçage</a>
     <a href="manutention.html" aria-current="page">Manutention</a>
   </nav>
+  <!-- Le programme en Python : dans la barre, pour laisser la place à la scène -->
+  <details class="menu menu-python">
+    <summary>Python</summary>
+    <div class="menu-liste python-in">
+      <button class="btn btn-mini" id="copier" type="button">Copier</button>
+      <pre><code id="code-python"></code></pre>
+    </div>
+  </details>
   <nav class="niveaux" id="niveaux" aria-label="Niveaux"></nav>
 </header>
 
@@ -59,7 +67,7 @@
   </div>
 </article>
 
-<main class="jeu">
+<main class="jeu jeu-scene">
   <section class="carte" aria-labelledby="titre-prog">
     <div class="carte-tete">
       <h2 id="titre-prog">Ton programme</h2>
@@ -117,13 +125,6 @@
       </label>
     </div>
     <div class="verdict info" id="verdict" aria-live="polite"></div>
-    <details class="python">
-      <summary>Voir mon programme en Python</summary>
-      <div class="python-in">
-        <button class="btn btn-mini" id="copier" type="button">Copier</button>
-        <pre><code id="code-python"></code></pre>
-      </div>
-    </details>
   </section>
 </main>
 
