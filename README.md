@@ -23,6 +23,10 @@ Autres points :
 
 ## Captures
 
+![Niveau 26 « Un quai par couleur » : le bras sur rail trie 6 caisses, les rouges en A, les bleues en B, les jaunes en C (animation accélérée)](docs/captures/niveau26.gif)
+
+*Niveau 26, « Un quai par couleur » : le bras sur rail trie six caisses, les rouges en A, les bleues en B, les jaunes en C (lecture accélérée ×2).*
+
 | Traçage : l'étoile | Manutention : tri à trois couleurs (tapis) |
 |---|---|
 | ![Atelier Traçage, niveau 6 : tracer une étoile à 5 branches](docs/captures/tracage.png) | ![Atelier Manutention, niveau 10 : bras robot qui trie les caisses par couleur](docs/captures/manutention.png) |
