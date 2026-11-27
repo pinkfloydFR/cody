@@ -1,343 +1,233 @@
-# CLAUDE.md — Maquette « Cody », ex « La tortue » (futur bloc `:::tortue` de PlayTP)
+# CLAUDE.md — Cody (ex « La tortue », futur bloc `:::tortue` de PlayTP)
 
-L'outil s'appelle **Cody** depuis le 26/11/2026 ; le curseur du traçage est un crayon (mine au point
-du tracé, orientée selon le cap). Les noms internes (`tortue.js`, blocs `tortue_*`, clés `tortue-*`,
-dossier) sont inchangés pour garder les programmes sauvegardés.
+Maquette autonome de programmation par blocs (Blockly) pour élèves de 3e / Seconde, dans l'esprit
+de la tortue Logo, pour valider l'idée **avant** l'intégration dans PlayTP (`pinkfloydFR/PlayTP`).
+Validée par l'enseignant le 26/11/2026. Nommée **Cody** le 26/11/2026 ; les noms internes
+(`tortue.js`, blocs `tortue_*`, clés `tortue-*`) sont gardés pour ne pas perdre les sauvegardes.
 
-Maquette autonome d'un exercice de programmation par blocs, dans l'esprit de la tortue Logo,
-pour les élèves de 3e / Seconde. Elle sert à valider l'idée **avant** l'intégration dans
-PlayTP (dépôt `pinkfloydFR/PlayTP`). Testée et validée par l'enseignant le 26/11/2026.
+Pourquoi : activité de fin d'apprentissage des bases (logique, boucles), graphique, **auto-hébergée**.
+Étudiés : Blockly Games (Apache 2.0, niveau « Tortue »), Rapid Router, Snap!, TurboWarp, Basthon,
+Reeborg's World. Décision : un widget Blockly maison intégré à PlayTP, prévu pour aller vers Python.
 
-## Pourquoi ce projet
-
-- Besoin : une activité de fin d'apprentissage des bases (logique, boucles), graphique et
-  ludique, **auto-hébergée**.
-- Projets open source existants étudiés : Blockly Games (Google, Apache 2.0, niveau
-  « Tortue »), Rapid Router (Code for Life, Django, blocs → Python), Snap! (Berkeley),
-  TurboWarp (Scratch), Basthon (Python + `turtle` dans le navigateur), Reeborg's World.
-- Décision : plutôt qu'un outil de plus à côté, **intégrer une tortue dans PlayTP**, sous forme
-  d'un widget Blockly maison (option « 2 », pensée pour évoluer vers blocs ↔ Python).
-
-## Contenu du dossier
+## Fichiers
 
 ```
-index.html          atelier Traçage        (aucun JS ni style inline : CSP de PlayTP)
-manutention.html    atelier Manutention    (les onglets sont de simples liens)
-vue.html            vue 3D seule, pour un second écran (ouverte par manutention.html)
-tortue.css          styles des deux pages (« atelier technique », clair/sombre)
-js/atelier.js       commun : thème Blockly, mémoire, verdict, étoiles
-js/tortue.js        traçage
-js/manutention-moteur.js   règles, niveaux, vérification (sans DOM, testable avec Node)
-js/manutention.js          blocs, animation, dessin 2D de secours
-js/manutention-3d.js       rendu 3D du bras et des tapis (textures dessinées dans le code)
-js/vue-ecran.js            fenêtre vue.html : reçoit les vues par postMessage et les dessine en 3D
-js/manutention-decors.js   12 fonds peints dans le code, un par niveau (atelier -> Mars) ; chacun
-                           fixe aussi la teinte du sol. Remplacent la tôle ondulée (« rideau »).
-                           3D seulement ; le 2D de secours garde son fond quadrillé.
-                           Volontairement flous et atténués (`adoucir` : FLOU, DOUCEUR, VOILE).
-js/three.min.js            three.js r128 (MIT), copié depuis cdnjs le 26/11/2026
-js/commun-3d.js            commun aux rendus 3D : qualité (mode léger), fusion des pièces fixes
-js/export-pdf.js           PDF sans bibliothèque : pages dessinées sur toile, empreinte SHA-256
-js/blockly_compressed.js, js/blockly-fr.js   Blockly 13.5.0 (npm), messages français
-tests/              voir « Tests »
-docs/superpowers/   designs et plan du 26/11/2026
-docs/essais/        essai 3D jetable (charge three.js depuis Internet)
-media/, fonts/      Blockly ; Luciole (licence incluse)
+index.html, manutention.html   ateliers Traçage et Manutention (onglets = simples liens ;
+                               aucun JS ni style inline : CSP de PlayTP)
+vue.html                       vue 3D seule pour un second écran (js/vue-ecran.js)
+tortue.css                     styles (« atelier technique », clair/sombre)
+js/atelier.js                  commun : Blockly (thème, rendu « cody »), mémoire, verdict, étoiles,
+                               barème, fête, indice, export PDF et espace prof
+js/export-pdf.js               PDF sans bibliothèque, empreinte SHA-256
+js/tortue.js                   traçage
+js/manutention.js              interface commune de la manutention (kits, animation, 2D de secours)
+js/manutention-moteur.js, js/tri-moteur.js, js/pivot-moteur.js
+                               règles, niveaux, vérification (sans DOM : testés avec Node)
+js/tri.js, js/pivot.js         blocs, géométrie, 2D, objectif, textes (KitTri, KitPivot, KitRail)
+js/manutention-3d.js, js/tri-3d.js, js/pivot-3d.js
+                               rendus 3D (textures dessinées dans le code)
+js/commun-3d.js                commun aux rendus 3D : qualité (mode léger), fusion des pièces fixes
+js/manutention-decors.js       12 fonds peints dans le code (atelier -> Mars), flous et atténués
+                               (`adoucir`) ; chacun fixe la teinte du sol ; 3D seulement
+js/three.min.js                three.js r128 (MIT)
+js/blockly_compressed.js, js/blockly-fr.js   Blockly 13.5.0, messages français
+media/, fonts/                 Blockly (sans sons) ; Luciole (licence incluse)
+tests/                         voir « Tests »
+docs/captures/                 images du README (LISEZMOI.md) ; docs/superpowers/ : designs et plans ;
+                               docs/essais/ : essais 3D jetables (three.js depuis Internet)
 ```
 
-Fonctionne hors ligne : ouvrir `index.html`, ou `python -m http.server` dans le dossier.
-Dépôt git : `pinkfloydFR/cody` (**public** : n'y mettre ni adresse IP, ni nom de domaine privé,
-ni mot de passe).
+Hors ligne : ouvrir `index.html`, ou `python -m http.server` dans le dossier.
+Dépôt **public** : n'y mettre ni adresse IP, ni nom de domaine privé, ni mot de passe.
+Les solutions (`prog` des niveaux) sont dans le JS envoyé au navigateur : rien n'est secret.
 
 ## Déploiement
 
-Docker : `docker-compose.yml` + `Dockerfile` (nginx, en-têtes dans `deploy/nginx.conf` ; l'image ne
-contient que les fichiers servis). **Aucun port publié** : accès par Traefik seulement, avec **le
-géoblocage et CrowdSec, et rien d'autre** (demande de l'enseignant ; modèle
-`deploy/traefik-cody.exemple.yml`, la vraie règle reste sur le serveur). Le dossier du serveur est
-un clone du dépôt : `./deploy/deployer.sh`.
-Les solutions des exercices sont dans les moteurs, donc visibles dans le dépôt public
-et dans le navigateur : à traiter avant tout usage noté.
+Docker : `docker-compose.yml` + `Dockerfile` (nginx, en-têtes et CSP dans `deploy/nginx.conf` ;
+l'image ne contient que les fichiers servis, pas `docs/`). **Aucun port publié** : Traefik seulement,
+avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèle
+`deploy/traefik-cody.exemple.yml`). Sur le serveur, un clone du dépôt : `./deploy/deployer.sh`
+(pull de la branche courante, reconstruction, attente de l'état « healthy »).
 
-## Présentation (choix de l'enseignant)
+## Présentation et interface (choix de l'enseignant)
 
-Public : préados, ados, adultes. « Atelier technique » : ardoise et blanc cassé, accent bleu
-pétrole, vert/rouge pour le résultat ; pas de décor enfantin. **Écran de réussite** demandé par
-l'enseignant (`A.feter`) : grandes étoiles, feu d'artifice, « Retenter », « Rejouer au maximum »
-(niveaux à nombre de caisses variable : relance le programme avec le plus de caisses possible,
-`departMaximum`) et « Niveau suivant »
-(absent au dernier niveau ; rien en création libre ni en cas d'échec ; Échap ferme). Score en 3 étoiles (les barres de niveau essayées le
-26/11/2026 ont été remplacées par des étoiles à la demande de l'enseignant). Blockly en rendu `cody` (voir « Blocs »). Consignes : verbe à l'infinitif en gras majuscule
-(champ `verbe`), tutoiement. Cible : PC en 1920×1080.
+- Public : préados, ados, adultes. « Atelier technique » : ardoise et blanc cassé, accent bleu
+  pétrole ; pas de décor enfantin. Police Luciole. Cible : PC en 1920×1080.
+- Consignes : verbe à l'infinitif en majuscules (champ `verbe`), tutoiement.
+- **Score en 3 étoiles** : 3 si nb de blocs ≤ `opt`, 2 si ≤ `opt + 2`, sinon 1 (`A.noter`) ; barème
+  affiché sous l'objectif (`A.bareme`).
+- **Écran de réussite** (`A.feter`) : étoiles, feu d'artifice, « Retenter », « Rejouer au maximum »
+  (départ avec le plus de caisses, `departMaximum`), « Niveau suivant » (absent au dernier niveau ;
+  rien en création libre ni en cas d'échec ; Échap ferme).
+- **Barre du haut** (52 px) : onglets, logo Python (menu du code, `.menu-python`, avec Copier),
+  boutons **PDF** et **Prof**, puis les niveaux (rangée au traçage ; un menu par groupe avec les
+  étoiles gagnées à la manutention, après le bouton « Aide »).
+- **Indice** : bouton « ? » ambre à droite du titre (`A.boutonIndice`), fenêtre au milieu de l'écran.
+- Sous la scène : « Exécuter » ; « Configuration » (manutention : nouveau départ ; « Réinitialiser » au
+  traçage) ; « Recommencer le niveau » (efface le programme après confirmation, garde les étoiles).
+- Manutention : colonnes 5/7 (`.jeu-scene`), blocs à l'échelle 1/1,2 (1,1 au traçage), « Objectif » et
+  barème sur une ligne sous la consigne (`.objectif-pied`), vignette seule à droite.
 
-## Fonctionnement (js/tortue.js)
+## Blocs (`js/atelier.js`)
 
-- **Blocs** (`tortue_*`) : `depart` (« DÉPART », non supprimable), `avancer`, `reculer`, `tourner` (droite/gauche, degrés),
-  `repeter` (N fois, entrée `FAIRE`), `stylo` (lever/baisser), `couleur` (8 pastilles),
-  `epaisseur`. Les nombres sont des champs dans le bloc (pas d'entrées à emboîter).
-  `Blockly.Events.disableOrphans` grise les blocs non accrochés au départ.
-- **Niveaux** (`NIVEAUX`) : titre, `verbe` + `texte` (consigne), indice, `depart [x, y, cap]`, programme modèle
-  (`prog`, mini-DSL `R(n, …)`, `fd`, `rt`, `lt`, `up`, `dn`), `opt` (nombre de blocs pour
-  3 étoiles), `blocs` (boîte à outils du niveau). 8 niveaux : carré, triangle, escalier,
-  étoile, pointillés, rosace, maison, création libre (`prog: null`).
-- **Pas d'eval** : `compiler()` parcourt les blocs et produit une liste de commandes
-  (`av`, `tr`, `st`, `co`, `ep`, `hl` = surligner le bloc). Limite 20 000 commandes.
-- **Repère** : comme Python `turtle` (x à droite, y vers le haut, cap en degrés, 0 = est),
-  toile logique 400 × 400, origine au centre ; canevas 800 × 800 (×2 pour la netteté).
-  Trois calques : fond (grille, axes gradués, modèle en pointillés), encre, dessus (crayon,
-  écarts). L'encre par défaut s'affiche claire en thème sombre. Relevé x, y, cap, crayon.
-- **Vérification** : le modèle et le dessin de l'élève sont tracés en noir, trait de 10 px,
-  sur une toile cachée ; on compte les pixels différents. Réussi si écart < 5 % des pixels du
-  modèle. Échec : calque rouge (manque) / violet (dépasse). La couleur et l'épaisseur
-  choisies par l'élève sont ignorées pour la vérification.
-- **Barème** affiché sous l'objectif (`A.bareme`, demande de l'enseignant), dans les deux ateliers.
-- **Score** (3 étoiles, clé `tortue-etoiles` conservée) : 3 si nb de blocs ≤ `opt`, 2 si ≤ `opt + 2`, sinon 1.
-- **Python** : `python()` traduit les blocs en code `turtle` (en-tête `goto` / `setheading`
-  pour la position de départ), avec bouton Copier.
-- **Sauvegarde** : `localStorage` (`tortue-etoiles`, `tortue-niveau`, `tortue-prog-<n>`),
-  dans des try/catch. Dans PlayTP, ce sera remplacé par l'autosave des réponses.
-- `window.tortueTest` expose `NIVEAUX`, `ouvrir`, `ws`… pour les tests.
+- **Aucun son** : `sounds: false` et `media/*.mp3` retirés ; ne pas les remettre en mettant Blockly à jour.
+- Rendu `cody` = thrasos + **prise femelle au fond des boucles et conditions** (surcharge de
+  `drawStatementInput_`) ; `MetriquesCody` (surcharge de `getPaddedContent_`) supprime la marge en haut
+  et à gauche. **Ces deux surcharges sont à revérifier à chaque mise à jour de Blockly.**
+- Contour clair ; couleurs distinctes pour répéter, tant que et si ; partie « sinon » plus foncée
+  (copie découpée du contour, `teinterSinon` dans `manutention.js`). Bloc de départ « DÉPART », non
+  supprimable ; `disableOrphans` grise les blocs non accrochés.
+- `A.cadrer` place le programme à 16 px du coin haut gauche au chargement.
 
-## Niveaux « couleurs » du traçage
+## Atelier Traçage (`js/tortue.js`)
 
-- 13 niveaux **classés par difficulté** (remarque de l'enseignant) : carré, carré rouge, triangle,
-  escalier, carré bicolore, étoile, pointillés, triangle tricolore, escalier coloré, rosace,
-  maison, rosace bicolore, création libre. Niveaux à couleurs (`couleurs: true`) : 2, 5, 8, 9, 12.
-  Sauvegardes déplacées par numéro (`tortue-niveaux-couleurs`, `tortue-ordre-difficulte`).
-- Modèle dessiné dans ses couleurs ; après la forme (écart < 5 %), `couleursFausses` compare un
-  masque par couleur (écart max 8 %). Les consignes **nomment** les couleurs (daltonisme). Ne pas
-  créer de modèle où deux couleurs différentes se superposent. L'épaisseur reste ignorée.
+- Blocs `tortue_*` : `depart`, `avancer`, `reculer`, `tourner` (droite/gauche, degrés), `repeter`,
+  `stylo`, `couleur` (8 pastilles), `epaisseur`. Nombres en champs dans le bloc.
+- 13 niveaux **classés par difficulté** : carré, carré rouge, triangle, escalier, carré bicolore,
+  étoile, pointillés, triangle tricolore, escalier coloré, rosace, maison, rosace bicolore, création
+  libre (`prog: null`). Champs : titre, `verbe` + `texte`, indice, `depart [x, y, cap]`, `prog`
+  (mini-DSL `R(n, …)`, `fd`, `rt`, `lt`, `up`, `dn`, `co`), `opt`, `blocs` (boîte à outils).
+- **Pas d'eval** : `compiler()` produit des commandes (`av`, `tr`, `st`, `co`, `ep`, `hl`) ; limite 20 000.
+- Repère de Python `turtle` (cap en degrés, 0 = est), toile logique 400 × 400 centrée, canevas ×2.
+  Calques : fond (grille, axes, modèle en pointillés), encre, dessus (crayon, écarts).
+- **Vérification** : modèle et dessin tracés en noir (10 px) sur une toile cachée ; réussi si écart
+  < 5 % des pixels du modèle (calques rouge = manque, violet = dépasse). Niveaux à couleurs
+  (`couleurs: true` : 2, 5, 8, 9, 12) : ensuite un masque par couleur (écart max 8 %). Les consignes
+  **nomment** les couleurs (daltonisme) ; jamais deux couleurs superposées dans un modèle. Épaisseur ignorée.
+- Python : code `turtle` (en-tête `goto` / `setheading`). Mémoire : `tortue-etoiles`, `tortue-niveau`,
+  `tortue-prog-<n>` (dans PlayTP : autosave). `window.tortueTest` pour les tests.
 
-## Atelier Manutention
+## Atelier Manutention : commun (`js/manutention.js`)
 
-- **Bras articulé sur rail** (image validée par l'enseignant le 26/11/2026 ; remplace le portique,
-  qui reste le dessin 2D de secours). Postes : tapis d'**entrée** (`E`, file), piles `1` à `3`
-  (4 caisses), tapis de **sortie** (`S`, 6 caisses, ordre de livraison, on n'y reprend rien).
-  Chaque caisse porte un **numéro** (plus de lettres, demande de l'enseignant) **et** le nom de sa
-  couleur : 1, 2, 3… de bas en haut (piles) ou dans l'ordre d'arrivée (entrée) ; au **niveau 12**
-  seulement, c'est le **numéro de sortie attendu**. Sur chaque tapis, 2 caisses entières
-  sont visibles, les autres passent sous le capot ; le relevé « livrées » liste toute la sortie.
-- Blocs `manut_*` : aller, saisir, poser, repeter, tantque (« répéter tant qu'il y a une caisse
-  ici »), sicaisse (« s'il y a une caisse ici … sinon », demandé par l'enseignant : sans lui, les
-  élèves prenaient la boucle pour une condition ; proposé partout où `tantque` l'est), si (couleur).
-- 12 niveaux, groupes « Piles » (1 à 7) et « Tapis » (8 à 12), optima
-  4, 12, 20, 14, 6, 6, 8, 6, 6, 10, 12, 20 (niveau 4 : solution en 12, objectif assoupli de 2 le
-  27/11/2026, champ `marge` ; demande de l'enseignant). Niveau 10 = tri à trois couleurs (`si` imbriqués) :
-  l'ancien « Tri à la réception » doublait le niveau 7 (remarque de l'enseignant).
-- **Départs aléatoires** (demande de l'enseignant) aux niveaux 6, 7 et 9 à 12 : `niv.hasard(alea)`
-  tire un départ à chaque essai ; il est vérifié **en plus** des `configs` fixes (cas limites).
-  `verifier(niv, prog, montree, tirage)` rend `cas`, le départ à afficher. Si l'échec vient d'un
-  cas caché, il est joué **et annoncé** (« le départ a changé ») : demande de l'enseignant. Les consignes disent ce
-  qui varie. Toute modification d'une consigne doit rester cohérente avec les bornes des tirages.
-- **Initialisation obligatoire** (demande de l'enseignant) : la position de la pince au lancement
-  est inconnue et change à chaque essai. `verifier(niv, prog, montree)` contrôle chaque
-  configuration depuis les 5 positions. Défaut d'initialisation = réussit depuis au moins une
-  position (`reussiDepuis`) mais pas toutes. Si le programme échoue aussi depuis la position
-  montrée, c'est elle qui est rejouée (sinon la pince semblait toujours partir du même endroit).
-- Réussite : tous les postes identiques à l'objectif (ordre compris) et pince vide.
-- Erreurs : arrêt, bloc encadré en jaune ; limite de 500 instructions.
-- `executer()` calcule toute la trace, puis l'interface l'anime (vitesse 5 : résultat immédiat).
-  « Mouvements réduits » est volontairement ignoré (un PC sans effets d'animation n'animait rien).
-- Le rendu 3D reçoit les mêmes « vues » que le 2D (repère 1200 x 500, `tapis.E/S` = avance des
-  tapis, `instruction` = écran). Secours 2D si WebGL échoue ou avec `?2d`.
-- Vignette « Objectif » : schéma plat (toutes les caisses), sortie = dernière à gauche. Pas de
-  numéro de départ dans la légende (demande de l'enseignant).
+- 27 niveaux en 4 machines : bras (1 à 12, groupes « Piles » et « Tapis »), centre de tri (13 à 18,
+  « Convoyeurs »), bras pivotant (19 à 23, « Pivot »), pivot sur rail (24 à 27, « Pivot + rail »).
+  `kit` vaut `KitBras`, `KitTri`, `KitPivot` ou `KitRail` (même interface : moteur, compiler,
+  etatDepart, fixe, image, dessin2D, objectif, releve, textes) ; `machine(niv)` d'après le groupe.
+- Caisses : un **numéro** et le nom de leur couleur ; numéros = ordre (de bas en haut ou d'arrivée),
+  sauf au niveau 12 (numéro de sortie attendu). Vignette « Objectif » : schéma plat.
+- **Départs aléatoires** (`niv.hasard(alea)`) vérifiés **en plus** des `configs` fixes (cas limites).
+  Si l'échec vient d'un cas caché, il est joué **et annoncé** (« le départ a changé »). Les consignes
+  disent ce qui varie : les garder cohérentes avec les bornes des tirages.
+- **Initialisation obligatoire** : l'état de la machine au lancement (pince, plateaux, bras) est
+  inconnu ; `verifier` contrôle toutes les positions. Défaut d'initialisation = réussit depuis
+  certaines (`reussiDepuis`) mais pas toutes ; la position qui échoue est rejouée.
+- Réussite : postes identiques à l'objectif (ordre compris), pince vide. Erreur : arrêt, bloc encadré
+  en jaune ; 500 instructions max. `executer()` calcule la trace, l'interface l'anime (vitesse 5 :
+  immédiat ; « mouvements réduits » volontairement ignoré).
+- La 3D reçoit les mêmes « vues » que le 2D ; 2D de secours si WebGL échoue ou avec `?2d`.
+- **Aide** : `#intro` (texte seul), à la première visite (`manut-intro-vue`) puis par le bouton
+  « Aide ». **La tenir à jour quand une règle change.**
+- **Second écran** : bouton (deux moniteurs) en haut à gauche de la scène, masqué seulement si
+  `getScreenDetails()` (autorisé) ne voit qu'un écran (`screen.isExtended` ment dans Brave). Ouvre
+  `vue.html` sur l'autre écran (autorisation « gestion des fenêtres » ; sinon fenêtre à déplacer,
+  1280 x 720 sous Firefox) ; vues par postMessage (`init`, `vue`), encart « Ramener la vue ici »,
+  « Plein écran ». Fermer la fenêtre ramène la vue.
 - Python en lecture seule. Mémoire : `manut-notes-2`, `manut-niveau`, `manut-prog-<n>`.
 
-- **Page d'explications (bouton « Aide »)** (texte seul, sans score ; demande de l'enseignant) :
-  `#intro` dans `manutention.html`, ouvert à la première visite (`manut-intro-vue`) puis par le
-  bouton « Aide ». Le tenir à jour quand une règle de l'atelier change.
+## Bras sur rail (niveaux 1 à 12, `manutention-moteur.js`, `manutention-3d.js`)
 
-- **Second écran** (demande de l'enseignant, 27/11/2026) : bouton « Second écran » (icône de deux moniteurs, demande de l'enseignant) en haut à gauche de
-  la scène 3D, affiché **sauf** si `getScreenDetails()` (autorisation accordée) ne voit qu'un écran :
-  `screen.isExtended` répond `false` à tort (Brave, constaté le 27/11/2026 ; même souci dans qcm_picker). Il ouvre
-  `vue.html`, placée sur l'autre écran par `getScreenDetails()` (autorisation « gestion des fenêtres »
-  demandée au premier clic ; refusée : fenêtre à déplacer à la main). L'atelier envoie la géométrie
-  (`init`) puis chaque vue (`vue`) par postMessage et ne dessine plus la 3D ; un encart « Ramener la vue
-  ici » remplace la scène. Fermer la fenêtre ramène la vue. Bouton « Plein écran » dans la fenêtre.
-  Sans l'API (Firefox), fenêtre 1280 x 720 à glisser sur l'autre écran.
+- Postes : entrée `E` (file), piles `1` à `3` (4 caisses), sortie `S` (6, ordre de livraison, on
+  n'y reprend rien). Sur chaque tapis, 2 caisses visibles, les autres sous le capot.
+- Blocs `manut_*` : aller, saisir, poser, repeter, tantque (« tant qu'il y a une caisse ici »),
+  sicaisse (« s'il y a une caisse ici … sinon », proposé partout où `tantque` l'est : sans lui, les
+  élèves prenaient la boucle pour une condition), si (couleur).
+- Optima 4, 12, 20, **14**, 6, 6, 8, 6, 6, 10, 12, 20. Niveau 4 : solution en 12, objectif assoupli de
+  2 (champ `marge`, jugé trop dur à l'essai le 27/11/2026). Niveau 10 = tri à trois couleurs (`si`
+  imbriqués). Départs aléatoires aux niveaux 6, 7 et 9 à 12. Pince : 5 positions de départ.
 
-## Export PDF et espace prof (27/11/2026, demande de l'enseignant)
+## Centre de tri (niveaux 13 à 18, `tri-moteur.js`, `tri.js`, `tri-3d.js`)
 
-- Barre des deux ateliers : logo Python (menu du code), bouton **PDF**, bouton **Prof** (créés par
-  `Atelier.exports`, dans `#outils-export`).
-- **PDF de l'élève** : image de ses blocs (thème clair, police Luciole intégrée), atelier, numéro et nom
-  du niveau, consigne, barème, nombre de blocs, adresse du jeu (lien cliquable), date.
-- **Espace prof** : mot de passe, puis cases à cocher (un, plusieurs ou tous les niveaux, par groupe) ;
-  une page par solution (programme modèle `prog` converti en blocs : `versBlocs` dans `tortue.js` et
-  `manutention.js`, une règle par machine). Création libre : « Pas de solution ».
+- Entrée (file) -> plateau 1 (droit, A, attente) -> plateau 2 (droit, B) -> C. Attente = pile de 4
+  sans issue ; sorties de 6. Rien n'avance sans instruction.
+- **Alignement obligatoire** : une caisse ne monte que sur un plateau aligné avec son tapis
+  (entrer -> plateau 1 « droit » ; rappeler -> plateau 1 « attente » ; 1 -> 2 : plateau 2 « droit »).
+- Initialisation : 6 combinaisons d'orientations (`POSITIONS` « d1,d2 »). Optima 5, 9, 11, 12, 12, 20 ;
+  départs aléatoires partout. Une seule attente inverse un ordre sans pouvoir le rétablir : ne pas
+  créer de niveau qui l'exige.
+
+## Bras pivotant et pivot sur rail (niveaux 19 à 27, `pivot-moteur.js`, `pivot.js`, `pivot-3d.js`)
+
+- Design : `docs/superpowers/specs/2026-11-27-bras-pivotant-design.md`. `pivot-moteur.js` fabrique deux
+  machines (`fabriquer`) : `Pivot` (sur place) et `Pivot.Rail` ; un « plan » associe « cran,orientation »
+  au poste atteint. `pivot-3d.js` construit les deux scènes (toiles `c-pivot`, `c-rail`).
+- Rotation par **quart de tour** ; pince et caisse restent alignées avec les tapis. « Il y a une caisse
+  ici » regarde du côté visé, sorties comprises : dans une boucle, revenir face à l'entrée.
+- Sur place : entrée ouest, sorties N, E, S (6). 4 départs ; bloc « répéter jusqu'à être face à
+  l'ouest ». Pas de capot au tapis sud (il masquerait le bras). Optima 6, 7, 10, 12, 19 (minimum prouvé
+  aux 19 et 20 ; 23 : meilleure solution connue).
+- Sur rail : 3 crans ; entrée à l'ouest du cran 1 ; A, B, C au nord ; D à l'est du cran 3 ; attente (4,
+  on y reprend) au sud du cran 2 ; ailleurs, saisir ou poser est une erreur. 12 départs ; blocs
+  `pivot_glisser`, `pivot_jusquarail` (« face à l'ouest » / « au bout ouest du rail »). La pince se
+  relève au-dessus de la pile d'attente (`levee`). Optima 9, 13, 15, 24 (recherche bornée, partielle).
+  Caméra limitée par la hauteur (`max(29.5, 56 / aspect)`) : gagner de la hauteur agrandit la scène.
+- Niveaux 19 à 27 : pas encore validés par l'enseignant (au 27/11/2026).
+
+## Rendu 3D : règles et performances (27/11/2026)
+
+- Les trois rendus **recopient matières et caisses** : reporter toute retouche dans les trois fichiers.
+- Une scène n'est créée qu'à la première ouverture d'un niveau de sa machine (`moteur(nom)`).
+- `Commun3D.fusionner(racine, mobiles)` fusionne les pièces fixes (une par matière) en fin de `creer`,
+  et chaque caisse. **Toute nouvelle pièce qui bouge doit être ajoutée à `mobiles`** (sinon elle est
+  figée dans le décor), ses sous-groupes mobiles aussi. Pièces plates au sol : sans ombre portée.
+- Animation plafonnée à 60 images/s (30 en mode léger). Mesuré : le coût venait des appels de dessin
+  (~800 par image) et des 4 scènes créées au chargement, pas des ombres ni de l'anticrénelage.
+- **Mode léger** : rendu sans carte graphique détecté (SwiftShader, llvmpipe…), `?leger` ou
+  `localStorage["cody-3d"] = "leger"` ; `?complet` l'interdit ; bascule automatique (`alleger`, une
+  fois) sous ~22 images/s. Ombres PCF 1024, 30 images/s ; résolution, anticrénelage et filtrage gardés.
+  **Ne pas descendre sous la résolution de l'écran** : à ×0,7, numéros des caisses illisibles.
+- **Avertissement** `#alerte-3d` si le navigateur dessine sans carte graphique (`Commun3D.sansCarte`) :
+  où activer l'accélération matérielle (cas réel : option coupée dans Chrome). « Fermer » : pour l'onglet.
+  La console dit pourquoi le mode léger s'active.
+
+## Export PDF et espace prof (27/11/2026)
+
+- **PDF de l'élève** (bouton « PDF ») : image de ses blocs (thème clair, Luciole intégrée), atelier,
+  numéro et nom du niveau, consigne, barème, nombre de blocs, adresse du jeu (lien), date.
+- **Espace prof** (bouton « Prof ») : mot de passe, puis niveaux à cocher par groupe ; une page par
+  solution (`prog` converti en blocs par `versBlocs`, dans `tortue.js` et `manutention.js`, une règle
+  par machine). Création libre : « Pas de solution ». Accès retenu pour l'onglet (« cody-prof »).
 - **Mot de passe** : seule son empreinte SHA-256 est dans le code (`EMPREINTE_PROF`, `atelier.js`) ;
-  **ne jamais l'écrire en clair** (dépôt public). Pour le changer : calculer l'empreinte du nouveau
-  mot de passe et remplacer la constante. C'est un **rideau**, pas un verrou : les solutions restent
-  lisibles dans le JavaScript envoyé au navigateur (voir « Intégration prévue dans PlayTP »).
-  Accès retenu pour l'onglet (`sessionStorage` « cody-prof »).
+  **ne jamais l'écrire en clair**. Pour le changer, remplacer l'empreinte. C'est un rideau, pas un verrou.
 - Rendu : `Atelier.imageBlocs` charge l'état dans un espace Blockly caché (`.export-blocs`), copie le
-  calque des blocs dans un SVG autonome (styles de la page + `defs`), puis le dessine sur une toile.
-  `export-pdf.js` compose des pages A4 à 150 ppp et écrit un PDF minimal (image compressée par
-  `CompressionStream`, sans perte). CSP : `img-src data:` suffit.
-
-## Rendu 3D : performances (27/11/2026)
-
-- Mesures (niveau 26, bras en mouvement) : le coût venait du **nombre d'appels de dessin** (~800 par
-  image, ombres comprises) et des **4 scènes créées au chargement**, bien plus que des ombres ou de
-  l'anticrénelage. Scripts de mesure : non versionnés (CDP sur Brave, carte graphique et SwiftShader).
-- `manutention.js` crée la scène 3D d'une machine **à la première ouverture d'un de ses niveaux**
-  (`moteur(nom)`), comme `vue-ecran.js` le faisait déjà.
-- `Commun3D.fusionner(racine, mobiles)` : à la fin de chaque `creer`, les pièces fixes sont fusionnées
-  (une par matière et réglage d'ombre) ; chaque caisse aussi. **Toute nouvelle pièce qui bouge doit être
-  ajoutée à la liste `mobiles`** (sinon elle reste figée dans le décor) ; ses sous-groupes mobiles
-  aussi. Les pièces plates au sol ne projettent plus d'ombre. Pièces à plusieurs matières non fusionnées.
-- Animation plafonnée à **60 images/s** (30 en mode léger), `Commun3D.intervalle()`.
-- **Mode léger** : rendu logiciel détecté (SwiftShader, llvmpipe…), `?leger` dans l'adresse, ou
-  `localStorage["cody-3d"] = "leger"` ; `?complet` l'interdit. Résolution ×1 (au plus celle de l'écran),
-  ombres PCF 1024, anticrénelage gardé (le couper ne gagnait rien). **Ne pas descendre sous ×1** : à ×0,7, chiffres et noms des caisses
-  illisibles (retour d'un élève, 27/11/2026).
-- **Avertissement** (`#alerte-3d`, demande de l'enseignant) : si le navigateur dessine sans carte graphique
-  (`Commun3D.sansCarte`), un bandeau en bas de la scène dit où activer l'accélération matérielle (cas
-  réel : option coupée dans Chrome sur un portable d'élève). « Fermer » le masque pour la session. Bascule automatique (`alleger`, une fois) si l'animation tombe sous
-  ~22 images/s. Gains mesurés : voir le message du commit.
-
-## Centre de tri (niveaux 13 à 18, groupe « Convoyeurs », même page)
-
-- Barre : bouton « Aide » puis un **menu déroulant par groupe** (Piles, Tapis, Convoyeurs ; demande de
-  l'enseignant) avec les étoiles gagnées. Le traçage garde ses boutons en rangée (pas de `groupe`).
-- Fichiers : `js/tri-moteur.js` (règles, niveaux, vérification ; Node), `js/tri.js` (blocs `tri_*`,
-  géométrie, 2D, objectif, textes), `js/tri-3d.js` (3D). `tri-3d.js` **recopie les matières et les
-  caisses** de `manutention-3d.js` : reporter toute retouche dans les deux.
-- `manutention.js` est l'interface commune : `kit` vaut `KitBras` ou `window.KitTri` (même
-  interface : moteur, compiler, etatDepart, fixe, image, dessin2D, objectif, releve, textes).
-- Plan : entrée (file) -> plateau 1 (droit, A, attente) -> plateau 2 (droit, B) -> C. Attente =
-  pile de 4 sans issue ; sorties de 6. Caisse par caisse : rien n'avance sans instruction.
-- **Alignement obligatoire** (relevé par l'enseignant) : une caisse ne monte que sur un plateau
-  aligné avec le tapis d'où elle vient : entrer -> plateau 1 « droit » ; rappeler -> plateau 1
-  « attente » ; plateau 1 -> 2 : plateau 2 « droit ».
-- Initialisation : orientations de départ inconnues (6 combinaisons, `POSITIONS` « d1,d2 »).
-- Optima 5, 9, 11, 12, 12, 20. Départs aléatoires à tous les niveaux + cas fixes.
-- Avec une seule attente on inverse un ordre sans pouvoir le rétablir : ne pas créer de niveau
-  qui l'exige.
-
-## Bras pivotant (niveaux 19 à 23, groupe « Pivot »)
-
-- Design validé le 27/11/2026 : `docs/superpowers/specs/2026-11-27-bras-pivotant-design.md` ;
-  images fixes `docs/essais/bras-pivotant.html` et `bras-sur-rail.html`.
-- Fichiers : `js/pivot-moteur.js` (règles, niveaux, vérification ; Node), `js/pivot.js` (blocs
-  `pivot_*`, géométrie, 2D, objectif, textes : `window.KitPivot`), `js/pivot-3d.js`. `pivot-3d.js`
-  **recopie les matières et les caisses** de `manutention-3d.js` : reporter toute retouche dans les
-  trois fichiers 3D.
-- Entrée à l'ouest (file), sorties N, E, S (6 caisses, on n'y reprend rien). Rotation par
-  **quart de tour** (choix de l'enseignant). La pince et la caisse restent alignées avec les tapis.
-- Initialisation : orientation inconnue (4 cas). Bloc « répéter jusqu'à être face à l'ouest ».
-- « Il y a une caisse ici » regarde du côté visé, sorties comprises : dans une boucle, le bras doit
-  être revenu face à l'entrée en fin de tour.
-- Optima 6, 7, 10, 12, 19. Recherche exhaustive : minimum prouvé aux niveaux 19 et 20 ; aux 21 et
-  22, rien de plus court jusqu'à 9 blocs pour la forme « jusqu'à + tant que » ; 23 : meilleure
-  solution connue.
-- Capot absent au tapis sud (il masquerait le bras) : une seule caisse visible au-delà de la place.
-- **Pas encore testé par l'enseignant.**
-
-## Pivot sur rail (niveaux 24 à 27, groupe « Pivot + rail »)
-
-- Même design. `pivot-moteur.js` fabrique **deux machines** (`fabriquer`) : `Pivot` (sur place) et
-  `Pivot.Rail` / `window.PivotRail`. Un « plan » associe « cran,orientation » au poste atteint.
-  `pivot.js` fait de même pour l'interface (`KitPivot`, `KitRail`, blocs `pivot_*` communs, plus
-  `pivot_glisser` et `pivot_jusquarail`) ; `pivot-3d.js` construit les deux scènes d'après la
-  géométrie du kit (toiles `c-pivot` et `c-rail`).
-- 3 crans ; entrée à l'ouest du cran 1 ; A, B, C au nord ; D à l'est du cran 3 ; pile d'attente (4,
-  on y reprend) au sud du cran 2. Rien ailleurs : saisir ou poser y est une erreur.
-- Initialisation : 12 départs. « répéter jusqu'à être [face à l'ouest · au bout ouest du rail] ».
-- La pince se relève au-dessus de la pile d'attente selon sa hauteur (`disposer`, `levee`).
-- Optima 9, 13, 15, **24** (la fiche ne fixait pas de nombre ; solutions testées). Recherche bornée,
-  partielle : rien de plus court au niveau 24 jusqu'à 4 blocs, ni aux niveaux 25 et 26 pour la forme
-  « initialisation + tant que » jusqu'à un corps de 7 et 6 blocs ; 27 : meilleure solution connue.
-- Déployé le 27/11/2026. **Pas encore testé par l'enseignant.**
-
-## Pistes
-
-- Niveau 23 : l'enseignant a demandé pourquoi il est plus dur que le 22 (aucune information sur la
-  caisse : la place dans le programme sert de mémoire). Proposé : réduire à une alternance nord / est
-  ou le rendre facultatif ; pas de réponse à ce jour.
-- Idée antérieure, non conçue : bras et tapis orientables.
-
-## Blocs (les deux ateliers, `js/atelier.js`)
-
-- **Aucun son** (demande de l'enseignant) : `sounds: false` à l'injection de Blockly et fichiers
-  `media/*.mp3` retirés. Ne pas les remettre lors d'une mise à jour de Blockly.
-- Rendu `cody` = thrasos + **prise femelle au fond des boucles et conditions** (surcharge de
-  `drawStatementInput_`, Blockly 13.5 : à revérifier à chaque mise à jour de Blockly).
-- Contour clair sur chaque bloc ; couleurs distinctes pour répéter, tant que et si ; la partie
-  « sinon » est plus foncée (copie découpée du contour, `teinterSinon`).
-- Bloc de départ : « DÉPART ».
-- Au chargement d'un programme, `A.cadrer` place le programme (DÉPART en tête) à 16 px du coin haut
-  gauche et y ramène la vue ; `MetriquesCody` (surcharge de `getPaddedContent_`, Blockly 13.5 : à
-  revérifier à chaque mise à jour) supprime la marge au-dessus et à gauche : les ascenseurs ne vont
-  que vers la droite et le bas (demande de l'enseignant).
-
-## Place à l'écran (1920 x 1080)
-
-- 27/11/2026, la scène du niveau 26 était trop petite (remarque de l'enseignant) : barre du haut
-  ramenée à 52 px, **programme Python dans un menu « Python » de la barre** (les deux ateliers ;
-  `.menu-python`, même fermeture que les menus de niveaux), marges réduites. Manutention seulement :
-  colonnes 5/7 (`.jeu-scene`) et blocs à l'échelle 1/1,2, soit un cran de « zoom moins » (choix de l'enseignant ; 1,1 au traçage).
-  **Indice** : bouton « ? » ambre à droite du titre du niveau (`A.boutonIndice`), texte dans une
-  fenêtre au milieu de l'écran (les deux ateliers ; remplace « Un indice ? »). Manutention : « Objectif »
-  et le barème sur une seule ligne directement sous la consigne (`.objectif-pied`), vignette seule à droite.
-  La caméra du rail est limitée par la hauteur (`max(29.5, 56 / aspect)`) : gagner de la hauteur
-  agrandit la scène plus que gagner de la largeur.
-
-## Boutons sous la scène
-
-- « Exécuter » ; « **Configuration** » (manutention : tire un nouveau départ et remet la scène ;
-  nom choisi par l'enseignant. Le traçage garde « Réinitialiser ») ; « **Recommencer le niveau** »
-  (les deux ateliers : efface le programme après confirmation, garde les étoiles).
+  calque des blocs dans un SVG autonome (styles de la page + `defs`) puis sur une toile ; `export-pdf.js`
+  compose des pages A4 à 150 ppp et écrit le PDF (image compressée sans perte par `CompressionStream`).
 
 ## Tests
 
-- `node --test tests/*.test.js` : 227 tests (bras 103, tri 44, pivot 43, rail 37).
-  `tests/navigateur-pivot.js` et `navigateur-rail.js` : solutions 19 à 23 et 24 à 27 dans la page.
-  `tests/navigateur-tri.js` : solutions 13 à 18 dans la page.
-- `tests/navigateur-tracage.js` et `tests/navigateur-manutention.js` : à évaluer dans la page
-  (console), ils construisent les solutions en blocs. Ils écrasent les programmes sauvegardés
-  du navigateur utilisé.
-- 26/11/2026, après habillage : traçage aux mêmes résultats qu'avant (niveaux 1 à 7 optimaux,
-  carré à 3 côtés refusé) ; manutention 7/7 conformes ; aucune erreur console ; contrôle visuel
-  en 1920 de large, clair et sombre. **Pas encore testé par l'enseignant.**
+- `node --test tests/*.test.js` : 227 tests (bras 103, tri 44, pivot 43, rail 37) ; chaque solution
+  modèle doit réussir avec `opt` blocs (moins `marge` s'il y en a).
+- `tests/navigateur-*.js` (traçage, manutention, tri, pivot, rail) : à évaluer dans la page (console) ;
+  ils construisent les solutions en blocs et relèvent les verdicts. **Ils écrasent les programmes
+  sauvegardés** du navigateur utilisé.
 
-## Intégration prévue dans PlayTP (à faire, rien n'est commencé)
+## Pistes
 
-Suivre le CLAUDE.md de PlayTP (« Nouveau bloc `:::` du format ») :
-`app/tp_format/blocks.py` (dataclass `Tortue`) → `parser.py` (`_BLOCS`,
-`_valider_ouverture`, `_fermer`) → `templates/blocs/tortue.html` (+ `blocs/papier/`) →
-styles dans `base.css` **et** `pdf.css` → `docs/CONVERSION_TP.md`. Déployer l'appli avant de
-publier un TP qui l'utilise.
+- Niveau 23 plus dur que le 22 (aucune information sur la caisse : la place dans le programme sert de
+  mémoire) : proposé de le réduire à une alternance nord / est ou de le rendre facultatif ; sans réponse.
+- Retours des élèves sur le style et la difficulté des niveaux.
+- Blocs à ajouter : variables / compteur de boucle, « aller à x y », formes toutes faites ; mode texte
+  (Python) pour les plus avancés ; bras et tapis orientables (idée non conçue).
+- Notation : score seulement, ou lien avec une compétence (C08 Coder) ?
 
-Points d'attention :
-- **CSP stricte** (`script-src 'self'`, `style-src 'self'`) : servir Blockly depuis
-  `app/static/js/vendor/` ; Blockly injecte un `<style>` par défaut → `Blockly.inject(…, {css:
-  false})` et fournir sa CSS dans un fichier ; garder l'interpréteur (jamais d'eval).
-- **Anti-triche** : seul le **dessin modèle** est envoyé à l'élève (c'est la consigne) ; le
-  programme modèle sert à le tracer. Envoyer de préférence les segments déjà calculés, pas le
-  programme, pour ne pas donner la solution dans le JS.
-- **Réponse de l'élève** : un nouveau type de champ (programme sérialisé en JSON, réussite,
-  nb de blocs), branché sur l'autosave ; progression du sommaire (orange / vert).
-- **PDF** : image du dessin final (comme `:::capture`) + éventuellement le code Python.
-- **Accessibilité** : Luciole, cibles ≥ 2,75 rem, couleurs dans les trois thèmes de
-  `theme.css` + test de contraste.
-- **Docker** : rien de spécial (fichiers statiques), à voir au moment de l'intégration.
+## Intégration prévue dans PlayTP (rien n'est commencé)
 
-Exemple de syntaxe envisagée dans un `tp.md` (à arrêter) :
+Suivre le CLAUDE.md de PlayTP (« Nouveau bloc `:::` du format ») : `app/tp_format/blocks.py` (dataclass
+`Tortue`) → `parser.py` (`_BLOCS`, `_valider_ouverture`, `_fermer`) → `templates/blocs/tortue.html`
+(+ `blocs/papier/`) → styles dans `base.css` **et** `pdf.css` → `docs/CONVERSION_TP.md`. Déployer
+l'appli avant de publier un TP qui l'utilise.
+
+- **CSP stricte** (`style-src 'self'`) : Blockly depuis `app/static/js/vendor/`, `Blockly.inject(…,
+  {css: false})` avec sa CSS dans un fichier ; garder l'interpréteur (jamais d'eval).
+- **Anti-triche** : n'envoyer que le dessin modèle (segments calculés) ou les départs et objectifs,
+  **jamais `prog`** ; c'est aussi ce qui rendrait l'espace prof vraiment protégé.
+- **Réponse de l'élève** : nouveau type de champ (programme en JSON, réussite, nb de blocs), autosave,
+  progression du sommaire (orange / vert). **PDF** : image du dessin final (comme `:::capture`).
+- **Accessibilité** : Luciole, cibles ≥ 2,75 rem, couleurs dans les trois thèmes de `theme.css`.
+
+Syntaxe envisagée (à arrêter) :
 
 ````markdown
 :::tortue id=q3 depart="-50 -50 90" blocs="avancer|tourner|repeter" optimal=3
 Fais tracer à la tortue un carré de 100 pas de côté.
 :::
 ````
-(le modèle serait décrit dans un bloc lié, ou en mini-langage `repeter 4 [avancer 100 droite 90]`).
-
-## Pistes ouvertes
-
-- Intégration PlayTP de la manutention : n'envoyer que départs et objectifs, jamais `prog`
-  (dans la maquette, `manutention-moteur.js` contient les solutions).
-- Retours des élèves sur le style et la difficulté des niveaux.
-- Blocs à ajouter : variables / compteur de boucle, « aller à x y », formes toutes faites.
-- Mode texte (Python) pour les plus avancés.
-- Notation : score seulement, ou lien avec une compétence (C08 Coder) ?
