@@ -29,7 +29,7 @@
     static fromJson() { return new ChampVariable(); }
   }
   B.fieldRegistry.register("field_variable_cody", ChampVariable);
-  const variable = { type: "field_variable_cody", name: "V" };
+  const variable = { type: "field_variable_cody", name: "V" }, autre = { type: "field_variable_cody", name: "W" };
   const valeur = (v, min = 0) => ({ type: "field_number", name: "N", value: v, min, max: 100, precision: 1 });
   const comparaison = { type: "field_dropdown", name: "OP", options: [[">", "gt"], ["<", "lt"], ["=", "eq"], ["≠", "ne"]] };
   B.defineBlocksWithJsonArray([
@@ -44,6 +44,15 @@
       tooltip: "Répète tant que la comparaison est vraie (elle est testée avant chaque tour)." },
     { type: "manut_sivar", message0: "si %1 %2 %3 %4 %5",
       args0: [variable, comparaison, valeur(0), { type: "input_dummy" }, corps("FAIRE")],
+      message1: "sinon %1", args1: [corps("SINON")], ...lien, style: "condition" },
+    { type: "manut_repetervar", message0: "répéter %1 fois %2 %3",
+      args0: [variable, { type: "input_dummy" }, corps("FAIRE")], ...lien, style: "boucle",
+      tooltip: "Répète autant de fois que la valeur de la variable (lue au début de la boucle)." },
+    { type: "manut_tantquevar2", message0: "répéter tant que %1 %2 %3 %4 %5",
+      args0: [variable, comparaison, autre, { type: "input_dummy" }, corps("FAIRE")], ...lien, style: "tantque",
+      tooltip: "Répète tant que la comparaison des deux variables est vraie." },
+    { type: "manut_sivar2", message0: "si %1 %2 %3 %4 %5",
+      args0: [variable, comparaison, autre, { type: "input_dummy" }, corps("FAIRE")],
       message1: "sinon %1", args1: [corps("SINON")], ...lien, style: "condition" },
   ]);
   B.defineBlocksWithJsonArray([
@@ -67,9 +76,11 @@
       message1: "sinon %1", args1: [corps("SINON")], ...lien, style: "condition" },
   ]);
 
-  const boiteOutils = (noms, prefixe = "manut_") => ({
+  /* Comparaison de deux variables : la boîte propose d'emblée les deux premières du niveau */
+  const boiteOutils = (noms, prefixe = "manut_", variables = []) => ({
     kind: "flyoutToolbox",
-    contents: noms.map((n) => ({ kind: "block", type: prefixe + n })),
+    contents: noms.map((n) => ({ kind: "block", type: prefixe + n,
+      ...(n.endsWith("var2") && variables.length > 1 ? { fields: { V: variables[0], W: variables[1] } } : {}) })),
   });
   const ws = A.injecter("blockly", boiteOutils(NIVEAUX[0].blocs), 1 / 1.2); /* un cran de « zoom moins » : choix de l'enseignant */
   const indice = A.boutonIndice($("indice"));
@@ -123,6 +134,12 @@
       else if (t === "tantquevar") { c.v = b.getFieldValue("V"); c.op = b.getFieldValue("OP"); c.n = +b.getFieldValue("N"); c.corps = dedans("FAIRE"); }
       else if (t === "sivar") {
         c.v = b.getFieldValue("V"); c.op = b.getFieldValue("OP"); c.n = +b.getFieldValue("N");
+        c.alors = dedans("FAIRE"); c.sinon = dedans("SINON");
+      }
+      else if (t === "repetervar") { c.v = b.getFieldValue("V"); c.corps = dedans("FAIRE"); }
+      else if (t === "tantquevar2") { c.v = b.getFieldValue("V"); c.op = b.getFieldValue("OP"); c.w = b.getFieldValue("W"); c.corps = dedans("FAIRE"); }
+      else if (t === "sivar2") {
+        c.v = b.getFieldValue("V"); c.op = b.getFieldValue("OP"); c.w = b.getFieldValue("W");
         c.alors = dedans("FAIRE"); c.sinon = dedans("SINON");
       }
       else if (t === "repeter") { c.n = +b.getFieldValue("N"); c.corps = dedans("FAIRE"); }
@@ -258,7 +275,8 @@
     }
     /* Variables : données de l'exercice, valeurs attendues à la fin */
     const liste = (o) => Object.entries(o).map(([v, n]) => `${v} = ${n}`).join(" · ");
-    if (niv.donnees && cas.vars) ecrire(g, `Départ : ${liste(cas.vars)}`, 415, 36, 19, t.repere);
+    const donnees = niv.donnees && cas.vars ? Object.fromEntries(niv.donnees.map((v) => [v, cas.vars[v]])) : null;
+    if (donnees) ecrire(g, `Départ : ${liste(donnees)}`, 415, 36, 19, t.repere);
     if (cas.varsFin) ecrire(g, `Fin : ${liste(cas.varsFin)}`, 415, niv.donnees ? 68 : 36, 19, t.repere);
   }
 
@@ -529,7 +547,7 @@
     indice(niv.indice);
     chargement = true;
     ws.clear();
-    ws.updateToolbox(boiteOutils(niv.blocs, kit.prefixe));
+    ws.updateToolbox(boiteOutils(niv.blocs, kit.prefixe, niv.variables));
     const sauve = memo.lire("manut-prog-" + i, null);
     try { if (sauve) B.serialization.workspaces.load(sauve, ws); } catch { ws.clear(); }
     if (!debut()) B.serialization.blocks.append({ type: "manut_depart", x: 30, y: 30, deletable: false }, ws);
@@ -702,7 +720,8 @@
     if (c.t === "repeter") b.fields.N = c.n;
     if (m === "bras") {
       if (c.t === "aller") b.fields.P = c.p;
-      if (c.v !== undefined) { b.fields.V = c.v; b.fields.N = c.n; }
+      if (c.v !== undefined) { b.fields.V = c.v; if (c.n !== undefined) b.fields.N = c.n; }
+      if (c.w !== undefined) b.fields.W = c.w;
       if (c.op) b.fields.OP = c.op;
       if (c.t === "si") b.fields.C = c.c;
     } else if (m === "tri") {

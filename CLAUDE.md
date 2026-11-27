@@ -109,8 +109,8 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 
 ## Atelier Manutention : commun (`js/manutention.js`)
 
-- 34 niveaux en 4 machines + variables : bras (1 à 12, groupes « Piles » et « Tapis »), centre de tri (13 à 18,
-  « Convoyeurs »), bras pivotant (19 à 23, « Pivot »), pivot sur rail (24 à 27, « Pivot + rail »), variables (28 à 34, bras sur rail).
+- 37 niveaux en 4 machines + variables : bras (1 à 12, groupes « Piles » et « Tapis »), centre de tri (13 à 18,
+  « Convoyeurs »), bras pivotant (19 à 23, « Pivot »), pivot sur rail (24 à 27, « Pivot + rail »), variables (28 à 37, bras sur rail).
   `kit` vaut `KitBras`, `KitTri`, `KitPivot` ou `KitRail` (même interface : moteur, compiler,
   etatDepart, fixe, image, dessin2D, objectif, releve, textes) ; `machine(niv)` d'après le groupe.
 - Caisses : un **numéro** et le nom de leur couleur ; numéros = ordre (de bas en haut ou d'arrivée),
@@ -172,21 +172,26 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   Caméra limitée par la hauteur (`max(29.5, 56 / aspect)`) : gagner de la hauteur agrandit la scène.
 - Niveaux 19 à 27 : pas encore validés par l'enseignant (au 27/11/2026).
 
-## Variables (niveaux 28 à 34, groupe « Variables », LVL6 ; 27/11/2026, demande de l'enseignant)
+## Variables (niveaux 28 à 37, groupe « Variables », LVL6 ; 27/11/2026, demande de l'enseignant)
 
 - Même bras sur rail (`machine` = « bras »), niveaux dans `M.VARIABLES` (`manutention-moteur.js`),
   ajoutés en fin de liste par `manutention.js`. Tests : `tests/variables.test.js`.
 - Une ou plusieurs variables **nommées** par niveau (`variables: ["rouges", "bleues"]`). Blocs (style
   `variable`, bleu) : `manut_mettre`, `manut_ajouter`, `manut_retirer` (de N), `manut_tantquevar` et
-  `manut_sivar` (comparaison `>` `<` `=` `≠` à un nombre). Liste des noms : champ `field_variable_cody`,
+  `manut_sivar` (comparaison `>` `<` `=` `≠` à un nombre), `manut_tantquevar2` et `manut_sivar2` (à une
+  autre variable, champ `W` ; la boîte les propose avec les deux premières variables du niveau),
+  `manut_repetervar` (« répéter [variable] fois », valeur lue au début de la boucle). Liste des noms : champ `field_variable_cody`,
   limité aux variables du niveau ouvert (toutes dans un espace caché, pour le PDF des solutions).
 - Chaque cas porte `vars` (valeurs au lancement) et, si contrôlées, `varsFin` (motif d'échec
-  « variables » : « compteur vaut 9 au lieu de 5 »). Sauf `donnees: true` (niveaux 29 et 31 : la valeur
-  est l'énoncé, affichée dans l'objectif « Départ : … »), la valeur de départ est quelconque (1 à 9) :
+  « variables » : « compteur vaut 9 au lieu de 5 »). Sauf celles listées dans `donnees` (niveaux 29, 31,
+  35, 36 : la valeur est l'énoncé, affichée dans l'objectif « Départ : … »), la valeur de départ est quelconque (1 à 9) :
   il faut l'initialiser. Valeurs dans le relevé, en titre de l'écran 3D (`vue.variables`) et en haut du 2D.
 - Niveaux : compter les caisses (8), la commande (6), deux piles (10), piles sur mesure (2 variables
   données, 12), rouges et bleues (2 variables, 11), contrôle qualité (une sur trois, 11), autant de
-  vertes (14 ; l'ordre de la sortie interdit d'alterner sans variable). Optima = solutions écrites,
+  vertes (14 ; l'ordre de la sortie interdit d'alterner sans variable), commande en double (10 ; « répéter nombre fois », demande de l'enseignant), puis **deux variables comparées
+  entre elles** (demande de l'enseignant : ne pas laisser croire qu'on ne compare qu'à un nombre) : bon de
+  commande (7 ; `commande` ne doit pas changer, ce qui interdit de la décompter), couleur majoritaire
+  (22 ; `retirer` et `sivar` absents de la boîte, sinon une seule variable « écart » suffisait). Optima = solutions écrites,
   non prouvés minimaux. Départs aléatoires partout. **Pas encore testé par l'enseignant.**
 
 ## Rendu 3D : règles et performances (27/11/2026)
@@ -224,7 +229,7 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 
 ## Tests
 
-- `node --test tests/*.test.js` : 268 tests (bras 103, tri 44, pivot 43, rail 37, variables 41) ; chaque solution
+- `node --test tests/*.test.js` : 288 tests (bras 103, tri 44, pivot 43, rail 37, variables 61) ; chaque solution
   modèle doit réussir avec `opt` blocs (moins `marge` s'il y en a).
 - `tests/navigateur-*.js` (traçage, manutention, tri, pivot, rail) : à évaluer dans la page (console) ;
   ils construisent les solutions en blocs et relèvent les verdicts. **Ils écrasent les programmes

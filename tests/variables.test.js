@@ -9,9 +9,14 @@ const poser = () => ({ t: "poser" });
 /* Générateur pseudo-aléatoire reproductible */
 const graine = (n) => () => ((n = (n * 16807) % 2147483647) - 1) / 2147483646;
 
-test("groupe « Variables » : 7 niveaux, optima attendus", () => {
-  assert.deepEqual(V.map((n) => n.groupe), Array(7).fill("Variables"));
-  assert.deepEqual(V.map((n) => n.opt), [8, 6, 10, 12, 11, 11, 14]);
+test("groupe « Variables » : 9 niveaux, optima attendus", () => {
+  assert.deepEqual(V.map((n) => n.groupe), Array(10).fill("Variables"));
+  assert.deepEqual(V.map((n) => n.opt), [8, 6, 10, 12, 11, 11, 14, 10, 7, 22]);
+});
+
+test("au moins deux niveaux comparent deux variables", () => {
+  const compare = (l) => l.some((c) => c.t.endsWith("var2") || compare([...(c.corps || []), ...(c.alors || []), ...(c.sinon || [])]));
+  assert.ok(V.filter((n) => compare(n.prog)).length >= 2);
 });
 
 test("au moins un niveau à plusieurs variables", () => {
@@ -37,7 +42,7 @@ V.forEach((niv, i) => {
   test(`${nom} : chaque cas donne une valeur de départ à chaque variable du niveau`, () => {
     for (const cas of niv.configs) assert.deepEqual(Object.keys(cas.vars).sort(), [...niv.variables].sort());
   });
-  if (!niv.donnees) {
+  if (niv.variables.some((v) => !(niv.donnees || []).includes(v))) {
     test(`${nom} : sans « mettre » au début, refusé (la valeur de départ est quelconque)`, () => {
       const sans = niv.prog.filter((c) => c.t !== "mettre" || niv.prog.indexOf(c) > 1);
       assert.ok(sans.length < niv.prog.length);
@@ -84,4 +89,39 @@ test("Python : noms des variables et comparaisons", () => {
   assert.match(py, /if compteur < 4:/);
   assert.match(py, /compteur = compteur \+ 1/);
   assert.match(M.python(V[1].prog), /while compteur > 0:/);
+});
+
+test("comparer deux variables : <, >, =, ≠", () => {
+  const essai = (op, y) => M.executer([{ t: "sivar2", v: "x", op, w: "y", alors: [{ t: "mettre", v: "r", n: 1 }], sinon: [{ t: "mettre", v: "r", n: 0 }] }], {}, "1", { x: 3, y }).etat.vars.r;
+  assert.deepEqual([essai("lt", 4), essai("lt", 3), essai("gt", 2), essai("eq", 3), essai("ne", 3)], [1, 0, 1, 1, 0]);
+  assert.match(M.python([{ t: "tantquevar2", v: "a", op: "lt", w: "b", corps: [] }]), /while a < b:/);
+});
+
+test("niveau 36 : décompter la commande au lieu de compter les livrées est refusé (la commande change)", () => {
+  const niv = V[8];
+  const prog = [{ t: "mettre", v: "livraisons", n: 0 }, { t: "tantquevar", v: "commande", op: "gt", n: 0,
+    corps: [aller("E"), saisir(), aller("S"), poser(), { t: "retirer", v: "commande", n: 1 }, { t: "ajouter", v: "livraisons", n: 1 }] }];
+  const r = M.verifier(niv, prog);
+  assert.equal(r.reussi, false);
+  assert.equal(r.motif, "variables");
+});
+
+test("niveau 37 : jamais d'égalité entre rouges et bleues, 4 au plus de chaque", () => {
+  const alea = graine(3);
+  for (let k = 0; k < 300; k++) {
+    const E = V[9].hasard(alea).depart.E, r = E.filter((x) => x.c === "rouge").length, b = E.length - r;
+    assert.ok(r !== b && r <= 4 && b <= 4);
+  }
+});
+
+test("répéter « variable » fois : la valeur est lue une fois, au début", () => {
+  const prog = [{ t: "repetervar", v: "n", corps: [{ t: "ajouter", v: "k", n: 1 }, { t: "ajouter", v: "n", n: 1 }] }];
+  assert.equal(M.executer(prog, {}, "1", { n: 3, k: 0 }).etat.vars.k, 3);
+  assert.match(M.python(prog), /for i in range\(n\):/);
+});
+
+test("niveau 35 : un nombre fixe de répétitions échoue (nombre change)", () => {
+  const corps = (p) => [aller("E"), saisir(), aller(p), poser()];
+  const prog = [{ t: "repeter", n: 2, corps: corps("S") }, { t: "repeter", n: 2, corps: corps("3") }];
+  assert.equal(M.verifier(V[7], prog).reussi, false);
 });
