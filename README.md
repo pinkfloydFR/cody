@@ -11,7 +11,30 @@ extérieur. La progression est enregistrée dans le navigateur.
   plateaux tournants, puis un bras pivotant, sur place et sur rail. Les départs sont tirés au hasard : le programme doit
   gérer tous les cas.
 
-Chaque programme peut être relu en Python.
+Chaque programme peut être relu en Python (menu « Python » de la barre du haut).
+
+Autres points :
+
+- **3 étoiles** par niveau : moins le programme a de blocs, plus il en gagne ; écran de réussite.
+- **Indice** : bouton « ? » à côté du titre du niveau, le texte s'ouvre au milieu de l'écran.
+- **Second écran** (Chrome, Edge, Brave) : la vue 3D de la manutention s'ouvre dans une fenêtre sur
+  l'autre écran, ce qui laisse toute la place aux blocs.
+- Pensé pour un PC en 1920 × 1080, en thème clair ou sombre, avec la police Luciole.
+
+## Captures
+
+| Traçage | Manutention |
+|---|---|
+| ![Atelier Traçage : blocs à gauche, dessin à droite](docs/captures/tracage.png) | ![Atelier Manutention : bras robot en 3D](docs/captures/manutention.png) |
+| ![Centre de tri à plateaux tournants](docs/captures/centre-de-tri.png) | ![Bras pivotant sur rail](docs/captures/pivot-rail.png) |
+| ![Indice ouvert au milieu de l'écran](docs/captures/indice.png) | ![Écran de réussite avec les étoiles](docs/captures/reussite.png) |
+
+## Inspiration
+
+Cody s'appuie sur [**Blockly**](https://github.com/google/blockly) (Google) pour l'éditeur de blocs,
+et sur l'idée du niveau « Tortue » de [**Blockly Games**](https://github.com/google/blockly-games)
+(Google, Apache 2.0), elle-même héritée de la tortue du langage Logo. Aucun code de Blockly Games
+n'est repris : les niveaux, les blocs, l'interpréteur et les ateliers sont écrits pour ce projet.
 
 ## Lancer avec Docker
 
