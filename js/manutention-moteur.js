@@ -33,7 +33,7 @@
   const retirer = (v, n = 1) => ({ t: "retirer", v, n });
   const tantquevar = (v, op, n, ...corps) => ({ t: "tantquevar", v, op, n, corps });
   const sivar = (v, op, n, alors, sinon) => ({ t: "sivar", v, op, n, alors, sinon });
-  /* Comparer deux variables (niveaux 35 et 36 : une variable ne se compare pas qu'à un nombre) */
+  /* Comparer deux variables (niveaux 36 et 37 : une variable ne se compare pas qu'à un nombre) */
   /* Répéter autant de fois que la valeur d'une variable (lue une fois, au début de la boucle) */
   const repetervar = (v, ...corps) => ({ t: "repetervar", v, corps });
   const tantquevar2 = (v, op, w, ...corps) => ({ t: "tantquevar2", v, op, w, corps });
@@ -178,6 +178,7 @@
   });
 
   /* ---------- Groupe « Variables » (niveaux 28 à 37 de l'atelier) : le même bras, plus des variables ----------
+     Classés par difficulté : lire une variable (28), la modifier (29 à 35), en comparer deux (36, 37).
      Chaque niveau nomme ses variables (« variables ») ; chaque cas donne leurs valeurs au lancement
      (« vars ») et, quand elles sont contrôlées, leurs valeurs attendues à la fin (« varsFin »).
      Une variable qui n'est pas une donnée de l'exercice contient au lancement un nombre quelconque :
@@ -252,6 +253,14 @@
   const QUELCONQUE = "Au lancement, le {compteur} contient un nombre quelconque.";
 
   const VARIABLES = [
+    { titre: "Commande en double", verbe: "LIVRER", variables: ["nombre"], donnees: ["nombre"],
+      texte: "à la sortie autant de caisses que vaut la variable {nombre}, PUIS le MÊME nombre à l'emplacement 3, dans l'ordre d'arrivée. {nombre} vaut de 1 à 3 et change d'un essai à l'autre. L'entrée contient 6 caisses ; les autres y restent.",
+      indice: "Le bloc « répéter … fois » peut aussi recevoir une variable : « répéter {nombre} fois ». Deux boucles suffisent.",
+      blocs: [...BASE, "repeter", "repetervar"],
+      configs: [["JVBRBJ", 2], ["RBJVRB", 1], ["BBRJVR", 3]].map(([m, n]) => double(m, n)),
+      hasard: (alea = Math.random) => double(motifAlea(alea, 6, 6, "RBJV"), entier(alea, 1, 3)),
+      prog: [repetervar("nombre", aller("E"), saisir(), aller("S"), poser()),
+        repetervar("nombre", aller("E"), saisir(), aller("3"), poser())], opt: 10 },
     { titre: "Compter les caisses", verbe: "LIVRER", variables: ["compteur"],
       texte: `toutes les caisses de l'entrée et les COMPTER : à la fin, le {compteur} doit valoir le nombre de caisses livrées. Il en arrive de 1 à 6. ${QUELCONQUE}`,
       indice: "Mets d'abord le {compteur} à 0, puis ajoute 1 à chaque caisse livrée.",
@@ -305,14 +314,6 @@
       hasard: (alea = Math.random) => autant(motifAlea(alea, 1, 3, RBJ), quelconque(alea)),
       prog: [mettre("compteur", 0), aller("E"), tantque(saisir(), aller("S"), poser(), ajouter("compteur"), aller("E")),
         tantquevar("compteur", "gt", 0, aller("1"), saisir(), aller("S"), poser(), retirer("compteur"))], opt: 14 },
-    { titre: "Commande en double", verbe: "LIVRER", variables: ["nombre"], donnees: ["nombre"],
-      texte: "à la sortie autant de caisses que vaut la variable {nombre}, PUIS le MÊME nombre à l'emplacement 3, dans l'ordre d'arrivée. {nombre} vaut de 1 à 3 et change d'un essai à l'autre. L'entrée contient 6 caisses ; les autres y restent.",
-      indice: "Le bloc « répéter … fois » peut aussi recevoir une variable : « répéter {nombre} fois ». Deux boucles suffisent.",
-      blocs: [...BASE, "repeter", "repetervar"],
-      configs: [["JVBRBJ", 2], ["RBJVRB", 1], ["BBRJVR", 3]].map(([m, n]) => double(m, n)),
-      hasard: (alea = Math.random) => double(motifAlea(alea, 6, 6, "RBJV"), entier(alea, 1, 3)),
-      prog: [repetervar("nombre", aller("E"), saisir(), aller("S"), poser()),
-        repetervar("nombre", aller("E"), saisir(), aller("3"), poser())], opt: 10 },
     { titre: "Bon de commande", verbe: "LIVRER", variables: ["commande", "livraisons"], donnees: ["commande"],
       texte: "autant de caisses que la commande en demande, en les COMPTANT dans {livraisons}. La variable {commande} (de 1 à 5) ne doit pas changer : à la fin, {livraisons} doit être égale à {commande}. L'entrée contient 6 caisses ; les autres y restent. Au lancement, {livraisons} contient un nombre quelconque.",
       indice: "Une variable peut se comparer à une autre : répète tant que {livraisons} est plus petite que {commande}.",

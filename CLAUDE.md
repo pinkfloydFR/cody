@@ -130,7 +130,8 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   « Aide ». Contenu : blocs grisés, jaune / rouge pendant l'exécution, tous les cas testés,
   « Configuration » / « Exécuter », initialiser (machine et variables), prendre une caisse, répéter et
   choisir (dont variables : mettre, ajouter, retirer, comparer à un nombre ou à une variable).
-  **La tenir à jour quand une règle change.**
+  **La tenir à jour quand une règle change**, et qu'elle tienne en 1920 x 1080 bouton « Commencer »
+  compris (police 18 px ; sinon un élève peut rester bloqué : remarque de l'enseignant).
 - **Second écran** : bouton (deux moniteurs) en haut à gauche de la scène, masqué seulement si
   `getScreenDetails()` (autorisé) ne voit qu'un écran (`screen.isExtended` ment dans Brave). Ouvre
   `vue.html` sur l'autre écran (autorisation « gestion des fenêtres » ; sinon fenêtre à déplacer,
@@ -189,19 +190,21 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 - Consignes et indices : `{nom}` marque une variable, affichée en `<var class="nom-var">` (italique, gras,
   bleu des blocs variable ; `A.riche`), accolades retirées dans le PDF (demande de l'enseignant).
 - Chaque cas porte `vars` (valeurs au lancement) et, si contrôlées, `varsFin` (motif d'échec
-  « variables » : « compteur vaut 9 au lieu de 5 »). Sauf celles listées dans `donnees` (niveaux 29, 31,
-  35, 36 : la valeur est l'énoncé, affichée dans l'objectif « Départ : … »), la valeur de départ est quelconque (1 à 9) :
-  il faut l'initialiser. Valeurs dans le relevé, en titre de l'écran 3D (`vue.variables`) et en haut du 2D.
-- Niveaux (optimum) : 28 compter les caisses (8) ; 29 la commande (6) ; 30 deux piles (10) ; 31 piles
-  sur mesure (2 variables données, 12) ; 32 rouges et bleues (2 variables, 11) ; 33 contrôle qualité
-  (une sur trois, 11) ; 34 autant de vertes (14 ; l'ordre de la sortie interdit d'alterner sans
-  variable) ; 35 commande en double (10 ; « répéter nombre fois ») ; 36 bon de commande (7 ;
-  `commande` ne doit pas changer, ce qui interdit de la décompter) ; 37 couleur majoritaire (22 ;
+  « variables » : « compteur vaut 9 au lieu de 5 »). Sauf celles listées dans `donnees` (niveaux 28, 30,
+  32, 36 : la valeur est l'énoncé, affichée dans l'objectif « Départ : … »), la valeur de départ est quelconque (1 à 9) :
+  il faut l'initialiser. « Rejouer au maximum » prend aussi les plus grandes valeurs des variables
+  `donnees` (niveau 28 : nombre = 3). Valeurs dans le relevé, en titre de l'écran 3D (`vue.variables`) et en haut du 2D.
+- Niveaux (optimum), **classés par difficulté** (27/11/2026, remarque de l'enseignant : l'ancien 35 était
+  bien plus facile que le 34) : 28 commande en double (10 ; « répéter nombre fois », lire une variable) ;
+  29 compter les caisses (8) ; 30 la commande (6) ; 31 deux piles (10) ; 32 piles sur mesure (2 variables
+  données, 12) ; 33 rouges et bleues (2 variables, 11) ; 34 contrôle qualité (une sur trois, 11) ;
+  35 autant de vertes (14 ; l'ordre de la sortie interdit d'alterner sans variable) ; 36 bon de commande
+  (7 ; `commande` ne doit pas changer, ce qui interdit de la décompter) ; 37 couleur majoritaire (22 ;
   `retirer` et `sivar` absents de la boîte, sinon une seule variable « écart » suffisait).
-  35 à 37 : demandes de l'enseignant (répéter « variable » fois ; comparer deux variables, pour ne pas
-  laisser croire qu'on ne compare qu'à un nombre). Optima = solutions écrites, non prouvés minimaux.
-  Départs aléatoires partout. Testés par l'enseignant le 27/11/2026 : 31 et 34 (consigne du 34 reprise :
-  « PUIS le MÊME nombre ») ; les autres pas encore.
+  Reclassement : `manut-variables-ordre` déplace étoiles, programmes et niveau ouvert (`manutention.js`).
+  Optima = solutions écrites, non prouvés minimaux. Départs aléatoires partout. Testés par l'enseignant
+  le 27/11/2026 : piles sur mesure, autant de vertes (consigne reprise : « PUIS le MÊME nombre »),
+  commande en double.
 
 ## Rendu 3D : règles et performances (27/11/2026)
 

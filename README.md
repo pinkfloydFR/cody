@@ -50,10 +50,10 @@ Autres points :
 | **Centre de tri : rouges à part (convoyeurs)** | **Bras pivotant : la navette** |
 | ![Centre de tri, niveau 14 : plateaux tournants qui envoient les caisses rouges vers la sortie A](docs/captures/centre-de-tri.png) | ![Bras pivotant, niveau 20 : transférer toutes les caisses sur le tapis nord](docs/captures/pivot.png) |
 
-**Variables : rouges et bleues** (niveau 32) — le programme compte chaque couleur dans sa variable ;
+**Variables : rouges et bleues** (niveau 33) — le programme compte chaque couleur dans sa variable ;
 les valeurs s'affichent sur l'écran de la scène et dans le relevé.
 
-![Niveau 32 « Rouges et bleues » : deux variables, rouges et bleues, comptent les caisses livrées ; leurs noms sont en italique bleu dans la consigne](docs/captures/variables.png)
+![Niveau 33 « Rouges et bleues » : deux variables, rouges et bleues, comptent les caisses livrées ; leurs noms sont en italique bleu dans la consigne](docs/captures/variables.png)
 
 ## Inspiration
 

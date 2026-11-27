@@ -308,11 +308,14 @@
   /* Un départ avec le plus grand nombre de caisses possible, couleurs au hasard : on tire un
      grand nombre de départs et on garde le plus fourni */
   const nombreCaisses = (cas) => Object.values(cas.depart).reduce((n, pile) => n + pile.length, 0);
+  /* Niveaux à variables données (commande, nombre, pile1…) : le nombre de caisses de départ ne change
+     pas toujours ; on prend aussi les plus grandes valeurs de ces variables (niveau 28 : nombre = 3) */
+  const taille = (cas) => nombreCaisses(cas) + (niv.donnees || []).reduce((n, v) => n + ((cas.vars || {})[v] || 0), 0);
   const departMaximum = () => {
     let meilleur = niv.hasard();
     for (let i = 0; i < 300; i++) {
       const cas = niv.hasard();
-      if (nombreCaisses(cas) > nombreCaisses(meilleur)) meilleur = cas;
+      if (taille(cas) > taille(meilleur)) meilleur = cas;
     }
     return meilleur;
   };
@@ -489,6 +492,21 @@
     for (let i = 12; i < 18; i++) delete notes[i];
     memo.ecrire("manut-notes-2", notes);
     memo.ecrire("manut-tri-alignement", true);
+  }
+  /* Groupe « Variables » reclassé par difficulté (27/11/2026) : « Commande en double » (ancien 35,
+     indice 34) passe en tête (indice 27) ; les anciens 28 à 34 (indices 27 à 33) avancent d'un rang.
+     Étoiles, programmes et niveau ouvert suivent leur exercice. */
+  if (!memo.lire("manut-variables-ordre", false)) {
+    const place = (i) => (i === 34 ? 27 : i >= 27 && i <= 33 ? i + 1 : i);
+    const anciens = Array.from({ length: 8 }, (_, k) => memo.lire("manut-prog-" + (27 + k), null));
+    anciens.forEach((prog, k) => memo.ecrire("manut-prog-" + place(27 + k), prog));
+    const avant = { ...notes };
+    for (let i = 27; i <= 34; i++) delete notes[i];
+    for (let i = 27; i <= 34; i++) if (avant[i] !== undefined) notes[place(i)] = avant[i];
+    memo.ecrire("manut-notes-2", notes);
+    const ouvert = +memo.lire("manut-niveau", 0) || 0;
+    memo.ecrire("manut-niveau", place(ouvert));
+    memo.ecrire("manut-variables-ordre", true);
   }
   if (!memo.lire("manut-niveau10-trois-couleurs", false)) {
     delete notes[9];

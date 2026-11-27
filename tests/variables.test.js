@@ -9,9 +9,9 @@ const poser = () => ({ t: "poser" });
 /* Générateur pseudo-aléatoire reproductible */
 const graine = (n) => () => ((n = (n * 16807) % 2147483647) - 1) / 2147483646;
 
-test("groupe « Variables » : 9 niveaux, optima attendus", () => {
+test("groupe « Variables » : 10 niveaux, optima attendus", () => {
   assert.deepEqual(V.map((n) => n.groupe), Array(10).fill("Variables"));
-  assert.deepEqual(V.map((n) => n.opt), [8, 6, 10, 12, 11, 11, 14, 10, 7, 22]);
+  assert.deepEqual(V.map((n) => n.opt), [10, 8, 6, 10, 12, 11, 11, 14, 7, 22]);
 });
 
 test("au moins deux niveaux comparent deux variables", () => {
@@ -70,25 +70,25 @@ test("« tant que » sur une variable qui ne change pas : arrêt par la limite",
 });
 
 test("variable contrôlée fausse : motif « variables », caisses bien placées", () => {
-  const niv = V[0];
+  const niv = V[1];
   const prog = [aller("E"), { t: "tantque", corps: [saisir(), aller("S"), poser(), aller("E")] }];
   const r = M.verifier(niv, prog);
   assert.equal(r.reussi, false);
   assert.equal(r.motif, "variables");
 });
 
-test("niveau 34 : livrer en alternant (sans variable) ne respecte pas l'ordre de la sortie", () => {
-  const niv = V[6];
+test("niveau 35 : livrer en alternant (sans variable) ne respecte pas l'ordre de la sortie", () => {
+  const niv = V[7];
   const prog = [aller("E"), { t: "tantque", corps: [saisir(), aller("S"), poser(), aller("1"), saisir(), aller("S"), poser(), aller("E")] }];
   assert.equal(M.verifier(niv, prog).reussi, false);
 });
 
 test("Python : noms des variables et comparaisons", () => {
-  const py = M.python(V[2].prog);
+  const py = M.python(V[3].prog);
   assert.match(py, /^compteur = 0$/m);
   assert.match(py, /if compteur < 4:/);
   assert.match(py, /compteur = compteur \+ 1/);
-  assert.match(M.python(V[1].prog), /while compteur > 0:/);
+  assert.match(M.python(V[2].prog), /while compteur > 0:/);
 });
 
 test("comparer deux variables : <, >, =, ≠", () => {
@@ -120,8 +120,13 @@ test("répéter « variable » fois : la valeur est lue une fois, au début", ()
   assert.match(M.python(prog), /for i in range\(n\):/);
 });
 
-test("niveau 35 : un nombre fixe de répétitions échoue (nombre change)", () => {
+test("niveau 28 : un nombre fixe de répétitions échoue (nombre change)", () => {
   const corps = (p) => [aller("E"), saisir(), aller(p), poser()];
   const prog = [{ t: "repeter", n: 2, corps: corps("S") }, { t: "repeter", n: 2, corps: corps("3") }];
-  assert.equal(M.verifier(V[7], prog).reussi, false);
+  assert.equal(M.verifier(V[0], prog).reussi, false);
+});
+
+test("groupe « Variables » : classé par difficulté, lire une variable avant de la modifier", () => {
+  assert.equal(V[0].titre, "Commande en double");
+  assert.deepEqual(V.slice(-2).map((n) => n.titre), ["Bon de commande", "La couleur majoritaire"]);
 });
