@@ -19,6 +19,10 @@ Autres points :
 - **Indice** : bouton « ? » à côté du titre du niveau, le texte s'ouvre au milieu de l'écran.
 - **Second écran** (Chrome, Edge, Brave) : la vue 3D de la manutention s'ouvre dans une fenêtre sur
   l'autre écran, ce qui laisse toute la place aux blocs.
+- **PC modestes** : la 3D passe d'elle-même en mode léger (ombres plus simples, 30 images/s) si le
+  navigateur dessine sans carte graphique ou si l'animation est trop lente. Sans carte graphique, un
+  bandeau indique où activer l'accélération matérielle. Dans l'adresse : `?leger` force ce mode,
+  `?complet` l'interdit, `?2d` remplace la 3D par un dessin plat.
 - Pensé pour un PC en 1920 × 1080, en thème clair ou sombre, avec la police Luciole.
 
 ## Captures
