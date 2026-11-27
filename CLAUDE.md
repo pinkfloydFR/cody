@@ -17,12 +17,14 @@ index.html, manutention.html   ateliers Traçage et Manutention (onglets = simpl
 vue.html                       vue 3D seule pour un second écran (js/vue-ecran.js)
 tortue.css                     styles (« atelier technique », clair/sombre)
 js/atelier.js                  commun : Blockly (thème, rendu « cody »), mémoire, verdict, étoiles,
-                               barème, fête, indice, export PDF et espace prof
+                               barème, fête, indice, bloc fautif, noms de variables dans les textes,
+                               export PDF et espace prof
 js/export-pdf.js               PDF sans bibliothèque, empreinte SHA-256
 js/tortue.js                   traçage
 js/manutention.js              interface commune de la manutention (kits, animation, 2D de secours)
 js/manutention-moteur.js, js/tri-moteur.js, js/pivot-moteur.js
-                               règles, niveaux, vérification (sans DOM : testés avec Node)
+                               règles, niveaux, vérification (sans DOM : testés avec Node) ;
+                               manutention-moteur.js porte aussi les niveaux « Variables » (28 à 37)
 js/tri.js, js/pivot.js         blocs, géométrie, 2D, objectif, textes (KitTri, KitPivot, KitRail)
 js/manutention-3d.js, js/tri-3d.js, js/pivot-3d.js
                                rendus 3D (textures dessinées dans le code)
@@ -79,7 +81,6 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 - Bloc en cours : cadre jaune 6 px + halo (`.blocklyHighlighted`). Bloc où le programme s'arrête :
   cadre rouge clignotant (`A.marquerErreur`, classe `.bloc-fautif`), retiré au prochain essai, au
   changement de niveau ou dès que le programme change (demande de l'enseignant, 27/11/2026).
-
 - **Aucun son** : `sounds: false` et `media/*.mp3` retirés ; ne pas les remettre en mettant Blockly à jour.
 - Rendu `cody` = thrasos + **prise femelle au fond des boucles et conditions** (surcharge de
   `drawStatementInput_`) ; `MetriquesCody` (surcharge de `getPaddedContent_`) supprime la marge en haut
@@ -121,12 +122,15 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 - **Initialisation obligatoire** : l'état de la machine au lancement (pince, plateaux, bras) est
   inconnu ; `verifier` contrôle toutes les positions. Défaut d'initialisation = réussit depuis
   certaines (`reussiDepuis`) mais pas toutes ; la position qui échoue est rejouée.
-- Réussite : postes identiques à l'objectif (ordre compris), pince vide. Erreur : arrêt, bloc encadré
-  en jaune ; 500 instructions max. `executer()` calcule la trace, l'interface l'anime (vitesse 5 :
+- Réussite : postes identiques à l'objectif (ordre compris), pince vide, variables contrôlées (`varsFin`)
+  justes. Erreur : arrêt, bloc fautif en rouge clignotant ; 500 instructions max. `executer()` calcule la trace, l'interface l'anime (vitesse 5 :
   immédiat ; « mouvements réduits » volontairement ignoré).
 - La 3D reçoit les mêmes « vues » que le 2D ; 2D de secours si WebGL échoue ou avec `?2d`.
 - **Aide** : `#intro` (texte seul), à la première visite (`manut-intro-vue`) puis par le bouton
-  « Aide ». **La tenir à jour quand une règle change.**
+  « Aide ». Contenu : blocs grisés, jaune / rouge pendant l'exécution, tous les cas testés,
+  « Configuration » / « Exécuter », initialiser (machine et variables), prendre une caisse, répéter et
+  choisir (dont variables : mettre, ajouter, retirer, comparer à un nombre ou à une variable).
+  **La tenir à jour quand une règle change.**
 - **Second écran** : bouton (deux moniteurs) en haut à gauche de la scène, masqué seulement si
   `getScreenDetails()` (autorisé) ne voit qu'un écran (`screen.isExtended` ment dans Brave). Ouvre
   `vue.html` sur l'autre écran (autorisation « gestion des fenêtres » ; sinon fenêtre à déplacer,
@@ -182,17 +186,22 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   autre variable, champ `W` ; la boîte les propose avec les deux premières variables du niveau),
   `manut_repetervar` (« répéter [variable] fois », valeur lue au début de la boucle). Liste des noms : champ `field_variable_cody`,
   limité aux variables du niveau ouvert (toutes dans un espace caché, pour le PDF des solutions).
+- Consignes et indices : `{nom}` marque une variable, affichée en `<var class="nom-var">` (italique, gras,
+  bleu des blocs variable ; `A.riche`), accolades retirées dans le PDF (demande de l'enseignant).
 - Chaque cas porte `vars` (valeurs au lancement) et, si contrôlées, `varsFin` (motif d'échec
   « variables » : « compteur vaut 9 au lieu de 5 »). Sauf celles listées dans `donnees` (niveaux 29, 31,
   35, 36 : la valeur est l'énoncé, affichée dans l'objectif « Départ : … »), la valeur de départ est quelconque (1 à 9) :
   il faut l'initialiser. Valeurs dans le relevé, en titre de l'écran 3D (`vue.variables`) et en haut du 2D.
-- Niveaux : compter les caisses (8), la commande (6), deux piles (10), piles sur mesure (2 variables
-  données, 12), rouges et bleues (2 variables, 11), contrôle qualité (une sur trois, 11), autant de
-  vertes (14 ; l'ordre de la sortie interdit d'alterner sans variable), commande en double (10 ; « répéter nombre fois », demande de l'enseignant), puis **deux variables comparées
-  entre elles** (demande de l'enseignant : ne pas laisser croire qu'on ne compare qu'à un nombre) : bon de
-  commande (7 ; `commande` ne doit pas changer, ce qui interdit de la décompter), couleur majoritaire
-  (22 ; `retirer` et `sivar` absents de la boîte, sinon une seule variable « écart » suffisait). Optima = solutions écrites,
-  non prouvés minimaux. Départs aléatoires partout. **Pas encore testé par l'enseignant.**
+- Niveaux (optimum) : 28 compter les caisses (8) ; 29 la commande (6) ; 30 deux piles (10) ; 31 piles
+  sur mesure (2 variables données, 12) ; 32 rouges et bleues (2 variables, 11) ; 33 contrôle qualité
+  (une sur trois, 11) ; 34 autant de vertes (14 ; l'ordre de la sortie interdit d'alterner sans
+  variable) ; 35 commande en double (10 ; « répéter nombre fois ») ; 36 bon de commande (7 ;
+  `commande` ne doit pas changer, ce qui interdit de la décompter) ; 37 couleur majoritaire (22 ;
+  `retirer` et `sivar` absents de la boîte, sinon une seule variable « écart » suffisait).
+  35 à 37 : demandes de l'enseignant (répéter « variable » fois ; comparer deux variables, pour ne pas
+  laisser croire qu'on ne compare qu'à un nombre). Optima = solutions écrites, non prouvés minimaux.
+  Départs aléatoires partout. Testés par l'enseignant le 27/11/2026 : 31 et 34 (consigne du 34 reprise :
+  « PUIS le MÊME nombre ») ; les autres pas encore.
 
 ## Rendu 3D : règles et performances (27/11/2026)
 
@@ -240,7 +249,7 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 - Niveau 23 plus dur que le 22 (aucune information sur la caisse : la place dans le programme sert de
   mémoire) : proposé de le réduire à une alternance nord / est ou de le rendre facultatif ; sans réponse.
 - Retours des élèves sur le style et la difficulté des niveaux.
-- Blocs à ajouter : variables / compteur de boucle, « aller à x y », formes toutes faites ; mode texte
+- Blocs à ajouter : compteur de boucle, variables au traçage, « aller à x y », formes toutes faites ; mode texte
   (Python) pour les plus avancés ; bras et tapis orientables (idée non conçue).
 - Notation : score seulement, ou lien avec une compétence (C08 Coder) ?
 

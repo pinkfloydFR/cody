@@ -159,7 +159,11 @@
   }
 
   /* Consigne : verbe à l'infinitif en gras et en majuscules */
-  const consigne = (el, verbe, suite) => el.replaceChildren(creer("strong", "", verbe), " " + suite);
+  /* Texte de consigne ou d'indice : « {nom} » désigne une variable, mise à part (<var> : italique,
+     couleur ; demande de l'enseignant). « sansMarques » : le même texte sans accolades (PDF). */
+  const riche = (texte) => (texte || "").split(/\{(\w+)\}/).map((bout, i) => (i % 2 ? creer("var", "nom-var", bout) : bout));
+  const sansMarques = (texte) => (texte || "").replace(/\{(\w+)\}/g, "$1");
+  const consigne = (el, verbe, suite) => el.replaceChildren(creer("strong", "", verbe), " ", ...riche(suite));
 
   /* Un bouton de niveau ; « complet » : avec son titre, pour une ligne de menu */
   function boutonNiveau(n, i, courant, notes, ouvrir, complet) {
@@ -279,7 +283,7 @@
     document.body.append(fenetre);
     bouton.addEventListener("click", () => fenetre.showModal());
     return (t) => {
-      texte.textContent = t || "";
+      texte.replaceChildren(...riche(t));
       bouton.hidden = !t;
       if (fenetre.open) fenetre.close();
     };
@@ -611,5 +615,5 @@
     }));
   }
 
-  window.Atelier = { memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, marquerErreur, boutonIndice, boutonExecuter, cadrer };
+  window.Atelier = { riche, sansMarques, memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, marquerErreur, boutonIndice, boutonExecuter, cadrer };
 }

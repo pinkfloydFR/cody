@@ -245,6 +245,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .intro h3{margin:0 0 10px;font-size:22px;color:var(--accent)}
 .intro p{margin:4px 0}
 .intro .intro-chapeau{margin-top:10px;color:var(--doux)}
+.intro .intro-chapeau+.intro-chapeau{margin-top:2px}
 .intro-regle{margin:28px auto 0;max-width:860px;padding:22px 30px;border-radius:12px;border:2px solid #e5a50a;background:var(--carte)}
 .intro .intro-regle h3{color:var(--ink);font-size:28px}
 .intro-cartes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.75fr) minmax(0,1fr);gap:24px;margin-top:30px;text-align:left}
@@ -297,3 +298,5 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
   filter:drop-shadow(0 0 6px #ff2d20)!important;animation:fautif 1s ease-in-out infinite}
 @keyframes fautif{50%{stroke:#ffd0cc;filter:none}}
 @media (prefers-reduced-motion:reduce){.bloc-fautif>.blocklyPath,.bloc-fautif>.cody-sinon{animation:none}}
+/* Nom de variable dans une consigne ou un indice : italique, même bleu que les blocs « variable » */
+var.nom-var{font-style:italic;font-weight:700;color:light-dark(#2457a6,#8fb4ff)}

@@ -87,7 +87,8 @@ window.ExportPDF = (() => {
       y += 44;
     }
     y += 8;
-    ecrire(`${infos.verbe ? infos.verbe + " " : ""}${infos.texte}`, 27, false, ENCRE);
+    /* « {nom} » marque une variable dans la consigne : sans accolades sur papier */
+    ecrire(`${infos.verbe ? infos.verbe + " " : ""}${(infos.texte || "").replace(/\{(\w+)\}/g, "$1")}`, 27, false, ENCRE);
     if (infos.bareme) { y += 6; ecrire(`Objectif : ${infos.bareme}`, 23, false, DOUX); }
     if (!infos.solution && infos.detail) { y += 4; ecrire(infos.detail, 23, true, ENCRE); }
     /* Adresse du jeu, cliquable dans le PDF */

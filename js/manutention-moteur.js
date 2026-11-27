@@ -182,7 +182,8 @@
      (« vars ») et, quand elles sont contrôlées, leurs valeurs attendues à la fin (« varsFin »).
      Une variable qui n'est pas une donnée de l'exercice contient au lancement un nombre quelconque :
      il faut l'initialiser, comme la pince. « donnees » : les variables dont la valeur au lancement
-     est l'énoncé (affichées dans l'objectif). */
+     est l'énoncé (affichées dans l'objectif). Dans les consignes et les indices, {nom} désigne une
+     variable : affichée à part (italique, couleur), accolades retirées dans le PDF. */
   const arrivage = (motif) => [...motif].map((m, i) => caisse(String(i + 1), COULEUR[m]));
   const avec = (c, vars, varsFin) => ({ ...c, vars, ...(varsFin ? { varsFin } : {}) });
   const quelconque = (alea) => entier(alea, 1, 9);
@@ -248,19 +249,19 @@
       if (r <= 4 && b <= 4 && r !== b) return m;
     }
   };
-  const QUELCONQUE = "Au lancement, le compteur contient un nombre quelconque.";
+  const QUELCONQUE = "Au lancement, le {compteur} contient un nombre quelconque.";
 
   const VARIABLES = [
     { titre: "Compter les caisses", verbe: "LIVRER", variables: ["compteur"],
-      texte: `toutes les caisses de l'entrée et les COMPTER : à la fin, le compteur doit valoir le nombre de caisses livrées. Il en arrive de 1 à 6. ${QUELCONQUE}`,
-      indice: "Mets d'abord le compteur à 0, puis ajoute 1 à chaque caisse livrée.",
+      texte: `toutes les caisses de l'entrée et les COMPTER : à la fin, le {compteur} doit valoir le nombre de caisses livrées. Il en arrive de 1 à 6. ${QUELCONQUE}`,
+      indice: "Mets d'abord le {compteur} à 0, puis ajoute 1 à chaque caisse livrée.",
       blocs: [...BASE, "tantque", "mettre", "ajouter"],
       configs: [["JVB", 5], ["R", 0], ["BRJVRB", 9], ["VJ", 3]].map(([m, c]) => compterTout(m, c)),
       hasard: (alea = Math.random) => compterTout(motifAlea(alea, 1, 6, "RBJV"), quelconque(alea)),
       prog: [mettre("compteur", 0), aller("E"), tantque(saisir(), aller("S"), poser(), ajouter("compteur"), aller("E"))], opt: 8 },
     { titre: "La commande", verbe: "LIVRER", variables: ["compteur"], donnees: ["compteur"],
-      texte: "autant de caisses que la commande en demande. Au lancement, le compteur contient le nombre de caisses commandées, de 1 à 5 ; l'entrée en contient 6. Les autres restent à l'entrée.",
-      indice: "Après chaque caisse livrée, retire 1 au compteur. Il reste des caisses à livrer tant que le compteur est plus grand que 0.",
+      texte: "autant de caisses que la commande en demande. Au lancement, le {compteur} contient le nombre de caisses commandées, de 1 à 5 ; l'entrée en contient 6. Les autres restent à l'entrée.",
+      indice: "Après chaque caisse livrée, retire 1 au {compteur}. Il reste des caisses à livrer tant que le {compteur} est plus grand que 0.",
       blocs: [...BASE, "repeter", "tantque", "retirer", "tantquevar"],
       configs: [["JVBRBJ", 3], ["RBJVRB", 1], ["BBRJVR", 5], ["VJRBVJ", 2]].map(([m, n]) => commande(m, n)),
       hasard: (alea = Math.random) => commande(motifAlea(alea, 6, 6, "RBJV"), entier(alea, 1, 5)),
@@ -273,15 +274,15 @@
       hasard: (alea = Math.random) => deuxPiles(motifAlea(alea, 1, 8, "RBJV"), quelconque(alea)),
       prog: [mettre("compteur", 0), aller("E"), tantque(saisir(), sivar("compteur", "lt", 4, [aller("1")], [aller("2")]), poser(), ajouter("compteur"), aller("E"))], opt: 10 },
     { titre: "Piles sur mesure", verbe: "EMPILER", variables: ["pile1", "pile2"], donnees: ["pile1", "pile2"],
-      texte: "les caisses de l'entrée dans l'ordre d'arrivée : d'abord autant de caisses à l'emplacement 1 que l'indique la variable pile1, puis autant à l'emplacement 2 que l'indique pile2. Ces nombres vont de 0 à 4 et changent d'un essai à l'autre. L'entrée contient 8 caisses ; les autres y restent.",
-      indice: "Deux boucles, une par variable : tant que pile1 est plus grand que 0, une caisse va à l'emplacement 1 et pile1 diminue de 1.",
+      texte: "les caisses de l'entrée dans l'ordre d'arrivée : d'abord autant de caisses à l'emplacement 1 que l'indique la variable {pile1}, puis autant à l'emplacement 2 que l'indique {pile2}. Ces nombres vont de 0 à 4 et changent d'un essai à l'autre. L'entrée contient 8 caisses ; les autres y restent.",
+      indice: "Deux boucles, une par variable : tant que {pile1} est plus grand que 0, une caisse va à l'emplacement 1 et {pile1} diminue de 1.",
       blocs: [...BASE, "repeter", "tantque", "retirer", "tantquevar"],
       configs: [["RBJVRBJV", 3, 2], ["JJBBRRVV", 0, 4], ["BRJVBRJV", 4, 0], ["VRBJVRBJ", 1, 1], ["RRBBJJVV", 4, 4]].map(([m, a, b]) => surMesure(m, a, b)),
       hasard: (alea = Math.random) => surMesure(motifAlea(alea, 8, 8, "RBJV"), entier(alea, 0, 4), entier(alea, 0, 4)),
       prog: [tantquevar("pile1", "gt", 0, aller("E"), saisir(), aller("1"), poser(), retirer("pile1")),
         tantquevar("pile2", "gt", 0, aller("E"), saisir(), aller("2"), poser(), retirer("pile2"))], opt: 12 },
     { titre: "Rouges et bleues", verbe: "LIVRER", variables: ["rouges", "bleues"],
-      texte: "toutes les caisses de l'entrée et les COMPTER par couleur : à la fin, la variable rouges doit valoir le nombre de caisses rouges, et bleues celui des bleues. Il arrive de 1 à 6 caisses. Au lancement, les deux variables contiennent un nombre quelconque.",
+      texte: "toutes les caisses de l'entrée et les COMPTER par couleur : à la fin, la variable {rouges} doit valoir le nombre de caisses rouges, et {bleues} celui des bleues. Il arrive de 1 à 6 caisses. Au lancement, les deux variables contiennent un nombre quelconque.",
       indice: "Mets les deux variables à 0. Après avoir saisi une caisse, choisis laquelle augmenter selon sa couleur.",
       blocs: [...BASE, "tantque", "si", "mettre", "ajouter"],
       configs: [["RBBR", 3, 1], ["B", 6, 0], ["RRRBRR", 0, 7], ["BRB", 8, 8]].map(([m, r, b]) => rougesBleues(m, r, b)),
@@ -290,7 +291,7 @@
         tantque(saisir(), si("rouge", [ajouter("rouges")], [ajouter("bleues")]), aller("S"), poser(), aller("E"))], opt: 11 },
     { titre: "Contrôle qualité", verbe: "EXPÉDIER", variables: ["compteur"],
       texte: `les caisses de l'entrée, sauf une sur trois : la 3e, la 6e… arrivée part au contrôle, à l'emplacement 3. Il en arrive de 1 à 8. ${QUELCONQUE}`,
-      indice: "Compte les caisses : quand le compteur arrive à 3, la caisse part au contrôle et le compteur repart de 0.",
+      indice: "Compte les caisses : quand le {compteur} arrive à 3, la caisse part au contrôle et le {compteur} repart de 0.",
       blocs: [...BASE, "tantque", "mettre", "ajouter", "sivar"],
       configs: [["RBJVRBJV", 4], ["JV", 0], ["BRJ", 7], ["RBJVRB", 2], ["V", 3]].map(([m, c]) => uneSurTrois(m, c)),
       hasard: (alea = Math.random) => uneSurTrois(motifAlea(alea, 1, 8, RBJ), quelconque(alea)),
@@ -298,30 +299,30 @@
         sivar("compteur", "eq", 3, [aller("3"), mettre("compteur", 0)], [aller("S")]), poser(), aller("E"))], opt: 11 },
     { titre: "Autant de vertes", verbe: "LIVRER", variables: ["compteur"],
       texte: `toutes les caisses de l'entrée, PUIS le MÊME nombre de caisses vertes de l'emplacement 1. Il arrive de 1 à 3 caisses. ${QUELCONQUE}`,
-      indice: "Compte les caisses de l'entrée pendant que tu les livres. Ensuite, livre une verte et retire 1 au compteur, tant qu'il est plus grand que 0.",
+      indice: "Compte les caisses de l'entrée pendant que tu les livres. Ensuite, livre une verte et retire 1 au {compteur}, tant qu'il est plus grand que 0.",
       blocs: [...BASE, "tantque", "mettre", "ajouter", "retirer", "tantquevar"],
       configs: [["RBJ", 5], ["J", 0], ["BR", 8], ["RRJ", 2]].map(([m, c]) => autant(m, c)),
       hasard: (alea = Math.random) => autant(motifAlea(alea, 1, 3, RBJ), quelconque(alea)),
       prog: [mettre("compteur", 0), aller("E"), tantque(saisir(), aller("S"), poser(), ajouter("compteur"), aller("E")),
         tantquevar("compteur", "gt", 0, aller("1"), saisir(), aller("S"), poser(), retirer("compteur"))], opt: 14 },
     { titre: "Commande en double", verbe: "LIVRER", variables: ["nombre"], donnees: ["nombre"],
-      texte: "à la sortie autant de caisses que vaut la variable nombre, PUIS le MÊME nombre à l'emplacement 3, dans l'ordre d'arrivée. nombre vaut de 1 à 3 et change d'un essai à l'autre. L'entrée contient 6 caisses ; les autres y restent.",
-      indice: "Le bloc « répéter … fois » peut aussi recevoir une variable : « répéter nombre fois ». Deux boucles suffisent.",
+      texte: "à la sortie autant de caisses que vaut la variable {nombre}, PUIS le MÊME nombre à l'emplacement 3, dans l'ordre d'arrivée. {nombre} vaut de 1 à 3 et change d'un essai à l'autre. L'entrée contient 6 caisses ; les autres y restent.",
+      indice: "Le bloc « répéter … fois » peut aussi recevoir une variable : « répéter {nombre} fois ». Deux boucles suffisent.",
       blocs: [...BASE, "repeter", "repetervar"],
       configs: [["JVBRBJ", 2], ["RBJVRB", 1], ["BBRJVR", 3]].map(([m, n]) => double(m, n)),
       hasard: (alea = Math.random) => double(motifAlea(alea, 6, 6, "RBJV"), entier(alea, 1, 3)),
       prog: [repetervar("nombre", aller("E"), saisir(), aller("S"), poser()),
         repetervar("nombre", aller("E"), saisir(), aller("3"), poser())], opt: 10 },
     { titre: "Bon de commande", verbe: "LIVRER", variables: ["commande", "livraisons"], donnees: ["commande"],
-      texte: "autant de caisses que la commande en demande, en les COMPTANT dans livraisons. La variable commande (de 1 à 5) ne doit pas changer : à la fin, livraisons doit être égale à commande. L'entrée contient 6 caisses ; les autres y restent. Au lancement, livraisons contient un nombre quelconque.",
-      indice: "Une variable peut se comparer à une autre : répète tant que livraisons est plus petite que commande.",
+      texte: "autant de caisses que la commande en demande, en les COMPTANT dans {livraisons}. La variable {commande} (de 1 à 5) ne doit pas changer : à la fin, {livraisons} doit être égale à {commande}. L'entrée contient 6 caisses ; les autres y restent. Au lancement, {livraisons} contient un nombre quelconque.",
+      indice: "Une variable peut se comparer à une autre : répète tant que {livraisons} est plus petite que {commande}.",
       blocs: [...BASE, "tantque", "mettre", "ajouter", "retirer", "tantquevar", "tantquevar2"],
       configs: [["JVBRBJ", 3, 7], ["RBJVRB", 1, 0], ["BBRJVR", 5, 2], ["VJRBVJ", 2, 9]].map(([m, c, l]) => bon(m, c, l)),
       hasard: (alea = Math.random) => bon(motifAlea(alea, 6, 6, "RBJV"), entier(alea, 1, 5), quelconque(alea)),
       prog: [mettre("livraisons", 0), tantquevar2("livraisons", "lt", "commande", aller("E"), saisir(), aller("S"), poser(), ajouter("livraisons"))], opt: 7 },
     { titre: "La couleur majoritaire", verbe: "TRIER", variables: ["rouges", "bleues"],
-      texte: "les caisses de l'entrée : les rouges à l'emplacement 2, les bleues à l'emplacement 3. Ensuite, LIVRER toute la pile de la couleur la plus nombreuse ; l'autre reste en place. Il arrive de 1 à 7 caisses, 4 au plus de chaque couleur, jamais autant de rouges que de bleues. Au lancement, rouges et bleues contiennent un nombre quelconque.",
-      indice: "Compte les rouges et les bleues pendant le tri. Puis compare les deux variables : si rouges > bleues, vide l'emplacement 2, sinon l'emplacement 3.",
+      texte: "les caisses de l'entrée : les rouges à l'emplacement 2, les bleues à l'emplacement 3. Ensuite, LIVRER toute la pile de la couleur la plus nombreuse ; l'autre reste en place. Il arrive de 1 à 7 caisses, 4 au plus de chaque couleur, jamais autant de rouges que de bleues. Au lancement, {rouges} et {bleues} contiennent un nombre quelconque.",
+      indice: "Compte les rouges et les bleues pendant le tri. Puis compare les deux variables : si {rouges} > {bleues}, vide l'emplacement 2, sinon l'emplacement 3.",
       blocs: [...BASE, "tantque", "si", "mettre", "ajouter", "sivar2"],
       configs: [["RBBRR", 4, 0], ["B", 0, 6], ["RRRBBBB", 2, 2], ["BRB", 9, 1], ["RRRR", 5, 5]].map(([m, r, b]) => majorite(m, r, b)),
       hasard: (alea = Math.random) => majorite(motifMajorite(alea), quelconque(alea), quelconque(alea)),
