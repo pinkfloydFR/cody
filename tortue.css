@@ -6,7 +6,8 @@ TYPE   Luciole partout (lisibilité, élèves dyslexiques), comme dans PlayTP.
 */
 @font-face{font-family:Luciole;src:url(fonts/Luciole-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:Luciole;src:url(fonts/Luciole-Bold.woff2) format("woff2");font-weight:700;font-display:swap}
-:root{color-scheme:light dark;
+:root{color-scheme:dark; /* sombre par défaut, avant même atelier.js (pas d'éclair blanc) */
+
   --bg:light-dark(#eef0f3,#0e131a);--carte:light-dark(#ffffff,#181f29);--ink:light-dark(#1c2532,#e5eaf1);
   --doux:light-dark(#53606f,#a3b0c1);--trait:light-dark(#d3d9e1,#2c3746);--fond2:light-dark(#f3f5f8,#212a36);
   --barre:#1d2633;--accent:light-dark(#0e6b78,#5fc8d4);--accent-plein:#0e6b78;

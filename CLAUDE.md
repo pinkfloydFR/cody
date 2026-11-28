@@ -62,8 +62,8 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   (départ avec le plus de caisses, `departMaximum`), « Niveau suivant » (absent au dernier niveau ;
   rien en création libre ni en cas d'échec ; Échap ferme).
 - **Barre du haut** (52 px) : onglets, logo Python (menu du code, `.menu-python`, avec Copier),
-  boutons **PDF**, **Prof** et **clair / sombre** (`changerTheme`, `cody-theme` : thème du système tant que
-  l'élève n'a rien choisi ; `A.sombre` imite un MediaQueryList), puis les niveaux (rangée au traçage ; à la manutention, après le bouton
+  boutons **PDF**, **Prof** et **clair / sombre** (`changerTheme`, `cody-theme` : **sombre par défaut**
+  (choix de l'enseignant, 28/11/2026) ; `A.sombre` imite un MediaQueryList), puis les niveaux (rangée au traçage ; à la manutention, après le bouton
   « Aide », un menu par groupe nommé « LVL1 », « LVL2 »… pour la place ; nom du groupe et étoiles
   gagnées en tête du menu ouvert et dans l'infobulle).
 - **Indice** : bouton « ? » ambre à droite du titre (`A.boutonIndice`), fenêtre au milieu de l'écran.
@@ -84,8 +84,9 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   changement de niveau ou dès que le programme change (demande de l'enseignant, 27/11/2026).
 - **Aucun son** : `sounds: false` et `media/*.mp3` retirés ; ne pas les remettre en mettant Blockly à jour.
 - Rendu `cody` = thrasos + **prise femelle au fond des boucles et conditions** (surcharge de
-  `drawStatementInput_`) ; `MetriquesCody` (surcharge de `getPaddedContent_`) supprime la marge en haut
-  et à gauche. **Ces deux surcharges sont à revérifier à chaque mise à jour de Blockly.**
+  `drawStatementInput_`), « sinon » d'une branche vide centré sur sa partie (`InfoCody`, surcharge de
+  `getElemCenterline_`) ; `MetriquesCody` (surcharge de `getPaddedContent_`) supprime la marge en haut
+  et à gauche. **Ces surcharges sont à revérifier à chaque mise à jour de Blockly.**
 - Contour clair ; couleurs distinctes pour répéter, tant que et si ; partie « sinon » plus foncée
   (copie découpée du contour, `teinterSinon` dans `manutention.js`). Bloc de départ « DÉPART », non
   supprimable ; `disableOrphans` grise les blocs non accrochés.

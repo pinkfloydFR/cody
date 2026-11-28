@@ -2,6 +2,8 @@
    chaque image (« vue ») par postMessage ; cette fenêtre ne fait que dessiner. Fermer la fenêtre
    ramène la vue dans l'atelier. */
 {
+  /* Même thème que l'atelier (« cody-theme », sombre par défaut) */
+  try { if (JSON.parse(localStorage.getItem("cody-theme")) === "clair") document.documentElement.dataset.theme = "light"; } catch { /* rien */ }
   const $ = (id) => document.getElementById(id);
   const atelier = window.opener;
   const message = (texte) => { $("vue-message").textContent = texte; $("vue-message").hidden = !texte; };

@@ -6,10 +6,11 @@
     ecrire(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* navigation privée */ } },
   };
 
-  /* Thème clair ou sombre : celui du système, sauf choix de l'élève (bouton de la barre, « cody-theme »,
-     commun aux deux ateliers). « sombre » imite un MediaQueryList : .matches et l'événement « change ». */
+  /* Thème clair ou sombre : sombre par défaut (choix de l'enseignant), sauf choix de l'élève (bouton de
+     la barre, « cody-theme », commun aux deux ateliers). « sombre » imite un MediaQueryList : .matches et
+     l'événement « change ». (Sans choix enregistré, « null » suivrait le système.) */
   const systeme = matchMedia("(prefers-color-scheme: dark)");
-  let choixTheme = memo.lire("cody-theme", null);
+  let choixTheme = memo.lire("cody-theme", "sombre");
   const sombre = new EventTarget();
   Object.defineProperty(sombre, "matches", { get: () => (choixTheme ? choixTheme === "sombre" : systeme.matches) });
   const appliquerTheme = () => {
@@ -69,7 +70,24 @@
       this.positionStatementInputConnection_(ligne);
     }
   }
+  /* « sinon » d'une branche vide : centré sur toute la partie « sinon » (barre du dessus, creux, fond),
+     et non en haut du creux comme le place thrasos (demande de l'enseignant). Branche pleine : inchangé,
+     le mot reste en face du premier bloc. */
+  class InfoCody extends B.thrasos.RenderInfo {
+    getElemCenterline_(ligne, elem) {
+      const T = B.blockRendering.Types, entree = ligne.getLastInput && ligne.getLastInput();
+      if (T.isField(elem) && ligne.hasStatement && entree && !entree.connectedBlock) {
+        const i = this.rows.indexOf(ligne);
+        const dessus = i > 0 ? this.rows[i - 1].height : 0;
+        const dessous = this.rows.slice(i + 1).reduce((t, l) => t + l.height, 0);
+        /* « sinon » n'a ni jambage ni hampe : sa boîte est centrée, le mot paraît plus bas ; on le remonte un peu */
+        return ligne.yPos + (ligne.height + dessous - dessus) / 2 - elem.height * 0.12;
+      }
+      return super.getElemCenterline_(ligne, elem);
+    }
+  }
   class RenduCody extends B.thrasos.Renderer {
+    makeRenderInfo_(bloc) { return new InfoCody(this, bloc); }
     makeDrawer_(bloc, info) { return new DessinCody(bloc, info); }
   }
   B.blockRendering.register("cody", RenduCody);
