@@ -15,10 +15,10 @@ Reeborg's World. Décision : un widget Blockly maison intégré à PlayTP, prév
 index.html, manutention.html   ateliers Traçage et Manutention (onglets = simples liens ;
                                aucun JS ni style inline : CSP de PlayTP)
 vue.html                       vue 3D seule pour un second écran (js/vue-ecran.js)
-tortue.css                     styles (« atelier technique », clair/sombre)
-js/atelier.js                  commun : Blockly (thème, rendu « cody »), mémoire, verdict, étoiles,
-                               barème, fête, indice, bloc fautif, noms de variables dans les textes,
-                               export PDF et espace prof
+tortue.css                     styles (« atelier technique », sombre par défaut / clair)
+js/atelier.js                  commun : Blockly (thème, rendu « cody », surcharges), mémoire, thème,
+                               version, aide, explications des blocs, verdict, étoiles, fête, indice,
+                               bloc fautif, noms de variables, export PDF et espace prof
 js/export-pdf.js               PDF sans bibliothèque, empreinte SHA-256
 js/tortue.js                   traçage
 js/manutention.js              interface commune de la manutention (kits, animation, 2D de secours)
@@ -35,7 +35,7 @@ js/three.min.js                three.js r128 (MIT)
 js/blockly_compressed.js, js/blockly-fr.js   Blockly 13.5.0, messages français
 media/, fonts/                 Blockly (sans sons) ; Luciole (licence incluse)
 tests/                         voir « Tests »
-docs/captures/                 images du README (LISEZMOI.md) ; docs/superpowers/ : designs et plans ;
+docs/captures/                 images du `README.md` ; docs/superpowers/ : designs et plans ;
                                docs/essais/ : essais 3D jetables (three.js depuis Internet)
 ```
 
@@ -45,63 +45,68 @@ Les solutions (`prog` des niveaux) sont dans le JS envoyé au navigateur : rien 
 
 ## Déploiement
 
-Docker : `docker-compose.yml` + `Dockerfile` (nginx, en-têtes et CSP dans `deploy/nginx.conf` ;
-l'image ne contient que les fichiers servis, pas `docs/`). **Aucun port publié** : Traefik seulement,
-avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèle
-`deploy/traefik-cody.exemple.yml`). Sur le serveur, un clone du dépôt : `./deploy/deployer.sh`
-(pull de la branche courante, `version.txt` = « numéro commit », numéro = nombre de commits, reconstruction, attente de l'état « healthy »).
-**Version** affichée à côté de « Cody » (« v58 »). **Mise à jour automatique** des pages ouvertes
-(`surveillerVersion`, `atelier.js`) : `version.txt` relu chaque minute ; si elle change, « Cody » clignote
-(un clic recharge) ; rechargement si l'onglet est caché, sinon après 30 s sans geste, sans programme en cours,
-fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx) : une visite voit la dernière version.
+Docker (`docker-compose.yml`, `Dockerfile`, nginx : en-têtes et CSP dans `deploy/nginx.conf`) ; l'image
+ne contient que les fichiers servis. **Aucun port publié** : Traefik seulement, avec **géoblocage et
+CrowdSec, rien d'autre** (demande de l'enseignant ; modèle `deploy/traefik-cody.exemple.yml`).
+Sur le serveur (ce clone) : `./deploy/deployer.sh` = pull, `version.txt` (« numéro commit », numéro =
+nombre de commits ; non versionné), reconstruction, attente de « healthy ».
 
-## Présentation et interface (choix de l'enseignant)
+- **Toujours à jour** : tout est servi en `Cache-Control: no-cache`. Le numéro s'affiche à côté de
+  « Cody » (« v41 »). `surveillerVersion` (`atelier.js`) relit `version.txt` chaque minute : s'il change,
+  « Cody » clignote (un clic recharge), et la page se recharge seule si l'onglet est caché, sinon après
+  30 s sans geste, sans programme en cours, fenêtre ouverte ni second écran. Rien n'est perdu (tout est
+  en `localStorage`). Sans `version.txt` (local) : rien.
 
-- Public : préados, ados, adultes. « Atelier technique » : ardoise et blanc cassé, accent bleu
-  pétrole ; pas de décor enfantin. Police Luciole. Cible : PC en 1920×1080.
-- Consignes : verbe à l'infinitif en majuscules (champ `verbe`), tutoiement.
-- **Score en 3 étoiles** : 3 si nb de blocs ≤ `opt`, 2 si ≤ `opt + 2`, sinon 1 (`A.noter`) ; barème
-  affiché sous l'objectif (`A.bareme`).
-- **Écran de réussite** (`A.feter`) : étoiles, feu d'artifice, « Retenter », « Rejouer au maximum »
-  (départ avec le plus de caisses, `departMaximum`), « Niveau suivant » (absent au dernier niveau ;
-  rien en création libre ni en cas d'échec ; Échap ferme).
-- **Barre du haut** (52 px) : onglets, logo Python (menu du code, `.menu-python`, avec Copier),
-  boutons **PDF**, **Prof** et **clair / sombre** (`changerTheme`, `cody-theme` : **sombre par défaut**
-  (choix de l'enseignant, 28/11/2026) ; `A.sombre` imite un MediaQueryList), puis les niveaux (rangée au traçage ; à la manutention, après le bouton
-  « Aide », un menu par groupe nommé « LVL1 », « LVL2 »… pour la place ; nom du groupe et étoiles
-  gagnées en tête du menu ouvert et dans l'infobulle).
+## Interface (choix de l'enseignant)
+
+- Public : préados, ados, adultes. « Atelier technique » : ardoise et blanc cassé, accent bleu pétrole,
+  pas de décor enfantin. Police Luciole. Cible : PC en 1920×1080. Consignes : verbe à l'infinitif en
+  majuscules (champ `verbe`), tutoiement.
+- **Thème sombre par défaut** (28/11/2026) : bouton clair / sombre dans la barre (`changerTheme`, clé
+  `cody-theme`, commune aux deux ateliers et à `vue.html`) ; `A.sombre` imite un MediaQueryList.
+- **Barre du haut** (52 px) : « Cody » et version, onglets, logo Python (code, avec Copier), boutons
+  **PDF**, **Prof**, thème, puis « Aide » et les niveaux (rangée au traçage ; à la manutention, un menu
+  par groupe « LVL1 »… avec nom du groupe et étoiles gagnées). Sur l'accueil, aucun niveau en avant.
+- **Accueil** (`#intro`, première visite : `tortue-intro-vue`, `manut-intro-vue`) : très court, car
+  l'ancienne page d'aide servant d'accueil faisait peur (28/11/2026). Trois étapes (« Glisse tes ordres,
+  dans l'ordre, sous le bloc gris DÉPART »), la règle du jeu en mots simples, bouton « C'est parti ! »
+  (rouvre le niveau en cours). Aucune ligne coupée en 1920×1080.
+- **Aide** (bouton « Aide », caché sur l'accueil ; `<dialog id="aide">` de chaque page, `A.aide`) : pour
+  grands débutants (« que ma maman comprenne »), un sujet à la fois, onglets à gauche. Seuls les sujets
+  utiles au niveau ouvert sont proposés (`data-blocs`, `data-variables`). Images du quotidien, blocs
+  miniatures en CSS (`.mb-*`, couleurs d'`atelier.js`), « Revoir l'accueil ». Traçage : blocs, avancer et
+  tourner, répéter, crayon ; manutention : blocs, caisses, préparer la machine, répéter, choisir,
+  variables. **La tenir à jour quand une règle change** ; elle doit tenir en 1920×1080. Au traçage,
+  c'est le **crayon** qui dessine (plus de tortue dans les textes).
+- **Score en 3 étoiles** : 3 si nb de blocs ≤ `opt`, 2 si ≤ `opt + 2`, sinon 1 (`A.noter`, `A.bareme`).
+  **Réussite** (`A.feter`) : étoiles, feu d'artifice, « Retenter », « Rejouer au maximum »
+  (`departMaximum`), « Niveau suivant » (rien en création libre ni en cas d'échec ; Échap ferme).
 - **Indice** : bouton « ? » ambre à droite du titre (`A.boutonIndice`), fenêtre au milieu de l'écran.
-- « Exécuter » joue le départ affiché tant qu'il n'a pas été joué (à l'ouverture du niveau et après
-  « Configuration », où l'élève peut en chercher un précis : retour de l'enseignant, 27/11/2026) ; sinon
-  il en tire un nouveau (variable `neuf`, `manutention.js`).
-- Sous la scène : « Exécuter » ; « Configuration » (manutention : nouveau départ ; « Réinitialiser » au
-  traçage) ; « Recommencer le niveau » (efface le programme après confirmation, garde les étoiles).
-- En-tête « Ton programme » : « Supprimer les blocs grisés » (`A.boutonNettoyer`) efface les blocs non
-  accrochés à DÉPART en un seul groupe d'événements (Ctrl+Z les rend) ; grisé s'il n'y a rien.
-- Manutention : colonnes 5/7 (`.jeu-scene`), blocs à l'échelle 1/1,2 (1,1 au traçage), « Objectif » et
-  barème sur une ligne sous la consigne (`.objectif-pied`), vignette seule à droite.
+- Sous la scène : « Exécuter » (joue le départ affiché tant qu'il n'a pas été joué, sinon en tire un
+  nouveau : variable `neuf`), « Configuration » (nouveau départ ; « Réinitialiser » au traçage),
+  « Recommencer le niveau » (efface le programme après confirmation, garde les étoiles).
+- « Ton programme » : « Supprimer les blocs grisés » (`A.boutonNettoyer`, un seul groupe d'événements,
+  Ctrl+Z les rend). Manutention : colonnes 5/7, blocs à l'échelle 1/1,2 (1,1 au traçage).
 
-## Blocs (`js/atelier.js`)
+## Blocs (`js/atelier.js`) — surcharges de Blockly **à revérifier à chaque mise à jour**
 
-- Bloc en cours : cadre jaune 6 px + halo (`.blocklyHighlighted`). Bloc où le programme s'arrête :
-  cadre rouge posé par-dessus le bloc (bas compris), qui clignote 3 fois puis reste allumé (`A.marquerErreur`, `.contour-fautif`), retiré au prochain essai, au
-  changement de niveau ou dès que le programme change (demande de l'enseignant, 27/11/2026).
-- **Aucun son** : `sounds: false` et `media/*.mp3` retirés ; ne pas les remettre en mettant Blockly à jour.
-- Rendu `cody` = thrasos + **prise femelle au fond des boucles et conditions** (surcharge de
-  `drawStatementInput_`), « sinon » d'une branche vide centré sur sa partie (`InfoCody`, surcharge de
-  `getElemCenterline_`) ; `MetriquesCody` (surcharge de `getPaddedContent_`) supprime la marge en haut
-  et à gauche. **Ces surcharges sont à revérifier à chaque mise à jour de Blockly.**
-- Contour clair ; couleurs distinctes pour répéter, tant que et si ; partie « sinon » plus foncée
-  (copie découpée du contour, `teinterSinon` dans `manutention.js`). Bloc de départ « DÉPART », non
-  supprimable ; `disableOrphans` grise les blocs non accrochés.
-- **Explication au survol** de chaque bloc (`A.expliquer`, dans chaque fichier de blocs ; infobulle Blockly
-  restylée, `**mot**` en gras, 0,4 s) : phrases pour débutants. Boucles : « les blocs rangés DEDANS »
-  (`A.TEXTE_REPETER`), un ami de l'enseignant croyait que « répéter » rejouait les blocs du dessus.
-- `A.cadrer` place le programme à 16 px du coin haut gauche au chargement.
-- Ascenseurs masqués tant que le programme tient dans la vue (`majAscenseurs`) ; poubelle centrée sous
-  les boutons de zoom (`centrerPoubelle`, surcharge de `trashcan.position`) ; blocs redessinés une fois
-  Luciole chargée (sinon, police de secours plus étroite : texte qui déborde). **À revérifier à chaque
-  mise à jour de Blockly.**
+- Rendu `cody` = thrasos + prise femelle au fond des boucles et conditions (`drawStatementInput_`),
+  « sinon » d'une branche vide centré sur sa partie (`InfoCody.getElemCenterline_`). `MetriquesCody`
+  (`getPaddedContent_`) : pas de marge en haut et à gauche. Ascenseurs seulement si le programme dépasse
+  (`majAscenseurs`). Poubelle centrée sous le zoom (`centrerPoubelle`). Tout est redessiné une fois
+  Luciole chargée (sinon police de secours plus étroite sous Windows : texte qui déborde).
+- Bloc en cours : cadre jaune + halo (`.blocklyHighlighted`). **Bloc fautif** (`A.marquerErreur`) : copie
+  du contour posée par-dessus (`.contour-fautif`, sinon le bloc suivant en cache le bas), clignote 3 fois
+  puis reste ; retirée au prochain essai, au changement de niveau ou dès que le programme change.
+- **Explication au survol** (`A.expliquer` dans chaque fichier de blocs ; infobulle restylée, 0,4 s,
+  `**mot**` en gras, une phrase par ligne avec `\n`). Boucles : « les blocs rangés DEDANS »
+  (`A.TEXTE_REPETER`) : un débutant croyait que « répéter » rejouait les blocs du dessus.
+- Couleurs distinctes pour répéter, tant que et si ; partie « sinon » plus foncée (`teinterSinon`,
+  `manutention.js`). « DÉPART » non supprimable ; `disableOrphans` grise les blocs non accrochés.
+  `A.cadrer` place le programme à 16 px du coin haut gauche. **Aucun son** (`sounds: false`, pas de
+  `media/*.mp3`).
+- Animations (bras, fête, bloc fautif) : « mouvements réduits » **volontairement ignoré** (souvent coupé
+  dans Windows à l'insu de l'élève).
 
 ## Atelier Traçage (`js/tortue.js`)
 
@@ -111,11 +116,9 @@ fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx)
   étoile, pointillés, triangle tricolore, escalier coloré, rosace, maison, rosace bicolore, création
   libre (`prog: null`). Champs : titre, `verbe` + `texte`, indice, `depart [x, y, cap]`, `prog`
   (mini-DSL `R(n, …)`, `fd`, `rt`, `lt`, `up`, `dn`, `co`), `opt`, `blocs` (boîte à outils).
-- **Accueil** et **Aide** comme à la manutention (`#intro`, `tortue-intro-vue` ; `<dialog id="aide">`,
-  sujets : les blocs, avancer et tourner, répéter, le crayon), logique commune `A.aide` (`atelier.js`).
 - **Pas d'eval** : `compiler()` produit des commandes (`av`, `tr`, `st`, `co`, `ep`, `hl`) ; limite 20 000.
 - Repère de Python `turtle` (cap en degrés, 0 = est), toile logique 400 × 400 centrée, canevas ×2.
-  Calques : fond (grille, axes, modèle en pointillés), encre, dessus (crayon, écarts).
+  Calques : fond (grille 10 / 50 pas, axes, modèle en pointillés), encre, dessus (crayon, écarts).
 - **Vérification** : modèle et dessin tracés en noir (10 px) sur une toile cachée ; réussi si écart
   < 5 % des pixels du modèle (calques rouge = manque, violet = dépasse). Niveaux à couleurs
   (`couleurs: true` : 2, 5, 8, 9, 12) : ensuite un masque par couleur (écart max 8 %). Les consignes
@@ -125,8 +128,8 @@ fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx)
 
 ## Atelier Manutention : commun (`js/manutention.js`)
 
-- 37 niveaux en 4 machines + variables : bras (1 à 12, groupes « Piles » et « Tapis »), centre de tri (13 à 18,
-  « Convoyeurs »), bras pivotant (19 à 23, « Pivot »), pivot sur rail (24 à 27, « Pivot + rail »), variables (28 à 37, bras sur rail).
+- 37 niveaux : bras (1 à 12, « Piles » et « Tapis »), centre de tri (13 à 18, « Convoyeurs »), bras
+  pivotant (19 à 23, « Pivot »), pivot sur rail (24 à 27, « Pivot + rail »), variables (28 à 37, bras).
   `kit` vaut `KitBras`, `KitTri`, `KitPivot` ou `KitRail` (même interface : moteur, compiler,
   etatDepart, fixe, image, dessin2D, objectif, releve, textes) ; `machine(niv)` d'après le groupe.
 - Caisses : un **numéro** et le nom de leur couleur ; numéros = ordre (de bas en haut ou d'arrivée),
@@ -135,22 +138,11 @@ fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx)
   Si l'échec vient d'un cas caché, il est joué **et annoncé** (« le départ a changé »). Les consignes
   disent ce qui varie : les garder cohérentes avec les bornes des tirages.
 - **Initialisation obligatoire** : l'état de la machine au lancement (pince, plateaux, bras) est
-  inconnu ; `verifier` contrôle toutes les positions. Défaut d'initialisation = réussit depuis
-  certaines (`reussiDepuis`) mais pas toutes ; la position qui échoue est rejouée.
+  inconnu ; `verifier` contrôle toutes les positions (`reussiDepuis`) ; la position qui échoue est rejouée.
 - Réussite : postes identiques à l'objectif (ordre compris), pince vide, variables contrôlées (`varsFin`)
-  justes. Erreur : arrêt, bloc fautif en rouge clignotant ; 500 instructions max. `executer()` calcule la trace, l'interface l'anime (vitesse 5 :
-  immédiat ; « mouvements réduits » volontairement ignoré).
+  justes. Erreur : arrêt et bloc fautif ; 500 instructions max. `executer()` calcule la trace,
+  l'interface l'anime (vitesse 5 : immédiat).
 - La 3D reçoit les mêmes « vues » que le 2D ; 2D de secours si WebGL échoue ou avec `?2d`.
-- **Accueil** (`#intro`, à la première visite : `manut-intro-vue`) : trois étapes (« Glisse tes ordres,
-  dans l'ordre, sous le bloc gris DÉPART », demande de l'enseignant) et la règle « tous
-  les cas » en mots simples, bouton « C'est parti ! » (rouvre le niveau en cours). Rien d'autre : l'ancienne
-  page d'aide, qui servait d'accueil, faisait peur (retour de l'enseignant, 28/11/2026).
-- **Aide** (bouton « Aide », caché sur l'accueil ; `<dialog id="aide">`, `A.aide`) : pour grands débutants
-  (« que ma maman comprenne »), un sujet à la fois (onglets à gauche) : les blocs, les caisses, préparer
-  la machine, répéter, choisir, variables. Seuls les sujets utiles au niveau ouvert sont proposés
-  (`data-blocs` : un de ces blocs dans la boîte ; `data-variables`). Blocs miniatures en CSS (`.mb-*`,
-  mêmes couleurs qu'`atelier.js`). « Revoir l'accueil » en pied. **La tenir à jour quand une règle
-  change** et qu'elle tienne en 1920 x 1080.
 - **Second écran** : bouton (deux moniteurs) en haut à gauche de la scène, masqué seulement si
   `getScreenDetails()` (autorisé) ne voit qu'un écran (`screen.isExtended` ment dans Brave). Ouvre
   `vue.html` sur l'autre écran (autorisation « gestion des fenêtres » ; sinon fenêtre à déplacer,
@@ -207,15 +199,17 @@ fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx)
   `variable`, bleu) : `manut_mettre`, `manut_ajouter`, `manut_retirer` (de N), `manut_tantquevar` et
   `manut_sivar` (comparaison `>` `<` `=` `≠` à un nombre), `manut_tantquevar2` et `manut_sivar2` (à une
   autre variable, champ `W` ; la boîte les propose avec les deux premières variables du niveau),
-  `manut_repetervar` (« répéter [variable] fois », valeur lue au début de la boucle). Liste des noms : champ `field_variable_cody`,
-  limité aux variables du niveau ouvert (toutes dans un espace caché, pour le PDF des solutions).
+  `manut_repetervar` (« répéter [variable] fois », valeur lue au début de la boucle). Liste des noms :
+  champ `field_variable_cody`, limité aux variables du niveau ouvert (toutes dans un espace caché, pour
+  le PDF des solutions).
 - Consignes et indices : `{nom}` marque une variable, affichée en `<var class="nom-var">` (italique, gras,
   bleu des blocs variable ; `A.riche`), accolades retirées dans le PDF (demande de l'enseignant).
 - Chaque cas porte `vars` (valeurs au lancement) et, si contrôlées, `varsFin` (motif d'échec
   « variables » : « compteur vaut 9 au lieu de 5 »). Sauf celles listées dans `donnees` (niveaux 28, 30,
-  32, 36 : la valeur est l'énoncé, affichée dans l'objectif « Départ : … »), la valeur de départ est quelconque (1 à 9) :
-  il faut l'initialiser. « Rejouer au maximum » prend aussi les plus grandes valeurs des variables
-  `donnees` (niveau 28 : nombre = 3). Valeurs dans le relevé, en titre de l'écran 3D (`vue.variables`) et en haut du 2D.
+  32, 36 : la valeur est l'énoncé, affichée dans l'objectif « Départ : … »), la valeur de départ est
+  quelconque (1 à 9) : il faut l'initialiser. « Rejouer au maximum » prend aussi les plus grandes valeurs
+  des variables `donnees` (niveau 28 : nombre = 3). Valeurs dans le relevé, en titre de l'écran 3D
+  (`vue.variables`) et en haut du 2D.
 - Niveaux (optimum), **classés par difficulté** (27/11/2026, remarque de l'enseignant : l'ancien 35 était
   bien plus facile que le 34) : 28 commande en double (10 ; « répéter nombre fois », lire une variable) ;
   29 compter les caisses (8) ; 30 la commande (6) ; 31 deux piles (10) ; 32 piles sur mesure (2 variables
@@ -263,8 +257,8 @@ fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx)
 
 ## Tests
 
-- `node --test tests/*.test.js` : 288 tests (bras 103, tri 44, pivot 43, rail 37, variables 61) ; chaque solution
-  modèle doit réussir avec `opt` blocs (moins `marge` s'il y en a).
+- `node --test tests/*.test.js` : 289 tests (bras 103, tri 44, pivot 43, rail 37, variables 62) ;
+  chaque solution modèle doit réussir avec `opt` blocs (moins `marge` s'il y en a).
 - `tests/navigateur-*.js` (traçage, manutention, tri, pivot, rail) : à évaluer dans la page (console) ;
   ils construisent les solutions en blocs et relèvent les verdicts. **Ils écrasent les programmes
   sauvegardés** du navigateur utilisé.
