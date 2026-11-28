@@ -98,6 +98,8 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   étoile, pointillés, triangle tricolore, escalier coloré, rosace, maison, rosace bicolore, création
   libre (`prog: null`). Champs : titre, `verbe` + `texte`, indice, `depart [x, y, cap]`, `prog`
   (mini-DSL `R(n, …)`, `fd`, `rt`, `lt`, `up`, `dn`, `co`), `opt`, `blocs` (boîte à outils).
+- **Accueil** et **Aide** comme à la manutention (`#intro`, `tortue-intro-vue` ; `<dialog id="aide">`,
+  sujets : les blocs, avancer et tourner, répéter, le crayon), logique commune `A.aide` (`atelier.js`).
 - **Pas d'eval** : `compiler()` produit des commandes (`av`, `tr`, `st`, `co`, `ep`, `hl`) ; limite 20 000.
 - Repère de Python `turtle` (cap en degrés, 0 = est), toile logique 400 × 400 centrée, canevas ×2.
   Calques : fond (grille, axes, modèle en pointillés), encre, dessus (crayon, écarts).
@@ -126,10 +128,11 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   justes. Erreur : arrêt, bloc fautif en rouge clignotant ; 500 instructions max. `executer()` calcule la trace, l'interface l'anime (vitesse 5 :
   immédiat ; « mouvements réduits » volontairement ignoré).
 - La 3D reçoit les mêmes « vues » que le 2D ; 2D de secours si WebGL échoue ou avec `?2d`.
-- **Accueil** (`#intro`, à la première visite : `manut-intro-vue`) : trois étapes et la règle « tous
+- **Accueil** (`#intro`, à la première visite : `manut-intro-vue`) : trois étapes (« Glisse tes ordres,
+  dans l'ordre, sous le bloc gris DÉPART », demande de l'enseignant) et la règle « tous
   les cas » en mots simples, bouton « C'est parti ! » (rouvre le niveau en cours). Rien d'autre : l'ancienne
   page d'aide, qui servait d'accueil, faisait peur (retour de l'enseignant, 28/11/2026).
-- **Aide** (bouton « Aide », caché sur l'accueil ; `<dialog id="aide">`) : pour grands débutants
+- **Aide** (bouton « Aide », caché sur l'accueil ; `<dialog id="aide">`, `A.aide`) : pour grands débutants
   (« que ma maman comprenne »), un sujet à la fois (onglets à gauche) : les blocs, les caisses, préparer
   la machine, répéter, choisir, variables. Seuls les sujets utiles au niveau ouvert sont proposés
   (`data-blocs` : un de ces blocs dans la boîte ; `data-variables`). Blocs miniatures en CSS (`.mb-*`,

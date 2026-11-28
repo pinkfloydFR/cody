@@ -535,45 +535,8 @@
   }
 
   /* ---------- Aide : un sujet à la fois, seulement ceux utiles au niveau ouvert ---------- */
-  const fenetreAide = $("aide");
-  const ongletsAide = [...fenetreAide.querySelectorAll("[role=tab]")];
-  const pageAide = (o) => $(o.getAttribute("aria-controls"));
-  let sujetAide = "bases";
-  function choisirSujet(onglet, focus = false) {
-    sujetAide = onglet.dataset.sujet;
-    for (const o of ongletsAide) {
-      const ici = o === onglet;
-      o.setAttribute("aria-selected", String(ici));
-      o.tabIndex = ici ? 0 : -1;
-      pageAide(o).hidden = !ici;
-    }
-    if (focus) onglet.focus();
-  }
-  function aider() {
-    const boite = (niv.blocs || []).join(" ").split(" ");
-    for (const o of ongletsAide) {
-      const page = pageAide(o), blocs = page.dataset.blocs;
-      o.hidden = (blocs !== undefined && !blocs.split(" ").some((n) => boite.includes(n)))
-        || (page.hasAttribute("data-variables") && !(niv.variables || []).length);
-    }
-    const visibles = ongletsAide.filter((o) => !o.hidden);
-    choisirSujet(visibles.find((o) => o.dataset.sujet === sujetAide) || visibles[0]);
-    fenetreAide.showModal();
-  }
-  for (const o of ongletsAide) o.addEventListener("click", () => choisirSujet(o));
-  fenetreAide.querySelector("[role=tablist]").addEventListener("keydown", (e) => {
-    const visibles = ongletsAide.filter((o) => !o.hidden), i = visibles.indexOf(document.activeElement);
-    const pas = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
-    if (i < 0) return;
-    if (pas) choisirSujet(visibles[(i + pas + visibles.length) % visibles.length], true);
-    else if (e.key === "Home") choisirSujet(visibles[0], true);
-    else if (e.key === "End") choisirSujet(visibles[visibles.length - 1], true);
-    else return;
-    e.preventDefault();
-  });
-  $("aide-fermer").addEventListener("click", () => fenetreAide.close());
-  $("aide-ok").addEventListener("click", () => fenetreAide.close());
-  fenetreAide.addEventListener("click", (e) => { if (e.target === fenetreAide) fenetreAide.close(); });
+  const fenetreAide = $("aide"), ouvrirAide = A.aide(fenetreAide);
+  const aider = () => ouvrirAide(niv.blocs || [], !!(niv.variables || []).length);
   $("revoir-accueil").addEventListener("click", () => { fenetreAide.close(); presenter(true); });
   let chargement = false;
 

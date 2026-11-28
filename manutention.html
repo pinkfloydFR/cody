@@ -34,7 +34,7 @@
     <p class="intro-chapeau">Des machines déplacent des caisses. C'est toi qui leur dis quoi faire, avec des blocs.</p>
 
     <ol class="intro-etapes">
-      <li><span class="intro-num" aria-hidden="true">1</span><span><strong>Empile</strong> des blocs sous <strong>DÉPART</strong>.</span></li>
+      <li><span class="intro-num" aria-hidden="true">1</span><span>Glisse tes ordres, <strong>dans l'ordre</strong>, sous le bloc gris <span class="mb mb-depart">DÉPART</span></span></li>
       <li><span class="intro-num" aria-hidden="true">2</span><span>Clique sur <strong>Exécuter</strong> et regarde la machine.</span></li>
       <li><span class="intro-num" aria-hidden="true">3</span><span>Gagne jusqu'à <span class="intro-or">3 étoiles</span> : moins de blocs, plus d'étoiles.</span></li>
     </ol>
@@ -46,7 +46,7 @@
       <p><strong>Configuration</strong> change le départ. <strong>Exécuter</strong> joue celui qui est affiché.</p>
     </section>
 
-    <p class="intro-aide">Perdu ? Le bouton <strong>Aide</strong>, en haut, explique tout simplement.</p>
+    <p class="intro-aide">Perdu ? Une fois dans un niveau, un bouton <strong>Aide</strong> apparaît en haut à droite : il explique tout simplement.</p>
     <button class="btn btn-go" id="commencer" type="button">C'est parti !</button>
   </div>
 </article>
@@ -57,7 +57,7 @@
   <div class="aide-carte">
     <div class="aide-tete">
       <h2 id="aide-titre">Aide</h2>
-      <button class="aide-fermer" id="aide-fermer" type="button" aria-label="Fermer l'aide" title="Fermer (Échap)">×</button>
+      <button class="aide-fermer" type="button" data-fermer aria-label="Fermer l'aide" title="Fermer (Échap)">×</button>
     </div>
     <div class="aide-corps">
       <div class="aide-onglets" role="tablist" aria-orientation="vertical" aria-label="Sujets">
@@ -155,7 +155,7 @@
     </div>
     <div class="aide-pied">
       <button class="btn btn-sec" id="revoir-accueil" type="button">Revoir l'accueil</button>
-      <button class="btn btn-go" id="aide-ok" type="button">J'ai compris</button>
+      <button class="btn btn-go" type="button" data-fermer>J'ai compris</button>
     </div>
   </div>
 </dialog>

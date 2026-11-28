@@ -289,6 +289,49 @@
     };
   }
 
+  /* Aide pour débutants (<dialog> écrit dans la page) : onglets à gauche, un sujet à la fois.
+     Une page « data-blocs="a b" » n'est proposée que si l'un de ces blocs est dans la boîte du niveau ;
+     « data-variables », que si le niveau a des variables. Rend la fonction qui ouvre l'aide. */
+  function aide(fenetre) {
+    const onglets = [...fenetre.querySelectorAll("[role=tab]")];
+    const page = (o) => document.getElementById(o.getAttribute("aria-controls"));
+    let sujet = onglets[0].dataset.sujet;
+    function choisir(onglet, focus = false) {
+      sujet = onglet.dataset.sujet;
+      for (const o of onglets) {
+        const ici = o === onglet;
+        o.setAttribute("aria-selected", String(ici));
+        o.tabIndex = ici ? 0 : -1;
+        page(o).hidden = !ici;
+      }
+      if (focus) onglet.focus();
+    }
+    const visibles = () => onglets.filter((o) => !o.hidden);
+    for (const o of onglets) o.addEventListener("click", () => choisir(o));
+    fenetre.querySelector("[role=tablist]").addEventListener("keydown", (e) => {
+      const v = visibles(), i = v.indexOf(document.activeElement);
+      const pas = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+      if (i < 0) return;
+      if (pas) choisir(v[(i + pas + v.length) % v.length], true);
+      else if (e.key === "Home") choisir(v[0], true);
+      else if (e.key === "End") choisir(v[v.length - 1], true);
+      else return;
+      e.preventDefault();
+    });
+    for (const b of fenetre.querySelectorAll("[data-fermer]")) b.addEventListener("click", () => fenetre.close());
+    fenetre.addEventListener("click", (e) => { if (e.target === fenetre) fenetre.close(); });
+    return (blocs = [], variables = false) => {
+      for (const o of onglets) {
+        const p = page(o), utiles = p.dataset.blocs;
+        o.hidden = (utiles !== undefined && !utiles.split(" ").some((n) => blocs.includes(n)))
+          || (p.hasAttribute("data-variables") && !variables);
+      }
+      const v = visibles();
+      choisir(v.find((o) => o.dataset.sujet === sujet) || v[0]);
+      fenetre.showModal();
+    };
+  }
+
   function boutonExecuter(bouton, enCours) {
     bouton.setAttribute("aria-pressed", enCours ? "true" : "false");
     bouton.querySelector("span").textContent = enCours ? "Arrêter" : "Exécuter";
@@ -615,5 +658,5 @@
     }));
   }
 
-  window.Atelier = { riche, sansMarques, memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, marquerErreur, boutonIndice, boutonExecuter, cadrer };
+  window.Atelier = { riche, sansMarques, memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, marquerErreur, boutonIndice, aide, boutonExecuter, cadrer };
 }

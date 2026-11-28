@@ -484,7 +484,31 @@
   }
 
   /* ---------- Niveaux, sauvegarde ---------- */
-  const construireNav = () => A.boutonsNiveaux(ui.nav, NIVEAUX, numNiv, etoiles, ouvrir);
+  let surIntro = false;
+  function construireNav() {
+    A.boutonsNiveaux(ui.nav, NIVEAUX, numNiv, etoiles, ouvrir);
+    /* Bouton « Aide » : les explications pour débutants, dans une fenêtre, pendant les niveaux */
+    const b = A.creer("button", "niv niv-intro", "Aide");
+    b.type = "button";
+    b.title = "Aide : les blocs, avancer et tourner, les boucles…";
+    b.hidden = surIntro;
+    b.addEventListener("click", () => ouvrirAide(niv.blocs));
+    ui.nav.prepend(b);
+  }
+  const ouvrirAide = A.aide(document.getElementById("aide"));
+  /* Affiche la page d'accueil à la place de l'atelier, ou revient à l'atelier */
+  function presenter(oui) {
+    if (oui) { effacer(); attente(); }
+    surIntro = oui;
+    document.getElementById("intro").hidden = !oui;
+    document.querySelector("main.jeu").hidden = oui;
+    if (!oui) memo.ecrire("tortue-intro-vue", true);
+    construireNav();
+  }
+  document.getElementById("revoir-accueil").addEventListener("click", () => {
+    document.getElementById("aide").close(); presenter(true);
+  });
+  document.getElementById("commencer").addEventListener("click", () => ouvrir(numNiv));
 
   let chargement = false;
   /* « Recommencer le niveau » : le programme est effacé, les étoiles gagnées restent */
@@ -495,6 +519,7 @@
 
   function ouvrir(i) {
     annulerVider();
+    if (surIntro) presenter(false);
     effacer();
     numNiv = i; niv = NIVEAUX[i];
     memo.ecrire("tortue-niveau", i);
@@ -568,4 +593,6 @@
 
   window.tortueTest = { NIVEAUX, ouvrir, ws, comparer, tracer, aplatir, get niv() { return niv; } };
   ouvrir(Math.min(+memo.lire("tortue-niveau", 0) || 0, NIVEAUX.length - 1));
+  /* À la première visite sur ce navigateur, on commence par l'accueil */
+  if (!memo.lire("tortue-intro-vue", false)) presenter(true);
 }

@@ -27,6 +27,112 @@
   <nav class="niveaux" id="niveaux" aria-label="Niveaux"></nav>
 </header>
 
+<!-- Page d'accueil, à la première visite : très courte. Les explications sont dans l'aide (#aide) -->
+<article class="intro" id="intro" aria-labelledby="intro-titre" hidden>
+  <div class="intro-page">
+    <h2 id="intro-titre">Bienvenue !</h2>
+    <p class="intro-chapeau">Une tortue tient un crayon. Elle dessine en suivant tes ordres, donnés avec des blocs.</p>
+
+    <ol class="intro-etapes">
+      <li><span class="intro-num" aria-hidden="true">1</span><span>Glisse tes ordres, <strong>dans l'ordre</strong>, sous le bloc gris <span class="mb mb-depart">DÉPART</span></span></li>
+      <li><span class="intro-num" aria-hidden="true">2</span><span>Clique sur <strong>Exécuter</strong> et regarde la tortue dessiner.</span></li>
+      <li><span class="intro-num" aria-hidden="true">3</span><span>Gagne jusqu'à <span class="intro-or">3 étoiles</span> : moins de blocs, plus d'étoiles.</span></li>
+    </ol>
+
+    <section class="intro-regle">
+      <h3>Le but : repasser sur le modèle</h3>
+      <p>Le dessin à obtenir est tracé en <strong>pointillés</strong>. Ton dessin doit tomber dessus.</p>
+      <p>Si c'est raté, Cody te montre en <strong>rouge</strong> ce qui manque et en <strong>violet</strong> ce qui est en trop.</p>
+      <p><strong>Réinitialiser</strong> efface ton dessin, pas tes blocs.</p>
+    </section>
+
+    <p class="intro-aide">Perdu ? Une fois dans un niveau, un bouton <strong>Aide</strong> apparaît en haut à droite : il explique tout simplement.</p>
+    <button class="btn btn-go" id="commencer" type="button">C'est parti !</button>
+  </div>
+</article>
+
+<!-- Aide, pendant les niveaux : un sujet à la fois, pour débutants (Atelier.aide). Seuls les sujets
+     utiles au niveau ouvert sont proposés (data-blocs : un de ces blocs dans la boîte) -->
+<dialog class="aide" id="aide" aria-labelledby="aide-titre">
+  <div class="aide-carte">
+    <div class="aide-tete">
+      <h2 id="aide-titre">Aide</h2>
+      <button class="aide-fermer" type="button" data-fermer aria-label="Fermer l'aide" title="Fermer (Échap)">×</button>
+    </div>
+    <div class="aide-corps">
+      <div class="aide-onglets" role="tablist" aria-orientation="vertical" aria-label="Sujets">
+        <button type="button" role="tab" id="t-bases" aria-controls="p-bases" data-sujet="bases">Les blocs</button>
+        <button type="button" role="tab" id="t-bouger" aria-controls="p-bouger" data-sujet="bouger">Avancer et tourner</button>
+        <button type="button" role="tab" id="t-repeter" aria-controls="p-repeter" data-sujet="repeter">Répéter (les boucles)</button>
+        <button type="button" role="tab" id="t-crayon" aria-controls="p-crayon" data-sujet="crayon">Le crayon</button>
+      </div>
+
+      <section class="aide-page" role="tabpanel" id="p-bases" aria-labelledby="t-bases">
+        <h3>Un programme, c'est une recette</h3>
+        <p>Une liste d'ordres, lus <strong>un par un, de haut en bas</strong>. La tortue fait exactement ce qui est écrit : ni plus, ni moins.</p>
+        <div class="aide-exemple">
+          <div class="mini-blocs" aria-label="Exemple de programme">
+            <span class="mb mb-depart">DÉPART</span>
+            <span class="mb mb-mouvement">avancer de 100 pas</span>
+            <span class="mb mb-mouvement">tourner à gauche ↺ de 90 °</span>
+            <span class="mb mb-mouvement">avancer de 50 pas</span>
+          </div>
+          <p>Ici : un trait de 100 pas, un virage, puis un trait de 50 pas. Ça fait un « L ».</p>
+        </div>
+        <ul class="aide-liste">
+          <li><strong>Glisse</strong> les blocs de la boîte vers ton programme et <strong>accroche-les sous DÉPART</strong>, dans l'ordre.</li>
+          <li>Un bloc <strong>grisé</strong> n'est pas accroché : il ne fait rien.</li>
+          <li>Pendant l'exécution, le bloc en cours a un <strong>cadre jaune</strong>.</li>
+          <li>Pour changer un nombre, clique dessus et tape le nouveau.</li>
+        </ul>
+      </section>
+
+      <section class="aide-page" role="tabpanel" id="p-bouger" aria-labelledby="t-bouger" hidden>
+        <h3>Avancer et tourner : se mettre à la place de la tortue</h3>
+        <p>La tortue avance <strong>droit devant elle</strong>, dans le sens où elle regarde. Pour changer de direction, elle tourne <strong>sur place</strong>, sans dessiner.</p>
+        <p class="aide-astuce">Droite et gauche, ce sont <strong>les siennes</strong>, pas les tiennes. Si elle descend vers le bas de l'écran, sa droite est à ta gauche !</p>
+        <dl class="aide-def">
+          <dt><span class="mb mb-mouvement">tourner de 90 °</span></dt><dd>Un quart de tour : un coin de carré.</dd>
+          <dt><span class="mb mb-mouvement">tourner de 180 °</span></dt><dd>Un demi-tour : elle repart d'où elle vient.</dd>
+          <dt><span class="mb mb-mouvement">tourner de 360 °</span></dt><dd>Un tour complet : elle regarde de nouveau devant elle.</dd>
+        </dl>
+        <p>Sur la grille, les traits épais sont espacés de 50 pas, les traits fins de 10 pas.</p>
+      </section>
+
+      <section class="aide-page" role="tabpanel" id="p-repeter" aria-labelledby="t-repeter" data-blocs="repeter" hidden>
+        <h3>Répéter : ne pas écrire dix fois la même chose</h3>
+        <p>Une <strong>boucle</strong> refait les blocs rangés <strong>dans</strong> sa mâchoire. Comme une chanson : « refrain, 3 fois ».</p>
+        <div class="aide-exemple">
+          <div class="mini-blocs" aria-label="Exemple de boucle">
+            <span class="mb mb-boucle">répéter 4 fois</span>
+            <span class="mb-dans mb-dans-boucle"><span class="mb mb-mouvement">avancer de 100 pas</span><span class="mb mb-mouvement">tourner à droite ↻ de 90 °</span></span>
+            <span class="mb mb-boucle mb-fond"></span>
+          </div>
+          <p>2 blocs dedans, joués 4 fois : 4 côtés et 4 coins, donc un carré, avec seulement 3 blocs.</p>
+        </div>
+        <p class="aide-astuce">Pour trouver ce qui se répète, cherche le <strong>morceau</strong> du dessin qui revient plusieurs fois : un côté et un coin, une marche d'escalier…</p>
+        <p>Une boucle peut même en contenir une autre.</p>
+      </section>
+
+      <section class="aide-page" role="tabpanel" id="p-crayon" aria-labelledby="t-crayon" data-blocs="stylo couleur epaisseur" hidden>
+        <h3>Le crayon : dessiner ou pas, et en quelle couleur</h3>
+        <p>Au départ, le crayon est <strong>baissé</strong> : la tortue dessine partout où elle passe.</p>
+        <dl class="aide-def">
+          <dt><span class="mb mb-stylo">lever le crayon</span></dt><dd>Elle se déplace <strong>sans dessiner</strong>, comme quand tu lèves ton stylo de la feuille.</dd>
+          <dt><span class="mb mb-stylo">baisser le crayon</span></dt><dd>Elle dessine de nouveau.</dd>
+          <dt><span class="mb mb-stylo">couleur du crayon</span></dt><dd>Change la couleur des traits <strong>suivants</strong>. Ce qui est déjà dessiné ne change pas.</dd>
+          <dt><span class="mb mb-stylo">épaisseur du trait</span></dt><dd>Trait plus fin ou plus gros.</dd>
+        </dl>
+        <p class="aide-astuce">Un réglage du crayon reste valable jusqu'au prochain bloc qui le change.</p>
+      </section>
+    </div>
+    <div class="aide-pied">
+      <button class="btn btn-sec" id="revoir-accueil" type="button">Revoir l'accueil</button>
+      <button class="btn btn-go" type="button" data-fermer>J'ai compris</button>
+    </div>
+  </div>
+</dialog>
+
 <main class="jeu">
   <section class="carte" aria-labelledby="titre-prog">
     <div class="carte-tete">
