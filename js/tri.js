@@ -9,11 +9,33 @@
   const liste = (name, options) => ({ type: "field_dropdown", name, options });
   const PLATEAUX = () => liste("N", [["1", "1"], ["2", "2"]]);
   const OU = () => liste("O", [["à l'entrée", "entree"], ["en attente", "attente"]]);
+  /* Directions proposées selon le plateau. La valeur « droit » est gardée dans les programmes, mais
+     elle porte le nom de ce qui est au bout : le plateau 2 ou la sortie C (demande de l'enseignant). */
+  const DIRECTIONS = {
+    1: [["la sortie A", "A"], ["le plateau 2", "droit"], ["l'attente", "attente"]],
+    2: [["la sortie C", "droit"], ["la sortie B", "B"]],
+  };
+  function directions() {
+    const bloc = this && this.getSourceBlock && this.getSourceBlock();
+    return DIRECTIONS[(bloc && (bloc.plateau || bloc.getFieldValue("N"))) || "1"];
+  }
+  /* Quand on change de plateau, la liste et le nom affiché suivent */
+  B.Extensions.register("tri_directions", function () {
+    const bloc = this;
+    bloc.getField("N").setValidator((plateau) => {
+      bloc.plateau = plateau;
+      const champ = bloc.getField("D"), avant = champ.getValue();
+      if (champ.getOptions(false).some((o) => o[1] === avant)) {
+        champ.doValueUpdate_(avant); /* même valeur, autre nom */
+        champ.forceRerender();
+      } else champ.setValue("droit");
+      return plateau;
+    });
+  });
   B.defineBlocksWithJsonArray([
     { type: "tri_entrer", message0: "faire entrer la caisse suivante", ...lien, style: "stylo" },
     { type: "tri_orienter", message0: "orienter le plateau %1 vers %2", args0: [PLATEAUX(),
-      liste("D", [["la sortie A", "A"], ["tout droit", "droit"], ["la sortie B", "B"], ["l'attente", "attente"]])],
-      ...lien, style: "mouvement" },
+      liste("D", directions)], extensions: ["tri_directions"], ...lien, style: "mouvement" },
     { type: "tri_envoyer", message0: "envoyer la caisse du plateau %1", args0: [PLATEAUX()], ...lien, style: "stylo" },
     { type: "tri_rappeler", message0: "rappeler une caisse de l'attente", ...lien, style: "stylo" },
     { type: "tri_repeter", message0: "répéter %1 fois %2 %3", args0: [
@@ -63,7 +85,9 @@
     return m;
   }
   const ANGLE = { droit: 0, A: -Math.PI / 2, B: -Math.PI / 2, attente: Math.PI / 2 };
-  const VERS = { droit: "tout droit", A: "vers la sortie A", B: "vers la sortie B", attente: "vers l'attente" };
+  const AU_BOUT = { 1: "vers le plateau 2", 2: "vers la sortie C" };
+  const AUTRES = { A: "vers la sortie A", B: "vers la sortie B", attente: "vers l'attente" };
+  const vers = (n, d) => (d === "droit" ? AU_BOUT[n] : AUTRES[d]);
 
   const fixe = (etat) => ({ tri: true, caisses: [...places(etat).values()], angles: [ANGLE[etat.dir[1]], ANGLE[etat.dir[2]]],
     instruction: "en attente" });
@@ -73,7 +97,7 @@
     if (c.t === "entrer") return "faire entrer la caisse";
     if (c.t === "rappeler") return "rappeler de l'attente";
     if (c.t === "envoyer") return `envoyer le plateau ${c.n}`;
-    return `plateau ${c.n} ${VERS[c.d]}`;
+    return `plateau ${c.n} ${vers(c.n, c.d)}`;
   }
   /* Image intermédiaire : chaque caisse glisse de son ancienne place à la nouvelle, les plateaux tournent */
   function image(avant, ev, u) {
@@ -140,10 +164,11 @@
   }
 
   /* ---------- Relevé et messages ---------- */
-  const COURT = { droit: "tout droit", A: "vers A", B: "vers B", attente: "vers attente" };
-  const releve = (e) => [["plateau 1", COURT[e.dir[1]]], ["plateau 2", COURT[e.dir[2]]], ["en attente", e.attente.length],
+  const COURT = { A: "vers A", B: "vers B", attente: "vers attente" };
+  const court = (n, d) => (d === "droit" ? { 1: "vers plateau 2", 2: "vers C" }[n] : COURT[d]);
+  const releve = (e) => [["plateau 1", court(1, e.dir[1])], ["plateau 2", court(2, e.dir[2])], ["en attente", e.attente.length],
     ["livrées", ["A", "B", "C"].map((s) => s + " : " + (e[s].map((c) => c.l).join(" ") || "—")).join("   ")]];
-  const depuis = (p) => { const [a, b] = p.split(","); return `plateau 1 ${VERS[a]}, plateau 2 ${VERS[b]}`; };
+  const depuis = (p) => { const [a, b] = p.split(","); return `plateau 1 ${vers(1, a)}, plateau 2 ${vers(2, b)}`; };
 
   window.KitTri = {
     prefixe: "tri_", moteur: M, compiler, etatDepart, fixe, image, libelle, dessin2D, objectif, releve,

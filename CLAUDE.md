@@ -156,6 +156,9 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   sans issue ; sorties de 6. Rien n'avance sans instruction.
 - **Alignement obligatoire** : une caisse ne monte que sur un plateau aligné avec son tapis
   (entrer -> plateau 1 « droit » ; rappeler -> plateau 1 « attente » ; 1 -> 2 : plateau 2 « droit »).
+- La valeur interne `droit` s'affiche **« le plateau 2 »** (plateau 1) ou **« la sortie C »**
+  (plateau 2), jamais « tout droit » (demande de l'enseignant). La liste des directions dépend du
+  plateau choisi (`DIRECTIONS` et extension `tri_directions` dans `tri.js`).
 - Initialisation : 6 combinaisons d'orientations (`POSITIONS` « d1,d2 »). Optima 5, 9, 11, 12, 12, 20 ;
   départs aléatoires partout. Une seule attente inverse un ordre sans pouvoir le rétablir : ne pas
   créer de niveau qui l'exige.

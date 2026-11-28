@@ -13,9 +13,9 @@
 
   const ERREURS = {
     entree_vide: "Aucune caisse n'attend à l'entrée.",
-    alignement_entree: "Le plateau 1 n'est pas aligné avec l'entrée : oriente-le « tout droit » avant de faire entrer une caisse.",
+    alignement_entree: "Le plateau 1 n'est pas aligné avec l'entrée : oriente-le vers « le plateau 2 » (en ligne droite avec l'entrée) avant de faire entrer une caisse.",
     alignement_attente: "Le plateau 1 n'est pas aligné avec la voie d'attente : oriente-le vers « l'attente » avant de rappeler une caisse.",
-    alignement_plateau2: "Le plateau 2 n'est pas aligné avec le tapis venant du plateau 1 : oriente-le « tout droit » avant d'envoyer la caisse.",
+    alignement_plateau2: "Le plateau 2 n'est pas aligné avec le tapis venant du plateau 1 : oriente-le vers « la sortie C » (en ligne droite) avant d'envoyer la caisse.",
     occupe: "Le plateau 1 est déjà occupé : envoie d'abord sa caisse.",
     plateau_vide: "Ce plateau est vide : il n'y a rien à envoyer.",
     collision: "Collision : le plateau 2 est déjà occupé. Envoie d'abord sa caisse.",
@@ -65,7 +65,7 @@
 
   const NIVEAUX = [
     niveau({ titre: "Premier aiguillage", verbe: "ENVOYER", texte: "toutes les caisses vers la sortie A. Il en arrive de 1 à 6." + CHANGE,
-      indice: "Pour recevoir une caisse, le plateau doit être aligné avec le tapis d'où elle vient. Oriente-le tout droit, fais entrer la caisse, puis tourne-le vers la sortie.",
+      indice: "Pour recevoir une caisse, le plateau doit être aligné avec le tapis d'où elle vient. Pour l'aligner avec l'entrée, oriente-le vers le plateau 2 ; fais entrer la caisse, puis tourne-le vers la sortie.",
       blocs: COMMUN, opt: 5,
       prog: [tantque("entree", orienter(1, "droit"), entrer(), orienter(1, "A"), envoyer(1))] },
       (e) => ({ A: [...e] }), (alea) => motifAlea(alea, 1, 6, "RBJV"), ["JVB", "R", "BRJVRB", "VJ"]),
@@ -214,7 +214,8 @@
   }
 
   /* ---------- Python (lecture seule) ---------- */
-  const NOMS = { droit: "tout droit", A: "sortie A", B: "sortie B", attente: "attente" };
+  const NOMS = { A: "sortie A", B: "sortie B", attente: "attente" };
+  const nom = (n, d) => (d === "droit" ? { 1: "plateau 2", 2: "sortie C" }[n] : NOMS[d]);
   const TEST = { entree: "caisse_a_l_entree()", attente: "caisse_en_attente()" };
   function lignes(prog, ind, prof, out) {
     const p = "    ".repeat(ind);
@@ -223,7 +224,7 @@
       if (c.t === "entrer") out.push(`${p}faire_entrer()`);
       else if (c.t === "rappeler") out.push(`${p}rappeler()`);
       else if (c.t === "envoyer") out.push(`${p}envoyer(${c.n})`);
-      else if (c.t === "orienter") out.push(`${p}orienter(${c.n}, "${NOMS[c.d]}")`);
+      else if (c.t === "orienter") out.push(`${p}orienter(${c.n}, "${nom(c.n, c.d)}")`);
       else if (c.t === "repeter") { out.push(`${p}for ${"ijk"[prof] || "n" + prof} in range(${c.n}):`); corps(c.corps, 1); }
       else if (c.t === "tantque") { out.push(`${p}while ${TEST[c.ou]}:`); corps(c.corps); }
       else {

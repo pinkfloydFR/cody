@@ -145,6 +145,6 @@ test("une caisse oubliée en route fait échouer", () => {
 
 test("Python lisible", () => {
   const code = M.python(M.NIVEAUX[5].prog);
-  assert.match(code, /while caisse_a_l_entree\(\):\n    orienter\(1, "tout droit"\)\n    faire_entrer\(\)\n    if couleur_plateau\(1\) == "rouge":\n        orienter\(1, "sortie A"\)/);
+  assert.match(code, /while caisse_a_l_entree\(\):\n    orienter\(1, "plateau 2"\)\n    faire_entrer\(\)\n    if couleur_plateau\(1\) == "rouge":\n        orienter\(1, "sortie A"\)/);
   assert.match(code, /while caisse_en_attente\(\):\n    orienter\(1, "attente"\)\n    rappeler\(\)/);
 });
