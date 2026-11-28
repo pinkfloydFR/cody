@@ -49,9 +49,10 @@ Docker : `docker-compose.yml` + `Dockerfile` (nginx, en-têtes et CSP dans `depl
 l'image ne contient que les fichiers servis, pas `docs/`). **Aucun port publié** : Traefik seulement,
 avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèle
 `deploy/traefik-cody.exemple.yml`). Sur le serveur, un clone du dépôt : `./deploy/deployer.sh`
-(pull de la branche courante, `version.txt` = commit, reconstruction, attente de l'état « healthy »).
-**Mise à jour automatique** des pages ouvertes (`surveillerVersion`, `atelier.js`) : `version.txt` relu
-chaque minute ; rechargement si l'onglet est caché, sinon après 30 s sans geste, sans programme en cours,
+(pull de la branche courante, `version.txt` = « numéro commit », numéro = nombre de commits, reconstruction, attente de l'état « healthy »).
+**Version** affichée à côté de « Cody » (« v58 »). **Mise à jour automatique** des pages ouvertes
+(`surveillerVersion`, `atelier.js`) : `version.txt` relu chaque minute ; si elle change, « Cody » clignote
+(un clic recharge) ; rechargement si l'onglet est caché, sinon après 30 s sans geste, sans programme en cours,
 fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx) : une visite voit la dernière version.
 
 ## Présentation et interface (choix de l'enseignant)
@@ -83,7 +84,7 @@ fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx)
 ## Blocs (`js/atelier.js`)
 
 - Bloc en cours : cadre jaune 6 px + halo (`.blocklyHighlighted`). Bloc où le programme s'arrête :
-  cadre rouge clignotant (`A.marquerErreur`, classe `.bloc-fautif`), retiré au prochain essai, au
+  cadre rouge posé par-dessus le bloc (bas compris), qui clignote 3 fois puis reste allumé (`A.marquerErreur`, `.contour-fautif`), retiré au prochain essai, au
   changement de niveau ou dès que le programme change (demande de l'enseignant, 27/11/2026).
 - **Aucun son** : `sounds: false` et `media/*.mp3` retirés ; ne pas les remettre en mettant Blockly à jour.
 - Rendu `cody` = thrasos + **prise femelle au fond des boucles et conditions** (surcharge de

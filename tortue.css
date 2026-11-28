@@ -24,6 +24,15 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* Barre du haut */
 .barre{background:var(--barre);color:#fff;display:flex;flex-wrap:wrap;align-items:stretch;gap:4px 22px;padding:0 14px;min-height:52px}
 .barre h1{font-size:21px;align-self:center}
+.barre h1 .version{margin-left:6px;font-size:12px;font-weight:400;color:#9fb2cb;letter-spacing:.02em}
+/* Mise à jour disponible : « Cody » devient un bouton qui clignote ; un clic recharge la page */
+.titre-maj{display:flex;align-items:baseline;gap:0;font:inherit;color:#fff;background:transparent;cursor:pointer;
+  border:2px solid #f2b633;border-radius:8px;padding:4px 10px;animation:maj 1.2s ease-in-out infinite}
+.titre-maj .version{color:#ffe08a}
+.titre-maj .maj-texte{margin-left:8px;font-size:13px;color:#f2b633}
+@keyframes maj{50%{background:#f2b633;color:var(--barre)}}
+.titre-maj:hover{animation:none;background:#f2b633;color:var(--barre)}
+.titre-maj:hover .version,.titre-maj:hover .maj-texte{color:var(--barre)}
 .onglets{display:flex;gap:2px}
 .onglets a{display:flex;align-items:center;padding:0 18px;min-height:2.75rem;color:#c4cedb;text-decoration:none;
   font-weight:700;border-bottom:4px solid transparent;border-top:4px solid transparent}
@@ -334,11 +343,12 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* Bloc en cours : cadre jaune épais et halo (demande de l'enseignant : le cadre seul se voyait mal) */
 .blocklyHighlighted>.blocklyPath{filter:drop-shadow(0 0 5px #ffd23f) drop-shadow(0 0 2px #ffd23f)!important;stroke:#ffd23f!important;stroke-width:6px!important}
 .blocklyHighlighted>.cody-sinon{stroke-width:6px}
-/* Bloc où le programme s'est arrêté : cadre rouge clignotant */
-.bloc-fautif>.blocklyPath,.bloc-fautif>.cody-sinon{stroke:#ff2d20!important;stroke-width:6px!important;
-  filter:drop-shadow(0 0 6px #ff2d20)!important;animation:fautif 1s ease-in-out infinite}
-@keyframes fautif{50%{stroke:#ffd0cc;filter:none}}
-@media (prefers-reduced-motion:reduce){.bloc-fautif>.blocklyPath,.bloc-fautif>.cody-sinon{animation:none}}
+/* Bloc où le programme s'est arrêté : cadre rouge par-dessus le bloc (A.marquerErreur), qui clignote
+   3 fois franchement puis reste allumé */
+.contour-fautif{fill:none;stroke:#ff2d20;stroke-width:6px;filter:drop-shadow(0 0 6px #ff2d20);pointer-events:none;
+  animation:fautif .6s ease-in-out 3}
+@keyframes fautif{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.contour-fautif{animation:none}}
 /* Nom de variable dans une consigne ou un indice : italique, même bleu que les blocs « variable » */
 var.nom-var{font-style:italic;font-weight:700;color:light-dark(#2457a6,#8fb4ff)}
 

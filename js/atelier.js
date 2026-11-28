@@ -132,12 +132,17 @@
   const fautifs = new WeakMap();
   function marquerErreur(ws, id) {
     const avant = fautifs.get(ws);
-    if (avant) { const r = avant.getSvgRoot && avant.getSvgRoot(); if (r) r.classList.remove("bloc-fautif"); }
+    if (avant) avant.remove();
     fautifs.delete(ws);
     const bloc = id && ws.getBlockById(id);
     if (!bloc) return;
-    bloc.getSvgRoot().classList.add("bloc-fautif");
-    fautifs.set(ws, bloc);
+    /* Le cadre est une copie du contour posée PAR-DESSUS tout le bloc : sur le contour lui-même, le
+       bas était caché par le bloc suivant (dessiné après). Il clignote 3 fois puis reste allumé. */
+    const contour = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    contour.setAttribute("class", "contour-fautif");
+    contour.setAttribute("d", bloc.pathObject.svgPath.getAttribute("d"));
+    bloc.getSvgRoot().append(contour);
+    fautifs.set(ws, contour);
     if (!ws.codyFautif) {
       ws.codyFautif = true;
       ws.addChangeListener((e) => { if (!e.isUiEvent && fautifs.has(ws)) marquerErreur(ws, null); });
@@ -761,13 +766,15 @@
     }));
   }
 
-  /* Mise à jour automatique : deployer.sh écrit le commit dans version.txt. La page le relit chaque
-     minute ; s'il a changé, elle se recharge sans rien perdre (programmes, niveau et étoiles sont en
-     mémoire) : tout de suite si l'onglet est caché, sinon au premier moment calme (30 s sans souris
-     ni clavier, aucun programme en cours, aucune fenêtre ouverte, pas de second écran). Hors ligne
-     ou sans version.txt (fichier local, python -m http.server) : rien ne se passe. */
+  /* Version et mise à jour automatique. deployer.sh écrit version.txt : numéro (nombre de commits) puis
+     commit. Le numéro s'affiche à côté de « Cody ». La page relit le fichier chaque minute ; s'il a
+     changé, « Cody » clignote et devient un bouton qui recharge la page. Sinon elle se recharge seule,
+     sans rien perdre (programmes, niveau et étoiles sont en mémoire) : tout de suite si l'onglet est
+     caché, sinon au premier moment calme (30 s sans souris ni clavier, aucun programme en cours, aucune
+     fenêtre ouverte, pas de second écran). Sans version.txt (fichier local, python -m http.server) : rien. */
   (function surveillerVersion() {
     if (location.protocol === "file:") return;
+    const titre = document.querySelector(".barre h1");
     const lire = () => fetch("version.txt", { cache: "no-store" })
       .then((r) => (r.ok ? r.text() : null)).then((t) => (t ? t.trim() : null)).catch(() => null);
     let actuelle = null, nouvelle = false, dernierGeste = Date.now();
@@ -782,11 +789,29 @@
       return Date.now() - dernierGeste > 30000 && !enCours && !fenetre && !(ecran && !ecran.hidden);
     };
     const essayer = () => { if (nouvelle && calme()) location.reload(); };
+    /* « Cody » + numéro ; en cas de mise à jour, un bouton clignotant */
+    function afficher(v) {
+      if (!titre) return;
+      const [numero, commit] = v.split(/\s+/);
+      const version = creer("span", "version", "v" + numero);
+      version.title = `Version ${numero}${commit ? ` (${commit})` : ""}`;
+      if (!nouvelle) { titre.replaceChildren("Cody", version); return; }
+      const b = creer("button", "titre-maj");
+      b.type = "button";
+      b.title = "Nouvelle version disponible : clique pour mettre à jour (tu ne perds rien)";
+      b.append("Cody", version, creer("span", "maj-texte", "mise à jour"));
+      b.addEventListener("click", () => location.reload());
+      titre.replaceChildren(b);
+    }
     lire().then((v) => {
       actuelle = v;
       if (!v) return;
+      afficher(v);
       setInterval(async () => {
-        if (!nouvelle) { const v2 = await lire(); nouvelle = !!v2 && v2 !== actuelle; }
+        if (!nouvelle) {
+          const v2 = await lire();
+          if (v2 && v2 !== actuelle) { nouvelle = true; afficher(actuelle); }
+        }
         essayer();
       }, 60000);
       setInterval(essayer, 5000);
