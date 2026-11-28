@@ -523,6 +523,11 @@
     b.hidden = surIntro;
     b.addEventListener("click", () => aider());
     $("niveaux").prepend(b);
+    /* Sur l'accueil, aucun niveau n'est ouvert : aucun n'est mis en avant */
+    if (surIntro) {
+      for (const n of $("niveaux").querySelectorAll("[aria-current]")) n.removeAttribute("aria-current");
+      for (const n of $("niveaux").querySelectorAll(".menu-courant")) n.classList.remove("menu-courant");
+    }
   }
   /* Affiche la page d'accueil à la place de l'atelier, ou revient à l'atelier */
   function presenter(oui) {

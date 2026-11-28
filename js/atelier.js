@@ -1,12 +1,29 @@
 /* Parties communes aux deux ateliers (Traçage et Manutention). */
 {
   const B = window.Blockly;
-  const sombre = matchMedia("(prefers-color-scheme: dark)");
-
   const memo = {
     lire(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
     ecrire(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* navigation privée */ } },
   };
+
+  /* Thème clair ou sombre : celui du système, sauf choix de l'élève (bouton de la barre, « cody-theme »,
+     commun aux deux ateliers). « sombre » imite un MediaQueryList : .matches et l'événement « change ». */
+  const systeme = matchMedia("(prefers-color-scheme: dark)");
+  let choixTheme = memo.lire("cody-theme", null);
+  const sombre = new EventTarget();
+  Object.defineProperty(sombre, "matches", { get: () => (choixTheme ? choixTheme === "sombre" : systeme.matches) });
+  const appliquerTheme = () => {
+    if (choixTheme) document.documentElement.dataset.theme = choixTheme === "sombre" ? "dark" : "light";
+    else delete document.documentElement.dataset.theme;
+  };
+  appliquerTheme();
+  systeme.addEventListener("change", () => { if (!choixTheme) sombre.dispatchEvent(new Event("change")); });
+  function changerTheme() {
+    choixTheme = sombre.matches ? "clair" : "sombre";
+    memo.ecrire("cody-theme", choixTheme);
+    appliquerTheme();
+    sombre.dispatchEvent(new Event("change"));
+  }
 
   /* Couleurs de blocs : texte blanc, contraste d'au moins 4,5 */
   const style = (p, s, t) => ({ colourPrimary: p, colourSecondary: s, colourTertiary: t });
@@ -103,6 +120,31 @@
     ws.scroll(-m.scrollLeft, -m.scrollTop);
   }
 
+  /* Un ascenseur n'apparaît que si le contenu sort de la vue dans son sens (marge d'un pixel) */
+  function majAscenseurs(ws) {
+    const paire = ws.scrollbar;
+    if (!paire) return;
+    const mm = ws.getMetricsManager(), c = mm.getContentMetrics(true), v = mm.getViewMetrics(true);
+    const vide = !ws.getTopBlocks(false).length;
+    const depasse = (debut, taille, vDebut, vTaille) => !vide && (debut < vDebut - 1 || debut + taille > vDebut + vTaille + 1);
+    if (paire.vScroll) paire.vScroll.setContainerVisible(depasse(c.top, c.height, v.top, v.height));
+    if (paire.hScroll) paire.hScroll.setContainerVisible(depasse(c.left, c.width, v.left, v.width));
+  }
+
+  /* La poubelle (47 px de large) est alignée à droite comme les boutons de zoom (32 px) : on la décale
+     pour que les deux soient centrés sur le même axe */
+  function centrerPoubelle(ws) {
+    const poubelle = ws.trashcan, zoom = ws.zoomControls_;
+    if (!poubelle || !zoom || !zoom.WIDTH) return;
+    const placer = poubelle.position.bind(poubelle);
+    poubelle.position = (...args) => {
+      placer(...args);
+      poubelle.left += (47 - zoom.WIDTH) / 2;
+      if (poubelle.svgGroup) poubelle.svgGroup.setAttribute("transform", `translate(${poubelle.left},${poubelle.top})`);
+    };
+    ws.resize();
+  }
+
   function injecter(id, boite, echelle = 1.1) {
     const ws = B.inject(id, {
       toolbox: boite, renderer: "cody", theme: theme(), media: "media/", trashcan: true,
@@ -112,8 +154,18 @@
       plugins: { metricsManager: MetriquesCody },
     });
     ws.addChangeListener(B.Events.disableOrphans);
-    new ResizeObserver(() => B.svgResize(ws)).observe(document.getElementById(id));
+    centrerPoubelle(ws);
+    /* Ascenseurs seulement quand le programme dépasse de la vue (pas au départ d'un niveau) */
+    let attente = 0;
+    const ascenseurs = () => { if (!attente) attente = requestAnimationFrame(() => { attente = 0; majAscenseurs(ws); }); };
+    ws.addChangeListener(ascenseurs);
+    new ResizeObserver(() => { B.svgResize(ws); ascenseurs(); }).observe(document.getElementById(id));
     sombre.addEventListener("change", () => ws.setTheme(theme()));
+    /* Blockly mesure les textes au premier dessin : si Luciole arrive après (réseau lent, cache vide),
+       les blocs gardent la largeur de la police de secours et le texte déborde. On redessine tout
+       (blocs et boîte à outils) une fois la police chargée. */
+    Promise.all([document.fonts.load("12px Luciole"), document.fonts.load("bold 12px Luciole")])
+      .then(() => ws.setTheme(theme()), () => {});
     return ws;
   }
 
@@ -483,6 +535,8 @@
   const adresse = () => location.origin + location.pathname;
   const nbBlocs = (n) => `${n} bloc${n > 1 ? "s" : ""}`;
 
+  const ICONE_LUNE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>';
+  const ICONE_SOLEIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   const ICONE_PDF = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h8l5 5V21a.5.5 0 0 1-.5.5h-12A.5.5 0 0 1 6 21z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 2.5V8h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 11v6m-2.6-2.6L12 17l2.6-2.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const ICONE_PROF = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg>`;
 
@@ -501,7 +555,19 @@
     };
     const pdf = bouton("exporter-pdf", ICONE_PDF, "PDF", "Exporter ton programme en PDF (image des blocs et rappel du niveau)");
     const prof = bouton("espace-prof", ICONE_PROF, "Prof", "Espace prof : solutions des niveaux (mot de passe)");
-    place.replaceChildren(pdf, prof);
+    /* Bascule clair / sombre : l'icône montre le mode vers lequel on passe */
+    const theme = creer("button", "btn btn-mini btn-icone btn-theme");
+    theme.type = "button"; theme.id = "changer-theme";
+    const majTheme = () => {
+      const versSombre = !sombre.matches;
+      theme.innerHTML = versSombre ? ICONE_LUNE : ICONE_SOLEIL;
+      theme.title = versSombre ? "Passer en mode sombre" : "Passer en mode clair";
+      theme.setAttribute("aria-label", theme.title);
+    };
+    majTheme();
+    sombre.addEventListener("change", majTheme);
+    theme.addEventListener("click", changerTheme);
+    place.replaceChildren(pdf, prof, theme);
 
     const occupe = async (b, travail) => {
       if (b.disabled) return;

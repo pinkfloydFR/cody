@@ -62,7 +62,8 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   (départ avec le plus de caisses, `departMaximum`), « Niveau suivant » (absent au dernier niveau ;
   rien en création libre ni en cas d'échec ; Échap ferme).
 - **Barre du haut** (52 px) : onglets, logo Python (menu du code, `.menu-python`, avec Copier),
-  boutons **PDF** et **Prof**, puis les niveaux (rangée au traçage ; à la manutention, après le bouton
+  boutons **PDF**, **Prof** et **clair / sombre** (`changerTheme`, `cody-theme` : thème du système tant que
+  l'élève n'a rien choisi ; `A.sombre` imite un MediaQueryList), puis les niveaux (rangée au traçage ; à la manutention, après le bouton
   « Aide », un menu par groupe nommé « LVL1 », « LVL2 »… pour la place ; nom du groupe et étoiles
   gagnées en tête du menu ouvert et dans l'infobulle).
 - **Indice** : bouton « ? » ambre à droite du titre (`A.boutonIndice`), fenêtre au milieu de l'écran.
@@ -89,6 +90,10 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   (copie découpée du contour, `teinterSinon` dans `manutention.js`). Bloc de départ « DÉPART », non
   supprimable ; `disableOrphans` grise les blocs non accrochés.
 - `A.cadrer` place le programme à 16 px du coin haut gauche au chargement.
+- Ascenseurs masqués tant que le programme tient dans la vue (`majAscenseurs`) ; poubelle centrée sous
+  les boutons de zoom (`centrerPoubelle`, surcharge de `trashcan.position`) ; blocs redessinés une fois
+  Luciole chargée (sinon, police de secours plus étroite : texte qui déborde). **À revérifier à chaque
+  mise à jour de Blockly.**
 
 ## Atelier Traçage (`js/tortue.js`)
 

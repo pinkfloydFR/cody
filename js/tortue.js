@@ -494,6 +494,8 @@
     b.hidden = surIntro;
     b.addEventListener("click", () => ouvrirAide(niv.blocs));
     ui.nav.prepend(b);
+    /* Sur l'accueil, aucun niveau n'est ouvert : aucun n'est mis en avant */
+    if (surIntro) for (const n of ui.nav.querySelectorAll("[aria-current]")) n.removeAttribute("aria-current");
   }
   const ouvrirAide = A.aide(document.getElementById("aide"));
   /* Affiche la page d'accueil à la place de l'atelier, ou revient à l'atelier */
