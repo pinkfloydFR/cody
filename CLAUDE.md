@@ -49,7 +49,10 @@ Docker : `docker-compose.yml` + `Dockerfile` (nginx, en-têtes et CSP dans `depl
 l'image ne contient que les fichiers servis, pas `docs/`). **Aucun port publié** : Traefik seulement,
 avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèle
 `deploy/traefik-cody.exemple.yml`). Sur le serveur, un clone du dépôt : `./deploy/deployer.sh`
-(pull de la branche courante, reconstruction, attente de l'état « healthy »).
+(pull de la branche courante, `version.txt` = commit, reconstruction, attente de l'état « healthy »).
+**Mise à jour automatique** des pages ouvertes (`surveillerVersion`, `atelier.js`) : `version.txt` relu
+chaque minute ; rechargement si l'onglet est caché, sinon après 30 s sans geste, sans programme en cours,
+fenêtre ouverte ni second écran. Tout est en `Cache-Control: no-cache` (nginx) : une visite voit la dernière version.
 
 ## Présentation et interface (choix de l'enseignant)
 

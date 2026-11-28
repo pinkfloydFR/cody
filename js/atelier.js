@@ -761,5 +761,38 @@
     }));
   }
 
+  /* Mise à jour automatique : deployer.sh écrit le commit dans version.txt. La page le relit chaque
+     minute ; s'il a changé, elle se recharge sans rien perdre (programmes, niveau et étoiles sont en
+     mémoire) : tout de suite si l'onglet est caché, sinon au premier moment calme (30 s sans souris
+     ni clavier, aucun programme en cours, aucune fenêtre ouverte, pas de second écran). Hors ligne
+     ou sans version.txt (fichier local, python -m http.server) : rien ne se passe. */
+  (function surveillerVersion() {
+    if (location.protocol === "file:") return;
+    const lire = () => fetch("version.txt", { cache: "no-store" })
+      .then((r) => (r.ok ? r.text() : null)).then((t) => (t ? t.trim() : null)).catch(() => null);
+    let actuelle = null, nouvelle = false, dernierGeste = Date.now();
+    for (const ev of ["pointerdown", "pointermove", "keydown", "wheel"]) {
+      addEventListener(ev, () => { dernierGeste = Date.now(); }, { passive: true, capture: true });
+    }
+    const calme = () => {
+      if (document.hidden) return true;
+      const enCours = document.querySelector("#lancer[aria-pressed=true]");
+      const fenetre = document.querySelector("dialog[open]");
+      const ecran = document.getElementById("deportee");
+      return Date.now() - dernierGeste > 30000 && !enCours && !fenetre && !(ecran && !ecran.hidden);
+    };
+    const essayer = () => { if (nouvelle && calme()) location.reload(); };
+    lire().then((v) => {
+      actuelle = v;
+      if (!v) return;
+      setInterval(async () => {
+        if (!nouvelle) { const v2 = await lire(); nouvelle = !!v2 && v2 !== actuelle; }
+        essayer();
+      }, 60000);
+      setInterval(essayer, 5000);
+      document.addEventListener("visibilitychange", essayer);
+    });
+  })();
+
   window.Atelier = { riche, sansMarques, memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, marquerErreur, boutonIndice, aide, boutonExecuter, cadrer, expliquer, TEXTE_REPETER };
 }

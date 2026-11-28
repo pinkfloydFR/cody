@@ -4,6 +4,8 @@ set -eu
 cd "$(dirname "$0")/.."
 
 git pull --ff-only
+# Version servie : les pages ouvertes la comparent à la leur et se rechargent si elle change
+git rev-parse HEAD > version.txt
 docker compose up -d --build
 
 echo "Attente de l'état « healthy »…"
