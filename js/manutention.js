@@ -516,18 +516,15 @@
   let surIntro = false;
   function construireNav() {
     A.boutonsNiveaux($("niveaux"), NIVEAUX, numNiv, notes, ouvrir);
-    /* Bouton « Aide » : la page d'explications, avant le niveau 1 */
+    /* Bouton « Aide » : les explications pour débutants, dans une fenêtre, pendant les niveaux */
     const b = A.creer("button", "niv niv-intro", "Aide");
     b.type = "button";
-    b.title = "Explications avant de commencer";
-    b.addEventListener("click", () => presenter(true));
-    if (surIntro) {
-      for (const autre of $("niveaux").querySelectorAll("[aria-current]")) autre.removeAttribute("aria-current");
-      b.setAttribute("aria-current", "true");
-    }
+    b.title = "Aide : les blocs, les boucles, les variables…";
+    b.hidden = surIntro;
+    b.addEventListener("click", () => aider());
     $("niveaux").prepend(b);
   }
-  /* Affiche la page d'explications à la place de l'atelier, ou revient à l'atelier */
+  /* Affiche la page d'accueil à la place de l'atelier, ou revient à l'atelier */
   function presenter(oui) {
     if (oui) { arreter(); montrer(); attente(); }
     surIntro = oui;
@@ -536,6 +533,48 @@
     if (!oui) memo.ecrire("manut-intro-vue", true);
     construireNav();
   }
+
+  /* ---------- Aide : un sujet à la fois, seulement ceux utiles au niveau ouvert ---------- */
+  const fenetreAide = $("aide");
+  const ongletsAide = [...fenetreAide.querySelectorAll("[role=tab]")];
+  const pageAide = (o) => $(o.getAttribute("aria-controls"));
+  let sujetAide = "bases";
+  function choisirSujet(onglet, focus = false) {
+    sujetAide = onglet.dataset.sujet;
+    for (const o of ongletsAide) {
+      const ici = o === onglet;
+      o.setAttribute("aria-selected", String(ici));
+      o.tabIndex = ici ? 0 : -1;
+      pageAide(o).hidden = !ici;
+    }
+    if (focus) onglet.focus();
+  }
+  function aider() {
+    const boite = (niv.blocs || []).join(" ").split(" ");
+    for (const o of ongletsAide) {
+      const page = pageAide(o), blocs = page.dataset.blocs;
+      o.hidden = (blocs !== undefined && !blocs.split(" ").some((n) => boite.includes(n)))
+        || (page.hasAttribute("data-variables") && !(niv.variables || []).length);
+    }
+    const visibles = ongletsAide.filter((o) => !o.hidden);
+    choisirSujet(visibles.find((o) => o.dataset.sujet === sujetAide) || visibles[0]);
+    fenetreAide.showModal();
+  }
+  for (const o of ongletsAide) o.addEventListener("click", () => choisirSujet(o));
+  fenetreAide.querySelector("[role=tablist]").addEventListener("keydown", (e) => {
+    const visibles = ongletsAide.filter((o) => !o.hidden), i = visibles.indexOf(document.activeElement);
+    const pas = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+    if (i < 0) return;
+    if (pas) choisirSujet(visibles[(i + pas + visibles.length) % visibles.length], true);
+    else if (e.key === "Home") choisirSujet(visibles[0], true);
+    else if (e.key === "End") choisirSujet(visibles[visibles.length - 1], true);
+    else return;
+    e.preventDefault();
+  });
+  $("aide-fermer").addEventListener("click", () => fenetreAide.close());
+  $("aide-ok").addEventListener("click", () => fenetreAide.close());
+  fenetreAide.addEventListener("click", (e) => { if (e.target === fenetreAide) fenetreAide.close(); });
+  $("revoir-accueil").addEventListener("click", () => { fenetreAide.close(); presenter(true); });
   let chargement = false;
 
   function majProgramme() {
@@ -777,7 +816,8 @@
   });
 
   window.manutTest = { NIVEAUX, ouvrir, ws, departMaximum, nombreCaisses, get en3D() { return !!rendu3D(); }, get tirage() { return tirage; }, get pince() { return pince; } };
-  $("commencer").addEventListener("click", () => ouvrir(0));
+  /* « C'est parti » : retour au niveau en cours (le niveau 1 à la première visite) */
+  $("commencer").addEventListener("click", () => ouvrir(numNiv));
   ouvrir(Math.min(+memo.lire("manut-niveau", 0) || 0, NIVEAUX.length - 1));
   /* À la première visite sur ce navigateur, on commence par les explications */
   if (!memo.lire("manut-intro-vue", false)) presenter(true);

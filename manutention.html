@@ -27,51 +27,138 @@
   <nav class="niveaux" id="niveaux" aria-label="Niveaux"></nav>
 </header>
 
-<!-- Page d'explications, avant le niveau 1 : du texte seulement, court et aéré -->
+<!-- Page d'accueil, à la première visite : très courte. Les explications sont dans l'aide (#aide) -->
 <article class="intro" id="intro" aria-labelledby="intro-titre" hidden>
   <div class="intro-page">
-    <h2 id="intro-titre">Avant de commencer</h2>
-    <p class="intro-chapeau">Assemble tes blocs sous <strong>DÉPART</strong>, puis clique sur <strong>Exécuter</strong>.</p>
-    <p class="intro-chapeau">Bloc grisé : pas accroché, il ne fait rien. Cadre jaune : bloc en cours. Cadre rouge clignotant : le programme s'est arrêté sur ce bloc.</p>
+    <h2 id="intro-titre">Bienvenue !</h2>
+    <p class="intro-chapeau">Des machines déplacent des caisses. C'est toi qui leur dis quoi faire, avec des blocs.</p>
+
+    <ol class="intro-etapes">
+      <li><span class="intro-num" aria-hidden="true">1</span><span><strong>Empile</strong> des blocs sous <strong>DÉPART</strong>.</span></li>
+      <li><span class="intro-num" aria-hidden="true">2</span><span>Clique sur <strong>Exécuter</strong> et regarde la machine.</span></li>
+      <li><span class="intro-num" aria-hidden="true">3</span><span>Gagne jusqu'à <span class="intro-or">3 étoiles</span> : moins de blocs, plus d'étoiles.</span></li>
+    </ol>
 
     <section class="intro-regle">
-      <h3>Ton programme doit gérer TOUS les cas</h3>
-      <p>Les caisses et l'état de la machine au départ peuvent changer à chaque essai.</p>
-      <p>D'autres cas sont testés en coulisses. Si l'un échoue, il t'est montré.</p>
-      <p><strong>Configuration</strong> tire un nouveau départ : <strong>Exécuter</strong> joue celui qui est affiché.</p>
+      <h3>Une seule règle : ton programme doit marcher à tous les coups</h3>
+      <p>D'un essai à l'autre, les caisses et la position de la machine changent.</p>
+      <p>Cody essaie aussi ton programme sur d'autres départs. Si l'un rate, il te le montre.</p>
+      <p><strong>Configuration</strong> change le départ. <strong>Exécuter</strong> joue celui qui est affiché.</p>
     </section>
 
-    <div class="intro-cartes">
-      <section class="carte">
-        <h3>Initialiser</h3>
-        <p>Tu ne sais pas dans quel état est la machine.</p>
-        <p><strong>PLACER</strong> d'abord le bras ou les plateaux comme il te les faut.</p>
-        <p>Une variable aussi : <strong>METTRE</strong>-la à la bonne valeur avant de t'en servir.</p>
-      </section>
-      <section class="carte">
-        <h3>Prendre une caisse</h3>
-        <ul class="intro-postes">
-          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="6" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="17" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text><rect x="31" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="42" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text><rect x="56" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="67" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><path d="M84 42 H102 M95 35 L102 42 L95 49" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Entrée</strong> : comme dans une file d'attente, la première arrivée passe en premier.</span></li>
-          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="30" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="41" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><rect x="30" y="12" width="22" height="19" rx="2" fill="#0e6b78"/><text x="41" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text><rect x="58" y="4" width="22" height="19" rx="2" fill="#0e6b78"/><text x="69" y="18" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text><path d="M42 8 Q50 0 56 6 M49 2 L57 6 L51 11" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>1, 2, 3</strong> : comme des assiettes empilées, on prend celle du dessus.</span></li>
-          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="52" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="63" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><path d="M10 42 H42 M35 35 L42 42 L35 49" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M84 16 L100 32 M100 16 L84 32" stroke="#d8453a" stroke-width="4" stroke-linecap="round"/></svg><span><strong>Sortie</strong> : une caisse partie ne revient pas.</span></li>
-        </ul>
-      </section>
-      <section class="carte">
-        <h3>Répéter et choisir</h3>
-        <dl>
-          <dt>répéter 3 fois</dt><dd>le nombre est connu (ou rangé dans une variable)</dd>
-          <dt>répéter tant que</dt><dd>il est inconnu</dd>
-          <dt>répéter jusqu'à</dt><dd>on vise une position</dd>
-          <dt>s'il y a, si</dt><dd>on vérifie une seule fois</dd>
-          <dt>une variable</dt><dd>un nombre retenu : mettre, ajouter, retirer, comparer (à un nombre ou à une variable)</dd>
-        </dl>
-      </section>
-    </div>
-
-    <p class="intro-etoiles"><span aria-hidden="true">★★★</span> Moins tu utilises de blocs, plus tu gagnes d'étoiles.</p>
-    <button class="btn btn-go" id="commencer" type="button">Commencer le niveau 1</button>
+    <p class="intro-aide">Perdu ? Le bouton <strong>Aide</strong>, en haut, explique tout simplement.</p>
+    <button class="btn btn-go" id="commencer" type="button">C'est parti !</button>
   </div>
 </article>
+
+<!-- Aide, pendant les niveaux : un sujet à la fois, pour débutants. Seuls les sujets utiles au niveau
+     ouvert sont proposés (data-blocs : un de ces blocs dans la boîte ; data-variables : niveau à variables) -->
+<dialog class="aide" id="aide" aria-labelledby="aide-titre">
+  <div class="aide-carte">
+    <div class="aide-tete">
+      <h2 id="aide-titre">Aide</h2>
+      <button class="aide-fermer" id="aide-fermer" type="button" aria-label="Fermer l'aide" title="Fermer (Échap)">×</button>
+    </div>
+    <div class="aide-corps">
+      <div class="aide-onglets" role="tablist" aria-orientation="vertical" aria-label="Sujets">
+        <button type="button" role="tab" id="t-bases" aria-controls="p-bases" data-sujet="bases">Les blocs</button>
+        <button type="button" role="tab" id="t-caisses" aria-controls="p-caisses" data-sujet="caisses">Les caisses</button>
+        <button type="button" role="tab" id="t-preparer" aria-controls="p-preparer" data-sujet="preparer">Préparer la machine</button>
+        <button type="button" role="tab" id="t-repeter" aria-controls="p-repeter" data-sujet="repeter">Répéter (les boucles)</button>
+        <button type="button" role="tab" id="t-choisir" aria-controls="p-choisir" data-sujet="choisir">Choisir (si… sinon)</button>
+        <button type="button" role="tab" id="t-variables" aria-controls="p-variables" data-sujet="variables">Les variables</button>
+      </div>
+
+      <section class="aide-page" role="tabpanel" id="p-bases" aria-labelledby="t-bases">
+        <h3>Un programme, c'est une recette</h3>
+        <p>Une liste d'ordres, lus <strong>un par un, de haut en bas</strong>. La machine fait exactement ce qui est écrit : ni plus, ni moins.</p>
+        <div class="aide-exemple">
+          <div class="mini-blocs" aria-label="Exemple de programme">
+            <span class="mb mb-depart">DÉPART</span>
+            <span class="mb mb-mouvement">aller à l'entrée</span>
+            <span class="mb mb-stylo">saisir la caisse</span>
+            <span class="mb mb-mouvement">aller à la sortie</span>
+            <span class="mb mb-stylo">poser la caisse</span>
+          </div>
+          <p>Ici : va chercher une caisse à l'entrée, porte-la à la sortie.</p>
+        </div>
+        <ul class="aide-liste">
+          <li><strong>Glisse</strong> les blocs de la boîte vers ton programme et <strong>accroche-les sous DÉPART</strong>.</li>
+          <li>Un bloc <strong>grisé</strong> n'est pas accroché : il ne fait rien.</li>
+          <li>Pendant l'exécution, le bloc en cours a un <strong>cadre jaune</strong>. Si ça bloque, le bloc fautif <strong>clignote en rouge</strong>.</li>
+        </ul>
+      </section>
+
+      <section class="aide-page" role="tabpanel" id="p-caisses" aria-labelledby="t-caisses" hidden>
+        <h3>Où prendre une caisse ?</h3>
+        <ul class="intro-postes">
+          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="6" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="17" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text><rect x="31" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="42" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text><rect x="56" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="67" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><path d="M84 42 H102 M95 35 L102 42 L95 49" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>L'entrée</strong> : comme la file à la boulangerie, la première arrivée passe en premier.</span></li>
+          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="30" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="41" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><rect x="30" y="12" width="22" height="19" rx="2" fill="#0e6b78"/><text x="41" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text><rect x="58" y="4" width="22" height="19" rx="2" fill="#0e6b78"/><text x="69" y="18" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text><path d="M42 8 Q50 0 56 6 M49 2 L57 6 L51 11" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Une pile</strong> : comme des assiettes empilées, on prend celle du dessus.</span></li>
+          <li><svg viewBox="0 0 110 62" aria-hidden="true"><rect x="4" y="52" width="102" height="4" rx="2" fill="#8995a8"/><rect x="52" y="32" width="22" height="19" rx="2" fill="#0e6b78"/><text x="63" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text><path d="M10 42 H42 M35 35 L42 42 L35 49" fill="none" stroke="#e5a50a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M84 16 L100 32 M100 16 L84 32" stroke="#d8453a" stroke-width="4" stroke-linecap="round"/></svg><span><strong>La sortie</strong> : une caisse partie ne revient pas.</span></li>
+        </ul>
+        <p class="aide-astuce">La pince ne tient <strong>qu'une caisse à la fois</strong>, et doit être vide à la fin.</p>
+      </section>
+
+      <section class="aide-page" role="tabpanel" id="p-preparer" aria-labelledby="t-preparer" hidden>
+        <h3>Avant tout : mettre la machine en place</h3>
+        <p>Quand ton programme démarre, tu <strong>ne sais pas</strong> où est le bras, ni comment sont tournés les plateaux : quelqu'un a pu les bouger.</p>
+        <p>C'est comme monter dans une voiture : avant de partir, on règle le siège et les rétroviseurs, sans savoir comment le conducteur d'avant les avait laissés.</p>
+        <p class="aide-astuce">Commence donc par des blocs qui <strong>placent</strong> la machine là où tu en as besoin.</p>
+      </section>
+
+      <section class="aide-page" role="tabpanel" id="p-repeter" aria-labelledby="t-repeter" data-blocs="repeter tantque jusqua jusquarail repetervar tantquevar tantquevar2" hidden>
+        <h3>Répéter : ne pas écrire dix fois la même chose</h3>
+        <p>Une <strong>boucle</strong> refait les blocs rangés <strong>dans</strong> sa mâchoire. Comme une chanson : « refrain, 3 fois ».</p>
+        <div class="aide-exemple">
+          <div class="mini-blocs" aria-label="Exemple de boucle">
+            <span class="mb mb-boucle">répéter 3 fois</span>
+            <span class="mb-dans mb-dans-boucle"><span class="mb mb-mouvement">aller à l'entrée</span><span class="mb mb-stylo">saisir la caisse</span><span class="mb mb-mouvement">aller à la sortie</span><span class="mb mb-stylo">poser la caisse</span></span>
+            <span class="mb mb-boucle mb-fond"></span>
+          </div>
+          <p>4 blocs dedans, joués 3 fois : 3 caisses portées, avec seulement 5 blocs.</p>
+        </div>
+        <dl class="aide-def">
+          <dt><span class="mb mb-boucle">répéter 3 fois</span></dt><dd>Tu sais <strong>combien</strong> de fois.</dd>
+          <dt><span class="mb mb-tantque">répéter tant que…</span></dt><dd>Tu ne sais pas combien : on continue <strong>tant que</strong> c'est vrai. Comme « tant qu'il reste de la vaisselle, je lave ».</dd>
+          <dt><span class="mb mb-tantque">répéter jusqu'à…</span></dt><dd>On continue <strong>jusqu'à</strong> arriver quelque part.</dd>
+        </dl>
+      </section>
+
+      <section class="aide-page" role="tabpanel" id="p-choisir" aria-labelledby="t-choisir" data-blocs="si sicaisse sivar sivar2" hidden>
+        <h3>Choisir : faire une chose OU une autre</h3>
+        <p>Un bloc <strong>si</strong> pose une question. Si la réponse est oui, il fait ce qui est dans la partie du haut ; sinon, ce qui est dans la partie <strong>sinon</strong>.</p>
+        <p>Comme « s'il pleut, je prends un parapluie ; sinon, mes lunettes de soleil ».</p>
+        <div class="aide-exemple">
+          <div class="mini-blocs" aria-label="Exemple de choix">
+            <span class="mb mb-condition">si la caisse tenue est rouge</span>
+            <span class="mb-dans mb-dans-condition"><span class="mb mb-mouvement">aller à l'emplacement 1</span></span>
+            <span class="mb mb-condition mb-sinon">sinon</span>
+            <span class="mb-dans mb-dans-sinon"><span class="mb mb-mouvement">aller à l'emplacement 2</span></span>
+            <span class="mb mb-sinon mb-fond"></span>
+          </div>
+          <p>Rouge : emplacement 1. Toute autre couleur : emplacement 2.</p>
+        </div>
+        <p class="aide-astuce">Différence avec une boucle : <strong>si</strong> regarde <strong>une seule fois</strong> ; <strong>tant que</strong> recommence.</p>
+      </section>
+
+      <section class="aide-page" role="tabpanel" id="p-variables" aria-labelledby="t-variables" data-variables hidden>
+        <h3>Une variable : une boîte qui retient un nombre</h3>
+        <p>Imagine une boîte avec une étiquette, par exemple <var class="nom-var">compteur</var>. Dedans, un nombre. Le programme peut le changer et le relire.</p>
+        <dl class="aide-def">
+          <dt><span class="mb mb-variable">mettre compteur à 0</span></dt><dd>On vide la boîte et on y met 0. <strong>À faire au début</strong> : au départ, il y a n'importe quoi dedans.</dd>
+          <dt><span class="mb mb-variable">ajouter 1 à compteur</span></dt><dd>+1, comme quand on compte sur ses doigts.</dd>
+          <dt><span class="mb mb-variable">retirer 1 à compteur</span></dt><dd>−1, comme un compte à rebours.</dd>
+          <dt><span class="mb mb-tantque">répéter tant que compteur &gt; 0</span></dt><dd>On <strong>compare</strong> le nombre de la boîte (à un nombre ou à une autre boîte) pour décider.</dd>
+        </dl>
+        <p class="aide-astuce">Pendant l'exécution, la valeur de chaque variable s'affiche sur la scène.</p>
+      </section>
+    </div>
+    <div class="aide-pied">
+      <button class="btn btn-sec" id="revoir-accueil" type="button">Revoir l'accueil</button>
+      <button class="btn btn-go" id="aide-ok" type="button">J'ai compris</button>
+    </div>
+  </div>
+</dialog>
 
 <main class="jeu jeu-scene">
   <section class="carte" aria-labelledby="titre-prog">

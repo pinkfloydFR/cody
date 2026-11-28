@@ -126,12 +126,15 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
   justes. Erreur : arrêt, bloc fautif en rouge clignotant ; 500 instructions max. `executer()` calcule la trace, l'interface l'anime (vitesse 5 :
   immédiat ; « mouvements réduits » volontairement ignoré).
 - La 3D reçoit les mêmes « vues » que le 2D ; 2D de secours si WebGL échoue ou avec `?2d`.
-- **Aide** : `#intro` (texte seul), à la première visite (`manut-intro-vue`) puis par le bouton
-  « Aide ». Contenu : blocs grisés, jaune / rouge pendant l'exécution, tous les cas testés,
-  « Configuration » / « Exécuter », initialiser (machine et variables), prendre une caisse, répéter et
-  choisir (dont variables : mettre, ajouter, retirer, comparer à un nombre ou à une variable).
-  **La tenir à jour quand une règle change**, et qu'elle tienne en 1920 x 1080 bouton « Commencer »
-  compris (police 18 px ; sinon un élève peut rester bloqué : remarque de l'enseignant).
+- **Accueil** (`#intro`, à la première visite : `manut-intro-vue`) : trois étapes et la règle « tous
+  les cas » en mots simples, bouton « C'est parti ! » (rouvre le niveau en cours). Rien d'autre : l'ancienne
+  page d'aide, qui servait d'accueil, faisait peur (retour de l'enseignant, 28/11/2026).
+- **Aide** (bouton « Aide », caché sur l'accueil ; `<dialog id="aide">`) : pour grands débutants
+  (« que ma maman comprenne »), un sujet à la fois (onglets à gauche) : les blocs, les caisses, préparer
+  la machine, répéter, choisir, variables. Seuls les sujets utiles au niveau ouvert sont proposés
+  (`data-blocs` : un de ces blocs dans la boîte ; `data-variables`). Blocs miniatures en CSS (`.mb-*`,
+  mêmes couleurs qu'`atelier.js`). « Revoir l'accueil » en pied. **La tenir à jour quand une règle
+  change** et qu'elle tienne en 1920 x 1080.
 - **Second écran** : bouton (deux moniteurs) en haut à gauche de la scène, masqué seulement si
   `getScreenDetails()` (autorisé) ne voit qu'un écran (`screen.isExtended` ment dans Brave). Ouvre
   `vue.html` sur l'autre écran (autorisation « gestion des fenêtres » ; sinon fenêtre à déplacer,
