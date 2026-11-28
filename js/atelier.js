@@ -51,6 +51,25 @@
   const THEME_SOMBRE = fabriquer("atelier-sombre", "#161c25", "#222b37", "#4a576a", "#e5eaf1");
   const theme = () => (sombre.matches ? THEME_SOMBRE : THEME_CLAIR);
 
+  /* Explications des blocs (infobulle au survol, dans la boîte à outils comme dans le programme) :
+     des phrases pour débutants ; « **mot** » est mis en gras. Le survol suffit (0,4 s). */
+  const TEXTE_REPETER = "Répète les blocs rangés **DEDANS** (dans sa mâchoire), autant de fois que le nombre. "
+    + "Pas ceux du dessus ! Ensuite, le programme continue en dessous.";
+  function expliquer(textes) {
+    for (const [type, texte] of Object.entries(textes)) {
+      const def = B.Blocks[type];
+      if (!def) continue;
+      const init = def.init;
+      def.init = function () { init.call(this); this.setTooltip(texte); };
+    }
+  }
+  B.Tooltip.HOVER_MS = 400;
+  B.Tooltip.setCustomTooltip((div, element) => {
+    const t = B.Tooltip.getTooltipOfObject(element);
+    div.replaceChildren(...String(t).split(/\*\*(.+?)\*\*/).map((morceau, i) =>
+      (i % 2 ? creer("strong", "", morceau) : document.createTextNode(morceau))));
+  });
+
   /* Rendu « cody » : thrasos, avec en plus une prise femelle au fond des boucles et des conditions.
      Thrasos laisse ce fond plat : le picot du dernier bloc flottait, entouré d'un vide.
      (Reprend Drawer.drawStatementInput_ de Blockly 13.5 : à revérifier si Blockly est mis à jour.) */
@@ -742,5 +761,5 @@
     }));
   }
 
-  window.Atelier = { riche, sansMarques, memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, marquerErreur, boutonIndice, aide, boutonExecuter, cadrer };
+  window.Atelier = { riche, sansMarques, memo, exports, imageBlocs, sombre, injecter, noter, creer, etoiles, bareme, feter, fermerFete, verdict, consigne, boutonsNiveaux, boutonConfirmer, boutonCopier, boutonNettoyer, marquerErreur, boutonIndice, aide, boutonExecuter, cadrer, expliquer, TEXTE_REPETER };
 }

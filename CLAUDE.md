@@ -90,6 +90,9 @@ avec **géoblocage et CrowdSec, rien d'autre** (demande de l'enseignant ; modèl
 - Contour clair ; couleurs distinctes pour répéter, tant que et si ; partie « sinon » plus foncée
   (copie découpée du contour, `teinterSinon` dans `manutention.js`). Bloc de départ « DÉPART », non
   supprimable ; `disableOrphans` grise les blocs non accrochés.
+- **Explication au survol** de chaque bloc (`A.expliquer`, dans chaque fichier de blocs ; infobulle Blockly
+  restylée, `**mot**` en gras, 0,4 s) : phrases pour débutants. Boucles : « les blocs rangés DEDANS »
+  (`A.TEXTE_REPETER`), un ami de l'enseignant croyait que « répéter » rejouait les blocs du dessus.
 - `A.cadrer` place le programme à 16 px du coin haut gauche au chargement.
 - Ascenseurs masqués tant que le programme tient dans la vue (`majAscenseurs`) ; poubelle centrée sous
   les boutons de zoom (`centrerPoubelle`, surcharge de `trashcan.position`) ; blocs redessinés une fois

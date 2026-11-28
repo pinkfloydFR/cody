@@ -341,3 +341,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 @media (prefers-reduced-motion:reduce){.bloc-fautif>.blocklyPath,.bloc-fautif>.cody-sinon{animation:none}}
 /* Nom de variable dans une consigne ou un indice : italique, même bleu que les blocs « variable » */
 var.nom-var{font-style:italic;font-weight:700;color:light-dark(#2457a6,#8fb4ff)}
+
+/* Explications des blocs au survol (Atelier.expliquer) : carte lisible, même style que l'aide */
+body .blocklyTooltipDiv{font:16px/1.45 Luciole,system-ui,sans-serif;background:var(--carte);color:var(--ink);opacity:1;
+  border:1px solid var(--trait);border-left:5px solid #e5a50a;border-radius:8px;padding:10px 14px;max-width:24rem;
+  box-shadow:0 8px 24px rgba(0,0,0,.28)}
+body .blocklyTooltipDiv strong{color:var(--accent)}

@@ -49,6 +49,17 @@
       liste("C", [["rouge", "rouge"], ["bleue", "bleu"], ["jaune", "jaune"], ["verte", "vert"]]),
       { type: "input_dummy" }, corps("FAIRE")], message1: "sinon %1", args1: [corps("SINON")], ...lien, style: "condition" },
   ]);
+  /* Explications au survol des blocs (débutants) */
+  window.Atelier.expliquer({
+    tri_entrer: "La caisse suivante de l'entrée monte sur le plateau 1. Il doit être tourné vers **le plateau 2** (aligné avec l'entrée).",
+    tri_orienter: "Tourne le plateau choisi. Une caisse ne passe que si le plateau est **aligné** avec le tapis où elle va.",
+    tri_envoyer: "La caisse du plateau part du côté où il est tourné.",
+    tri_rappeler: "La caisse du dessus de l'attente revient sur le plateau 1. Il doit être tourné vers **l'attente**.",
+    tri_repeter: window.Atelier.TEXTE_REPETER,
+    tri_tantque: "Répète les blocs rangés **DEDANS** tant qu'une caisse attend à l'endroit choisi. La question est posée avant chaque tour.",
+    tri_sicaisse: "Pose la question **UNE seule fois** : si la réponse est oui, fait les blocs du haut ; sinon, ceux de « sinon ».",
+    tri_si: "Regarde la couleur de la caisse du plateau, **une seule fois** : si c'est celle-là, fait les blocs du haut ; sinon, ceux de « sinon ».",
+  });
 
   function compiler(b) {
     const out = [];

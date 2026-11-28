@@ -75,6 +75,25 @@
         { type: "input_dummy" }, corps("FAIRE")],
       message1: "sinon %1", args1: [corps("SINON")], ...lien, style: "condition" },
   ]);
+  /* Explications au survol des blocs (débutants) */
+  A.expliquer({
+    manut_depart: "Le programme commence ici. Accroche tes blocs **en dessous**, dans l'ordre : ils sont joués de haut en bas.",
+    manut_aller: "Le bras se déplace jusqu'au poste choisi.",
+    manut_saisir: "La pince attrape une caisse **là où est le bras** : celle du dessus d'une pile, ou la première de l'entrée. Une seule à la fois.",
+    manut_poser: "La pince pose la caisse qu'elle tient, **là où est le bras** (sur le dessus de la pile).",
+    manut_repeter: A.TEXTE_REPETER,
+    manut_tantque: "Répète les blocs rangés **DEDANS** tant qu'il reste une caisse là où est le bras. La question est posée avant chaque tour.",
+    manut_sicaisse: "Pose la question **UNE seule fois** : si la réponse est oui, fait les blocs du haut ; sinon, ceux de « sinon ».",
+    manut_si: "Regarde la couleur de la caisse tenue, **une seule fois** : si c'est celle-là, fait les blocs du haut ; sinon, ceux de « sinon ».",
+    manut_mettre: "Range ce nombre dans la variable (l'ancienne valeur est effacée). À faire **au début**.",
+    manut_ajouter: "Ajoute ce nombre à la variable : +1, comme quand on compte sur ses doigts.",
+    manut_retirer: "Enlève ce nombre à la variable : -1, comme un compte à rebours.",
+    manut_tantquevar: "Répète les blocs rangés **DEDANS** tant que la comparaison est vraie. Elle est vérifiée avant chaque tour.",
+    manut_tantquevar2: "Répète les blocs rangés **DEDANS** tant que la comparaison des deux variables est vraie. Elle est vérifiée avant chaque tour.",
+    manut_sivar: "Pose la question **UNE seule fois** : si la réponse est oui, fait les blocs du haut ; sinon, ceux de « sinon ».",
+    manut_sivar2: "Pose la question **UNE seule fois** : si la réponse est oui, fait les blocs du haut ; sinon, ceux de « sinon ».",
+    manut_repetervar: "Répète les blocs rangés **DEDANS** autant de fois que la valeur de la variable (lue au début de la boucle).",
+  });
 
   /* Comparaison de deux variables : la boîte propose d'emblée les deux premières du niveau */
   const boiteOutils = (noms, prefixe = "manut_", variables = []) => ({

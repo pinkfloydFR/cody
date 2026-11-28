@@ -34,6 +34,19 @@
       { type: "field_dropdown", name: "C", options: [["rouge", "rouge"], ["bleue", "bleu"], ["jaune", "jaune"], ["verte", "vert"]] },
       { type: "input_dummy" }, corps("FAIRE")], message1: "sinon %1", args1: [corps("SINON")], ...lien, style: "condition" },
   ]);
+  /* Explications au survol des blocs (débutants) */
+  window.Atelier.expliquer({
+    pivot_tourner: "Le bras pivote d'un quart de tour, vu de dessus. À droite : ouest, nord, est, sud.",
+    pivot_saisir: "La pince attrape la caisse du tapis **en face du bras**. Une seule à la fois.",
+    pivot_poser: "La pince pose la caisse qu'elle tient sur le tapis **en face du bras**.",
+    pivot_repeter: window.Atelier.TEXTE_REPETER,
+    pivot_jusqua: "Répète les blocs rangés **DEDANS** jusqu'à ce que le bras soit face à l'ouest. Vérifié avant chaque tour : si c'est déjà le cas, rien n'est fait.",
+    pivot_glisser: "Le bras avance d'un cran sur le rail, en gardant son orientation.",
+    pivot_jusquarail: "Répète les blocs rangés **DEDANS** jusqu'à ce que ce soit le cas. Vérifié avant chaque tour : si c'est déjà le cas, rien n'est fait.",
+    pivot_tantque: "Répète les blocs rangés **DEDANS** tant qu'il y a une caisse du côté où regarde le bras. La question est posée avant chaque tour.",
+    pivot_sicaisse: "Pose la question **UNE seule fois** : si la réponse est oui, fait les blocs du haut ; sinon, ceux de « sinon ».",
+    pivot_si: "Regarde la couleur de la caisse tenue, **une seule fois** : si c'est celle-là, fait les blocs du haut ; sinon, ceux de « sinon ».",
+  });
 
   function compiler(b) {
     const out = [];
