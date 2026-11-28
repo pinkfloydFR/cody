@@ -31,11 +31,11 @@
 <article class="intro" id="intro" aria-labelledby="intro-titre" hidden>
   <div class="intro-page">
     <h2 id="intro-titre">Bienvenue !</h2>
-    <p class="intro-chapeau">Une tortue tient un crayon. Elle dessine en suivant tes ordres, donnés avec des blocs.</p>
+    <p class="intro-chapeau">Un crayon dessine en suivant tes ordres, donnés avec des blocs.</p>
 
     <ol class="intro-etapes">
       <li><span class="intro-num" aria-hidden="true">1</span><span>Glisse tes ordres, <strong>dans l'ordre</strong>, sous le bloc gris <span class="mb mb-depart">DÉPART</span></span></li>
-      <li><span class="intro-num" aria-hidden="true">2</span><span>Clique sur <strong>Exécuter</strong> et regarde la tortue dessiner.</span></li>
+      <li><span class="intro-num" aria-hidden="true">2</span><span>Clique sur <strong>Exécuter</strong> et regarde le crayon dessiner.</span></li>
       <li><span class="intro-num" aria-hidden="true">3</span><span>Gagne jusqu'à <span class="intro-or">3 étoiles</span> : moins de blocs, plus d'étoiles.</span></li>
     </ol>
 
@@ -46,7 +46,7 @@
       <p><strong>Réinitialiser</strong> efface ton dessin, pas tes blocs.</p>
     </section>
 
-    <p class="intro-aide">Perdu ? Une fois dans un niveau, un bouton <strong>Aide</strong> apparaît en haut à droite : il explique tout simplement.</p>
+    <p class="intro-aide">Perdu ?<br>Une fois dans un niveau, un bouton <strong>Aide</strong> apparaît en haut à droite : il explique tout simplement.</p>
     <button class="btn btn-go" id="commencer" type="button">C'est parti !</button>
   </div>
 </article>
@@ -69,7 +69,7 @@
 
       <section class="aide-page" role="tabpanel" id="p-bases" aria-labelledby="t-bases">
         <h3>Un programme, c'est une recette</h3>
-        <p>Une liste d'ordres, lus <strong>un par un, de haut en bas</strong>. La tortue fait exactement ce qui est écrit : ni plus, ni moins.</p>
+        <p>Une liste d'ordres, lus <strong>un par un, de haut en bas</strong>. Le crayon fait exactement ce qui est écrit : ni plus, ni moins.</p>
         <div class="aide-exemple">
           <div class="mini-blocs" aria-label="Exemple de programme">
             <span class="mb mb-depart">DÉPART</span>
@@ -88,13 +88,13 @@
       </section>
 
       <section class="aide-page" role="tabpanel" id="p-bouger" aria-labelledby="t-bouger" hidden>
-        <h3>Avancer et tourner : se mettre à la place de la tortue</h3>
-        <p>La tortue avance <strong>droit devant elle</strong>, dans le sens où elle regarde. Pour changer de direction, elle tourne <strong>sur place</strong>, sans dessiner.</p>
-        <p class="aide-astuce">Droite et gauche, ce sont <strong>les siennes</strong>, pas les tiennes. Si elle descend vers le bas de l'écran, sa droite est à ta gauche !</p>
+        <h3>Avancer et tourner : se mettre à la place du crayon</h3>
+        <p>Le crayon avance <strong>droit devant lui</strong>, dans le sens de sa pointe. Pour changer de direction, il tourne <strong>sur place</strong>, sans dessiner.</p>
+        <p class="aide-astuce">Droite et gauche, ce sont <strong>celles du crayon</strong>, pas les tiennes. Si sa pointe descend vers le bas de l'écran, sa droite est à ta gauche !</p>
         <dl class="aide-def">
           <dt><span class="mb mb-mouvement">tourner de 90 °</span></dt><dd>Un quart de tour : un coin de carré.</dd>
-          <dt><span class="mb mb-mouvement">tourner de 180 °</span></dt><dd>Un demi-tour : elle repart d'où elle vient.</dd>
-          <dt><span class="mb mb-mouvement">tourner de 360 °</span></dt><dd>Un tour complet : elle regarde de nouveau devant elle.</dd>
+          <dt><span class="mb mb-mouvement">tourner de 180 °</span></dt><dd>Un demi-tour : il repart d'où il vient.</dd>
+          <dt><span class="mb mb-mouvement">tourner de 360 °</span></dt><dd>Un tour complet : il pointe de nouveau dans le même sens.</dd>
         </dl>
         <p>Sur la grille, les traits épais sont espacés de 50 pas, les traits fins de 10 pas.</p>
       </section>
@@ -116,10 +116,10 @@
 
       <section class="aide-page" role="tabpanel" id="p-crayon" aria-labelledby="t-crayon" data-blocs="stylo couleur epaisseur" hidden>
         <h3>Le crayon : dessiner ou pas, et en quelle couleur</h3>
-        <p>Au départ, le crayon est <strong>baissé</strong> : la tortue dessine partout où elle passe.</p>
+        <p>Au départ, le crayon est <strong>baissé</strong> : il dessine partout où il passe.</p>
         <dl class="aide-def">
-          <dt><span class="mb mb-stylo">lever le crayon</span></dt><dd>Elle se déplace <strong>sans dessiner</strong>, comme quand tu lèves ton stylo de la feuille.</dd>
-          <dt><span class="mb mb-stylo">baisser le crayon</span></dt><dd>Elle dessine de nouveau.</dd>
+          <dt><span class="mb mb-stylo">lever le crayon</span></dt><dd>Il se déplace <strong>sans dessiner</strong>, comme quand tu lèves ton stylo de la feuille.</dd>
+          <dt><span class="mb mb-stylo">baisser le crayon</span></dt><dd>Il dessine de nouveau.</dd>
           <dt><span class="mb mb-stylo">couleur du crayon</span></dt><dd>Change la couleur des traits <strong>suivants</strong>. Ce qui est déjà dessiné ne change pas.</dd>
           <dt><span class="mb mb-stylo">épaisseur du trait</span></dt><dd>Trait plus fin ou plus gros.</dd>
         </dl>
