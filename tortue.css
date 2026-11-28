@@ -348,7 +348,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .contour-fautif{fill:none;stroke:#ff2d20;stroke-width:6px;filter:drop-shadow(0 0 6px #ff2d20);pointer-events:none;
   animation:fautif .6s ease-in-out 3}
 @keyframes fautif{50%{opacity:0}}
-@media (prefers-reduced-motion:reduce){.contour-fautif{animation:none}}
+/* Comme l'animation du bras et la fête, ignore « mouvements réduits » (souvent coupé dans Windows sans
+   que l'élève le sache : le cadre ne clignotait pas chez l'enseignant) */
 /* Nom de variable dans une consigne ou un indice : italique, même bleu que les blocs « variable » */
 var.nom-var{font-style:italic;font-weight:700;color:light-dark(#2457a6,#8fb4ff)}
 
