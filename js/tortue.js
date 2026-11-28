@@ -109,13 +109,13 @@
   const A = window.Atelier, memo = A.memo;
   /* Explications au survol des blocs (débutants) */
   A.expliquer({
-    tortue_depart: "Le programme commence ici. Accroche tes blocs **en dessous**, dans l'ordre : ils sont joués de haut en bas.",
+    tortue_depart: "Le programme commence ici.\nAccroche tes blocs **en dessous**, dans l'ordre : ils sont joués de haut en bas.",
     tortue_avancer: "Le crayon avance **tout droit**, dans le sens de sa pointe, du nombre de pas indiqué.",
     tortue_reculer: "Le crayon recule du nombre de pas indiqué, sans se retourner.",
-    tortue_tourner: "Le crayon pivote **sur place**, vers **sa** droite ou **sa** gauche. 90° = un quart de tour.",
+    tortue_tourner: "Le crayon pivote **sur place**, vers **sa** droite ou **sa** gauche.\n90° = un quart de tour.",
     tortue_repeter: A.TEXTE_REPETER,
-    tortue_stylo: "**Lever** : le crayon se déplace sans dessiner. **Baisser** : il dessine de nouveau.",
-    tortue_couleur: "Les traits **suivants** seront de cette couleur. Ceux déjà dessinés ne changent pas.",
+    tortue_stylo: "**Lever** : le crayon se déplace sans dessiner.\n**Baisser** : il dessine de nouveau.",
+    tortue_couleur: "Les traits **suivants** seront de cette couleur.\nCeux déjà dessinés ne changent pas.",
     tortue_epaisseur: "Les traits **suivants** seront de cette épaisseur.",
   });
   const ws = A.injecter("blockly", boiteOutils(BASE));

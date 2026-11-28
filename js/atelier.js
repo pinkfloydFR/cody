@@ -52,9 +52,9 @@
   const theme = () => (sombre.matches ? THEME_SOMBRE : THEME_CLAIR);
 
   /* Explications des blocs (infobulle au survol, dans la boîte à outils comme dans le programme) :
-     des phrases pour débutants ; « **mot** » est mis en gras. Le survol suffit (0,4 s). */
-  const TEXTE_REPETER = "Répète les blocs rangés **DEDANS** (dans sa mâchoire), autant de fois que le nombre. "
-    + "Pas ceux du dessus ! Ensuite, le programme continue en dessous.";
+     des phrases pour débutants, une par ligne (« \n ») ; « **mot** » est mis en gras. Le survol suffit (0,4 s). */
+  const TEXTE_REPETER = "Répète les blocs rangés **DEDANS** (dans sa mâchoire), autant de fois que le nombre.\n"
+    + "Pas ceux du dessus !\nEnsuite, le programme continue en dessous.";
   function expliquer(textes) {
     for (const [type, texte] of Object.entries(textes)) {
       const def = B.Blocks[type];
